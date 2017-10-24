@@ -150,9 +150,16 @@ this.setState(function(prevState, props) {
 ```
 
 ### 函数组件
-函数组件是指没有状态、没有方法的纯组件。我们应该最大限度地编写和使用这一类组件。这类组件作为函数，其参数就是 props 。
+函数组件是指没有状态、没有方法的纯组件，也称为无状态组件，是最基础的组件形式，由于没有状态的影响所以就是纯静态展示的作用。如按钮、标签、输入框等。我们应该最大限度地编写和使用这一类组件。编写这类组件的方法通常是使用 ES6 的箭头函数，将 props 作为函数的参数。
 
 ``` js
+const PureComponent = (props) => (
+  <div>
+    //use props
+  </div>
+)
+
+//当然也可以使用 es5 的函数，只是没有 es6 更加直观
 function ExpandableForm({ onExpand, expanded = false, children, onSubmit }) {
     const formStyle = expanded ? {height: 'auto'} : {height: 0}
     return (
@@ -468,6 +475,54 @@ export default (WrappedComponent) => {
   }
   return NewComponent
 }
+```
+
+做为一个高阶组件，可以在原有组件的基础上，对其增加新的功能和行为。我们一般希望编写的组件尽量纯净或者说其中的业务逻辑尽量单一。但是如果各种组件间又需要增加新功能，如打印日志，获取数据和校验数据等和展示无关的逻辑的时候，这些公共的代码就会被重复写很多遍。因此，我们可以抽象出一个高阶组件，用以给基础的组件增加这些功能，类似于插件的效果。
+
+假设我有一个组件，需要从LocalStorage中获取数据，然后渲染出来。于是我们可以这样写组件代码：
+
+``` js
+import React, { Component } from 'react'
+
+class MyComponent extends Component {
+
+  componentWillMount() {
+    let data = localStorage.getItem('data');
+    this.setState({data});
+  }
+
+  render() {
+    return <div>{this.state.data}</div>
+  }
+}
+```
+
+代码很简单，但当我有其他组件也需要从LocalStorage中获取同样的数据展示出来时，我需要在每个组件都重复componentWillMount中的代码，这显然是很冗余的。下面让我们来看看使用高阶组件可以怎么改写这部分代码：
+
+``` js
+import React, { Component } from 'react'
+
+function withPersistentData(WrappedComponent) {
+  return class extends Component {
+    componentWillMount() {
+      let data = localStorage.getItem('data');
+        this.setState({data});
+    }
+
+    render() {
+      // 通过{...this.props} 把传递给当前组件的属性继续传递给被包装的组件WrappedComponent
+      return <WrappedComponent data={this.state.data} {...this.props} />
+    }
+  }
+}
+
+class MyComponent2 extends Component {  
+  render() {
+    return <div>{this.props.data}</div>
+  }
+}
+
+const MyComponentWithPersistentData = withPersistentData(MyComponent2)
 ```
 
 ## 九、搭建开发环境
@@ -1252,6 +1307,17 @@ const store = createStore(reducer)
 
 <Provider store={store}>
   <App />
+</Provider>
+```
+
+Provider 是一个 react 组件，提供了一个参数 store，然后渲染了一个子组件，我们通常把路由渲染成子组件：
+
+``` html
+<!-- react-router4 -->
+<Provider store={store}>
+  <Router history={hashHistory}>
+    {routes}
+  </Router>
 </Provider>
 ```
 
