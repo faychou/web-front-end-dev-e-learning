@@ -1,0 +1,217 @@
+# npm
+
+## 常用命令
+### 全局安装
+``` bash
+npm install -g <package-name>
+```
+
+### 本地安装
+``` bash
+npm install <package-name>
+
+# 下载安装特定版本号的包
+npm install <package-name>@<version>
+
+# 下载安装包并添加到生产环境依赖
+npm install <package-name> --save
+
+# 下载安装包并添加到开发环境依赖
+npm install <package-name> --save-dev
+```
+
+### 搜索
+``` bash
+npm search <package-name>
+```
+
+### 更新
+``` bash
+# 本地更新
+npm update <package-name>
+
+# 全局更新
+npm update -g <package-name>
+```
+
+### 卸载
+``` bash
+# 本地
+npm uninstall <package-name>
+
+# 全局
+npm uninstall -g <package-name>
+```
+
+
+### 查看
+``` bash
+# 查看当前项目的本地依赖包
+npm list
+
+# 查看本地依赖包是否不是最新版
+npm outdated <package-name>
+
+# 查看包的安装路径
+npm root
+
+# 查看 package.json 信息 
+npm view <package-name>
+
+# 单独查看 package.json 某个配置，如 dependencies 字段
+npm view <package-name> dependencies
+```
+
+### 帮助
+``` bash
+# 查看所有帮助信息
+npm help
+
+# 查看某个命令的帮助信息
+npm <command> -h
+```
+
+> 注意更新 npm 直接使用 `npm update npm -g`
+
+## package.json
+用于存放模块的名称、版本、作者、机构、模块入口、依赖项等信息。首先我们通过 `npm init` 命令在当前工作目录下以用户引导的方式创建一个全新的 package.json 文件。
+
+* name：必选项，表示模块名称。命名时不能包含 js、node、和 url 中需要转义的字符，不能以 `.` 和 `_` 为开头。
+* version：必选项，表示模块的版本号。版本号以 主版本号 (Major).副版本号(Minor).补丁版本号(Patch) 构成（如1.2.0）。
+* main：必选项，模块入口文件相对路径（相对于模块根目录）。
+* description：可选项，表示模块功能描述，显示在 `npm search <package-name>` 中
+* keywords：可选项，数组类型，表示模块的关键字，显示在 `npm search <package-name>` 中
+* author：可选项，表示发起者信息。
+* engines：可选项，依赖的 node 版本。
+* repository：可选项，源码托管地址。
+* scripts：可选项，自定义在 cli 中输入 `npm <script>` 时实际执行的程序。npm 默认提供大量的 script 供我们调用。
+* dependencies 和 devDependencies：可选项，用于配置模块的生产环境依赖包和开发环境依赖包。当执行 `npm install` 时，npm 会根据这两个配置项的值去下载安装相关的依赖包。两者的区别是 devDependencies 是模块开发过程的依赖包（如：grunt 只在开发时有用的模块），并且当其他模块需要依赖当前模块时，当通过 `npm install <package-name>` 时会自动下载安装 dependencies 的包而不会下载 devDependencies 的包。
+
+## cnpm
+``` bash
+npm install cnpm -g
+```
+如果你在中国，那么你可能需要使用这个源：淘宝 NPM 镜像:
+
+``` bash
+npm install cnpm -g --registry=https://registry.npm.taobao.org
+```
+
+> 注意：cnpm支持 npm 除了 publish 之外的所有命令，也就是不支持publish，当然这并不影响我们使用，publish时换回npm即可
+
+## smart-npm
+智能的 npm，让你在中国使用 npm 时，下载速度更快，使用更方便！在我们使用 npm install 时自动从国内的镜像下载，而在我们使用 npm publish 又能发布到官方的 registry 上！
+
+### 安装
+``` bash
+npm install --global smart-npm --registry=https://registry.npm.taobao.org/
+```
+
+如果 window 用户安装最新版本不成功的话，可以试试安装 smart-npm@1 ， 两者功能差不多是一样的， 发布版本 2 的主要原因是由于 npm 的升级，使的在 mac 上无法通过 bin 别名的方式覆盖原来的 npm， 只能通过先删除原来的 npm link 文件，再创建一个新的；但这种方式在 window 上可能会有问题， 所以，如果你是 window 用户，并且通过上面脚本无法安装成功的话，可以用下面脚本再试试。
+
+``` bash
+npm install --global smart-npm@1 --registry=https://registry.npm.taobao.org/
+```
+
+安装成功后默认会在你的 npm 用户配置文件 ~/.npmrc 中添加淘宝的 registry。
+
+### 卸载
+``` bash
+npm smart uninstall   # 2.x.x 版本的 smart-npm 在卸载前需要先执行此脚本
+npm uninstall --global smart-npm
+```
+
+要先执行 npm smart uninstall 是因为如果直接执行 npm uninstall 会导致找不到 npm 文件。
+
+## nrm
+nrm 是一个 NPM 源管理器，允许你快速地在如下 NPM 源间切换，现已支持now include: npm, cnpm, taobao,nj(nodejitsu), rednpm。
+
+### nrm安装
+``` bash
+npm install -g nrm
+```
+
+### 使用
+``` bash
+# 查看可用版本
+$ nrm ls
+
+* npm -----  https://registry.npmjs.org/
+  cnpm ----  http://r.cnpmjs.org/
+  taobao --  https://registry.npm.taobao.org/
+  nj ------  https://registry.nodejitsu.com/
+  rednpm -- http://registry.mirror.cqupt.edu.cn
+  skimdb -- https://skimdb.npmjs.com/registry
+  
+#切换
+nrm use cnpm
+```
+
+``` bash
+# 增加源
+nrm add [home]
+```
+
+``` bash
+# 删除源
+nrm del
+```
+
+``` bash
+# 测试速度
+nrm test
+```
+
+> 注意： nrm只是一个源管理器，也不能使用publish命令。
+
+## 常见问题
+### 使用 npm 安装模块的时候，出现 npm ERR! network connect ETIMEDOUT 的几种解决方案：
+1、通过config命令：
+
+``` bash
+npm config set registry https://registry.npm.taobao.org
+npm info underscore #（如果上面配置正确这个命令会有字符串response）
+
+# or
+npm config set registry https://registry.npm.taobao.org
+npm config set disturl https://npm.taobao.org/dist
+```
+
+2、命令行指定:
+
+``` bash
+npm --registry https://registry.npm.taobao.org info underscore 
+```
+
+3、编辑 ~/.npmrc 加入下面内容:
+
+``` bash
+registry = https://registry.npm.taobao.org
+```
+
+4、设置代理
+
+```
+npm config set proxy http://proxy-server-address:8080 
+npm config set https-proxy http://proxy-server-address:8080
+```
+
+5、如果以上方法都无法解决问题，可以尝试这种：
+
+``` bash
+npm config edit
+# 然后找到与 proxy、registry 相关的代码行并删除
+```
+
+### 如何清除已设置的 npm 淘宝镜像？
+1、 方法一：使用 nrm 做切换。
+  
+2、方法二：
+
+``` bash
+npm config delete registry
+npm config delete disturl
+
+## 或者输入以下命令后找到淘宝那两行,删除
+npm config edit
+```

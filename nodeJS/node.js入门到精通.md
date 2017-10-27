@@ -16,35 +16,6 @@ JS是脚本语言，脚本语言都需要一个解析器才能运行。对于写
 ## 一、环境安装
 
 ## 二、npm
-### 命令
-* 搜索依赖包 `npm search <package-name>`
-* 查看依赖包的 package.json 信息 `npm view <package-name>`
-* 单独查看 package.json 某个配置。查看包的依赖关系：`npm view <package-name> dependencies`
-* 查看当前项目的本地依赖包 `npm list`
-* 查看全局依赖包， `npm list -g` 
-* 查看本地依赖包是否不是最新版， `npm outdated <package-name>` 
-* 安装本地/全局依赖包， `npm install <package-name>  /  npm install -g <package-name>`
-* 下载安装特定版本号的包则 `npm install <package-name>@<version>`
-* 卸载本地/全局依赖包， `npm uninstall <package-name> / npm uninstall -g <package-name>`
-* 更新本地/全局依赖包， `npm update <package-name> / npm update -g <package-name>`
-* `npm root` 查看包的安装路径
-* `npm help` 查看某条命令的详细帮助
-
-注意更新 npm 直接使用 `npm update npm -g`
-
-### package.json
-用于存放模块的名称、版本、作者、机构、模块入口、依赖项等信息。首先我们通过 `npm init` 命令在当前工作目录下以用户引导的方式创建一个全新的 package.json 文件。
-
-* name：必选项，表示模块名称。命名时不能包含 js、node、和 url 中需要转义的字符，不能以 `.` 和 `_` 为开头。
-* version：必选项，表示模块的版本号。版本号以 主版本号 (Major).副版本号(Minor).补丁版本号(Patch) 构成（如1.2.0）。
-* main：必选项，模块入口文件相对路径（相对于模块根目录）。
-* description：可选项，表示模块功能描述，显示在 `npm search <package-name>` 中
-* keywords：可选项，数组类型，表示模块的关键字，显示在 `npm search <package-name>` 中
-* author：可选项，表示发起者信息。
-* engines：可选项，依赖的 node 版本。
-* repository：可选项，源码托管地址。
-* scripts：可选项，自定义在 cli 中输入 `npm <script>` 时实际执行的程序。npm 默认提供大量的 script 供我们调用。
-* dependencies 和 devDependencies：可选项，用于配置模块的生产环境依赖包和开发环境依赖包。当执行 `npm install` 时，npm 会根据这两个配置项的值去下载安装相关的依赖包。两者的区别是 devDependencies 是模块开发过程的依赖包（如：grunt 只在开发时有用的模块），并且当其他模块需要依赖当前模块时，当通过 `npm install <package-name>` 时会自动下载安装 dependencies 的包而不会下载 devDependencies 的包。
 
 ## 三、命令交互模式
 打开终端，键入 node 进入命令交互模式。
