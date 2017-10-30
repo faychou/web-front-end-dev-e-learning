@@ -6,6 +6,41 @@
 npm install -g <package-name>
 ```
 
+#### 在全局安装时可能会提醒你权限不够，解决方式：
+1、方法一，以管理员的身份安装：
+
+``` bash
+sudo npm install -g XXX
+```
+
+评价：每次都要输入账号和密码，非常繁琐，且官方并不推荐。
+
+2、方法二：
+
+``` bash
+sudo chown -R 你的账号名 npm所在目录的路径 /{lib/node_modules,bin,share}
+```
+
+评价：官方推荐的做法，chown 全称为 change owner，即将 npm 目录的所有者指定为你的名字（授予权限），-R 表示对指定目录下所有的子目录和文件也都采取同种操作。
+
+获取 npm 所在目录的路径方法：
+
+``` bash
+npm config get prefix
+# /usr/local
+```
+
+最后，完整的命令：
+
+``` bash
+sudo chown -R faychou /usr/local/{lib/node_modules,bin,share}
+```
+
+>注意：`{lib/node_modules,bin,share}` 中的大括号是要写上去的
+
+然后再次全局安装，如：npm install -g express
+
+
 ### 本地安装
 ``` bash
 npm install <package-name>
@@ -34,13 +69,22 @@ npm update <package-name>
 npm update -g <package-name>
 ```
 
+> 注意更新 npm 直接使用 `npm update npm -g`
+
+
 ### 卸载
 ``` bash
-# 本地
+# 本地卸载
 npm uninstall <package-name>
 
-# 全局
+# 全局卸载
 npm uninstall -g <package-name>
+
+#卸载模块，同时删除模块留在package.json中dependencies下的对应信息
+npm uninstall <package-name> --save 
+
+#卸载模块，同时删除模块留在package.json中devDependencies下的对应信息
+npm uninstall <package-name> --save-dev 
 ```
 
 
@@ -71,7 +115,36 @@ npm help
 npm <command> -h
 ```
 
-> 注意更新 npm 直接使用 `npm update npm -g`
+### 发布
+第一步：发布包之前你首先要有一个npm的账号，根据提示输入账号，密码和邮箱，然后将提示创建成功：
+
+``` bash
+npm adduser
+```
+
+> 注意：npm adduser 成功的时候默认你已经登陆了。
+
+如果已经有账号了，直接在终端输入以下命令，然后输入你创建的账号和密码，和邮箱，登陆：
+
+``` bash
+npm login
+```
+
+第二步，发布：
+
+``` bash
+npm publish
+```
+
+> 【注意点1】不能和已有的包的名字重名！
+
+> 【注意点2】还有一点要注意的是npm对包名的限制：不能有大写字母/空格/下滑线!
+
+> 【注意点3】你的项目里有部分私密的代码不想发布到npm上？将它写入.gitignore 或.npmignore中，上传就会被忽略了
+
+### 更新发布后的包
+1. 修改包的版本（package.json里的version字段）
+2. npm publish
 
 ## package.json
 用于存放模块的名称、版本、作者、机构、模块入口、依赖项等信息。首先我们通过 `npm init` 命令在当前工作目录下以用户引导的方式创建一个全新的 package.json 文件。
