@@ -1767,7 +1767,23 @@ const router = new VueRouter({
 </script>
 ```
 
-
+### 路由拦截
+``` js
+router.beforeEach((to, from, next) => {
+//假设登陆成功后，user信息保存在sessionStorage中。
+  if (to.path == '/login') {
+    sessionStorage.removeItem('user');
+  //如果访问登录页，清空之前sessionStorage中的user信息
+  }
+  let user = JSON.parse(sessionStorage.getItem('user'));
+  if (!user && to.path != '/login') {
+    next({ path: '/login' })
+  } else {
+    next()
+  }
+//如果访问非登陆页，判断是否有保存的user信息，如果没有，则判断为非法访问，重定向到登录页面
+});
+```
 
 ## 十九、AJAX
 ### vue-resource(作者已停止更新)
