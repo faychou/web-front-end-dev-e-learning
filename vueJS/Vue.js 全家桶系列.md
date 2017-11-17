@@ -1397,7 +1397,7 @@ Vue.js 提供一个官方命令行工具，可用于快速搭建大型单页应�
 	vue init webpack my-project
 	cd my-project
 	
-	# 安装依赖
+	# 安装依赖（这里一定要从官方仓库安装，而不是国内镜像cnpm安装否则会导致后面缺了很多依赖库）
 	npm install
 	
 	# 运行
