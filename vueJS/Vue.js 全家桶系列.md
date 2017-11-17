@@ -1785,6 +1785,32 @@ router.beforeEach((to, from, next) => {
 });
 ```
 
+### 路由切换动效
+``` html
+<!--app.vue 根组件-->
+<template>
+  <div id="app">
+        <transition name="fade" mode="out-in">
+        <router-view></router-view>
+        </transition>
+    </div>
+</template>
+<script>
+  export default {
+      name: 'app',
+    components: {}
+  }
+</script>
+<style>
+    .fade-enter-active,.fade-leave-active {
+        transition: opacity .2s ease;
+    }
+    .fade-enter,.fade-leave-active {
+        opacity: 0;
+    }
+</style>
+```
+
 ## 十九、AJAX
 ### vue-resource(作者已停止更新)
 
