@@ -1785,6 +1785,43 @@ router.beforeEach((to, from, next) => {
 });
 ```
 
+### http拦截器
+拦截器是全局的，拦截器可以在请求发送前和发送请求后做一些处理。拦截器在一些场景下会非常有用，比如请求发送前在 headers 中设置 access_token  ，或者在请求失败时，提供通用的处理方式。
+
+``` js
+// http request 拦截器
+axios.interceptors.request.use(
+    config => {
+        if (store.state.token) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
+            config.headers.Authorization = `token ${store.state.token}`;
+        }
+        return config;
+    },
+    err => {
+        return Promise.reject(err);
+    });
+
+// http response 拦截器
+axios.interceptors.response.use(
+    response => {
+        return response;
+    },
+    error => {
+        if (error.response) {
+            switch (error.response.status) {
+                case 401:
+                    // 返回 401 清除token信息并跳转到登录页面
+                    store.commit(types.LOGOUT);
+                    router.replace({
+                        path: 'login',
+                        query: {redirect: router.currentRoute.fullPath}
+                    })
+            }
+        }
+        return Promise.reject(error.response.data)   // 返回接口返回的错误信息
+    });
+```
+
 ### 路由切换动效
 ``` html
 <!--app.vue 根组件-->
@@ -1809,6 +1846,38 @@ router.beforeEach((to, from, next) => {
         opacity: 0;
     }
 </style>
+```
+
+### 全局过滤器
+一个项目中，可能要用到很多过滤器来处理数据，多个组件公用的，可以注册全局过滤器。单个组件使用的，就挂载到实例 filters 中。
+
+项目做的多了以后，可以整理一套常用的 filters ，不用反复的写。比如：时间等各种操作，数据格式转化，单位换算，部分数据的 md5 加密等...
+
+``` js
+//filters.js 过滤器文件
+export function formatDateTime (date) {
+    //格式化时间戳
+  var y = date.getFullYear()
+  var m = date.getMonth() + 1
+  m = m < 10 ? ('0' + m) : m
+  var d = date.getDate()
+  d = d < 10 ? ('0' + d) : d
+  var h = date.getHours()
+  var minute = date.getMinutes()
+  minute = minute < 10 ? ('0' + minute) : minute
+  return y + '-' + m + '-' + d + ' ' + h + ':' + minute
+}
+export function test (a) {
+   return `${a}aaaa`
+}
+......
+//main.js 入口js文件
+import Vue from 'vue'
+import * as filters from './filters'
+
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
+});
 ```
 
 ## 十九、AJAX
