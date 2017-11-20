@@ -2543,6 +2543,15 @@ Vue.use(ui);
 <c v-model="data2"></c>
 ```
 
+### CSS模块化功能
+实现css的模块化，避免全局冲突，在单文件组件上，给 style 标签添加 scoped 即可：
+
+``` html
+<style lang="scss" scoped></style>
+```
+
+这样打包后每个类或者 id 乃至标签都会给自动在 css 后面添加 hash!
+
 ## 二十三、问题
 ### 跨域问题
 1、 CORS , 前后端都要对应去配置,IE10+

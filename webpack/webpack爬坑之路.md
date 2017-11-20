@@ -134,6 +134,19 @@ npm i webpack-dev-server --save-dev
 
 > 注意：webpack-dev-server 打包的文件是存在内存中的，所以只用来在开发环境使用。
 
+## resolve
+
+``` js
+resolve: {
+    extensions: [".js", ".vue", ".json"], // 可以导入的时候忽略的拓展名范围
+    alias: { //也就是路径别名
+      vue$: "vue/dist/vue.esm.js",  
+      "@": resolve("src"),  // 这里就是别名了,比如@就代表直接从/src 下开始找起!!!
+      "~": resolve("src/components")
+    }
+  },
+```
+
 ## 插件
 ### HtmlWebpackPlugin
 这个插件能在构建过程中自动在你的 HTML 文件里插入对构建文件的引用。
