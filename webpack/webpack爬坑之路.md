@@ -3,11 +3,12 @@
 ## 开始
 ``` js
 module.exports = {
-    entry: './src/index.js' // 这里是项目入口文件地址
-    ouput: {
-        path: __dirname + "/dist", // 这里是项目输出的路径,__dirname表示当前文件的位置
-        filename: "js/"+"[name].js" // 这里是生成文件的名称，可起你想要的名字
-    }
+  entry: './src/index.js' // 项目入口文件地址
+  ouput: {
+    path: __dirname + "/dist", // 项目输出路径,__dirname表示当前文件位置
+    publicPath:publicPath,   // 静态资源相对路径
+    filename: "js/"+"[name].js" // 打包后的文件名，[name]是指对应的入口文件名字，也可取任意名字
+  }
 }
 ```
 
@@ -30,26 +31,43 @@ output: {
 ```
 
 ## loader
+### enfore
 ``` js
 module.exports = {
-    entry: './src/index.js' // 这里是项目入口文件地址
-    ouput: {
-        path: __dirname + "/dist", // 这里是项目输出的路径,__dirname表示当前文件的位置
-        filename: "js/"+"[name].js" // 这里是生成文件的名称，可起你想要的名字
-    }，
-    module: {
-        rules: [
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
-        ]
-    },
+  entry: './src/index.js' // 这里是项目入口文件地址
+  ouput: {
+    path: __dirname + "/dist", // 这里是项目输出的路径,__dirname表示当前文件的位置
+    filename: "js/"+"[name].js" // 这里是生成文件的名称，可起你想要的名字
+  }，
+  module: {
+    rules: [
+      { 
+        test: /\.js$/,
+        enforce: "pre",  
+        loader: "source-map-loader" 
+      }
+    ]
+  },
 }
 ```
+
+``` js
+//语法检查
+rules: [
+  {
+    test: /\.js$/,
+    enforce: "pre",
+    loader: "eslint-loader"
+  }
+]
+```
+
+> 注意：之前 webpack1 中需要用到 preLoader 的地方可以改到 rules 的 enfore 中进行配置。
 
 ### css/css预处理语言(less、sass、stylus)
 ``` js
 {
-  test: /\.(scss|css)?$/, 
+  test: /\.(scss|css)$/, 
   loader: ["style-loader", "css-loader", "sass-loader"]
 }
 ```
@@ -91,6 +109,19 @@ module.exports = {
 
 postcss 解决兼容性问题主要依靠的是它的插件 autoprefixer 。
 
+### babel
+``` js
+module:{
+  rules:[
+    {
+      test: /\.(js|jsx)$/,
+      exclude: /node_modules/, //排除
+      loader: 'babel-loader',  //注意 webpack2.x 是不支持 loader 简写
+    }
+  ]
+},
+```
+
 ### 图片处理
 对图片进行 base64 转码以减小资源的体积。
 
@@ -104,8 +135,8 @@ npm install url-loader file-loader --save-dev
 
 ``` js
 {
-  test: /\.(png|jpg)$/,
-  loader: 'url?limit=8192&name=images/[hash:8].[name].[ext]'
+  test: /\.(png|jpg|gif)$/,
+  loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
 }
 ```
 
@@ -119,7 +150,10 @@ limit 设置一个阈值，小于这个值得图片就会自动启用 base64 编
 ``` js
 { 
   test: /\.(woff|svg|eot|ttf)?$/, 
-  loader: "url-loader" 
+  loader: "file-loader",
+  options: {
+    name: 'source/[name].[ext]?[hash]' //该参数是打包后的文件名
+  }
 }
 ```
 
@@ -130,6 +164,19 @@ limit 设置一个阈值，小于这个值得图片就会自动启用 base64 编
 
 ``` bash
 npm i webpack-dev-server --save-dev
+```
+
+第二步、配置：
+
+
+``` js
+devServer: {
+  contentBase: "./dist",//本地服务器所加载的页面所在的目录
+  //historyApiFallback: true, //非hash模式路由不刷新（适用于单页面开发调试）
+  noInfo:true,
+  host:'192.168.102.103',
+  port:'4001'
+},
 ```
 
 > 注意：webpack-dev-server 打包的文件是存在内存中的，所以只用来在开发环境使用。
@@ -167,10 +214,21 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 //使用插件
 new HtmlWebpackPlugin({
+  favicon: './src/favicon.ico', //favicon路径，会同时可以生成hash值,可选
   filename: 'index.html'  //最终生成的文件名
   template: 'path.join(__dirname, 'src/index.html')',  //html 文件模版，可选
-  inject: true,
-  chunksSortMode: 'dependency'
+  inject: true, //js插入的位置，true/'head'/'body'/false
+  chunksSortMode: 'dependency',
+  hash: true, //为静态资源生成hash值
+  chunks: [item[0].slice(0,-5),'common'],//需要引入的chunk，不配置就会引入所有页面的资源
+  minify: { //压缩HTML文件
+    removeComments: true, //移除HTML中的注释
+    collapseWhitespace: false, //删除空白符与换行符
+    ignoreCustomFragments:[
+      // regexp  //不处理 正则匹配到的 内容
+    ]
+  },
+  minify: false //不压缩
 })
 ```
 
@@ -185,15 +243,35 @@ var webpack = require('webpack');
 //...
 
 plugins: [
-  new webpack.optimize.UglifyJsPlugin({
+  new UglifyJsPlugin({
     compress: {
-      warnings: false
+      warnings: false //警告配置默认为 false，如果编译后想查看警告信息可设置为 true
     }
   })
 ]
 ```
 
-> 注意：在配置文件头部引入 webpack 。
+UglifyJsPlugin 中的 sourceMap 默认项为 false。需要手动开启UglifyJsPlugin 的配置项：sourceMap: true 。
+
+``` js
+devtool: "source-map",
+plugins: [
+  new UglifyJsPlugin({
+    sourceMap: true
+  })
+]
+```
+
+### BannerPlugin
+``` js
+plugins: [
+  new webpack.BannerPlugin({
+    banner: 'Banner', 
+    raw: true, 
+    entryOnly: true
+  });
+]
+```
 
 ### 拆分文件
 我们在使用的js库如vue或者react等的时候，webpack会将它们一起打包，react和react-dom文件就好几百k，全部打包成一个文件，可想而知，这个文件会很大，用户在首次打开时就往往会出现白屏等待时间过长的问题，这时，我们就需要将这类文件抽离出来。
@@ -265,11 +343,13 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 module.exports = {
   //...
   
-  module: {
-    loaders: [{
+  module:{
+    rules: [{
       test: /\.css$/,
-      loader: ExtractTextPlugin.extract('style-loader',
-      'css-loader!postcss-loader')
+      use: ExtractTextPlugin.extract({
+        fallback: "style-loader",
+        use: "css-loader!postcss-loader!sass-loader"
+      })
     }]
   },
   postcss: function() {
@@ -277,8 +357,24 @@ module.exports = {
   },
   plugins: [
     new ExtractTextPlugin('./css/[name].min.css') // 生成到css文件夹下
-  ]
+  ],
+  new ExtractTextPlugin("[name].css?[hash]") //基础配置只需要传入打包名称就行了
 }
 ```
 
 webpack会将所有引用到的css文件打包，最终生成./css/[name].min.css文件。
+
+## 项目发布
+在开发的阶段，我们往往不需要让文件打包到最优状态，因为需要保证打包速度，但是在发布的时候需要打包到最优状态，这就需要我们对开发和生产两种模式做不同的处理，我是采用  cross-env 这个包获取 NODE_ENV 的值来判断当前是什么环境：
+
+``` js
+if (process.env.NODE_ENV === 'production') {
+  //生产模式下进行打包优化
+}
+```
+
+如何来改变 NODE_ENV 的值呢？ cross-env 可以帮助我们通过命令来修改, 执行以下命令，就能将 process.env.NODE_ENV 的值变为 'development'
+
+``` bash
+cross-env NODE_ENV=development
+```
