@@ -442,3 +442,46 @@ if (process.env.NODE_ENV === 'production') {
 ``` bash
 cross-env NODE_ENV=development
 ```
+
+### 谈谈 NODE_ENV
+我们经常在工程代码中见到如下使用方法：
+
+``` js
+process.env.NODE_ENV
+```
+
+但是很显然，NODE_ENV 属性并不在原生 process.env 属性对象上。而这个属性是一个自定义变量，主要用途是在使用 nodejs 环境执行脚本时，通过这个属性来区分不同环境（开发、生产、测试等）下的应用程序打包、构建、运行策略。
+
+最常见的两个值：
+
+``` js
+process.env.NODE_ENV === 'development'; // 或简写 dev，意为开发环境
+process.env.NODE_ENV === 'production'; // 或简写 prod，意为生产环境
+```
+
+#### 如何使用
+package.json 中 scripts 属性是一个对象，它的每一个键名都可以在命令行中通过`npm run 键名` 来运行，在键值中添加如下代码:
+
+``` js
+{
+  "scripts": {
+    "dev": "NODE_ENV=development webpack --config webpack.dev.config.js"
+  }
+}
+```
+
+这样就把 NODE_ENV 属性添加到了 `process.env` 对象上，值为 development，然后就只能在 webpack.dev.config.js 脚本中访问到 `process.env.NODE_ENV` ，而无法在其它脚本中访问。
+
+#### 在webpack中的使用
+webpack 只打包入口 js 文件，这个入口 js 文件及其引用的 js 文件无法访问为 webpack.dev.config.js 脚本提供的 `process.env.NODE_ENV`，但是可以通过 webpack 的插件来让入口 js 文件及其引用的 js 文件都能访问到 `process.env.NODE_ENV`：
+
+``` js
+const webpack = require('webpack');
+module.exports = {
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': '"development"'
+    })
+  ]
+}
+```
