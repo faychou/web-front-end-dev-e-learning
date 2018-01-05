@@ -6,8 +6,10 @@ module.exports = {
   entry: './src/index.js' // 项目入口文件地址
   ouput: {
     path: __dirname + "/dist", // 项目输出路径,__dirname表示当前文件位置
+    //上面 path 也可以写成:path.join(__dirname, 'dist') 
     publicPath:publicPath,   // 静态资源相对路径
     filename: "js/"+"[name].js" // 打包后的文件名，[name]是指对应的入口文件名字，也可取任意名字
+    //filename: '[name].bundle.[hash].js'
   }
 }
 ```
@@ -66,16 +68,23 @@ rules: [
 
 ### css/css预处理语言(less、sass、stylus)
 ``` js
-{
-  test: /\.(scss|css)$/, 
-  loader: ["style-loader", "css-loader", "sass-loader"]
+module: {
+  rules: [
+    {
+      test: /\.(scss|css)$/,
+      include: [
+        path.join(__dirname, 'src')
+      ], 
+      use: ["style-loader", "css-loader", "sass-loader"]
+    }
+  ]
 }
 ```
 
 webpack 会按照从右到左的顺序执行 loader，先解析 sass，之后进行 css 的打包编译。
 
-* style-loader： 将 css 插入到页面的 style 标签;
-* css-loader： 是处理 css 文件中的 url() 等;
+* style-loader： 用来将 css 文件嵌入到 js 文件里;
+* css-loader： 用来解析 css 文件;
 * sass-loader： 是将 sass 文件编译成 css。
 
 ### postcss
@@ -107,7 +116,7 @@ module.exports = {
 };
 ```
 
-postcss 解决兼容性问题主要依靠的是它的插件 autoprefixer 。
+postcss 解决兼容性问题主要依靠的是它的插件 autoprefixer ，这里可能要去下载 `autoprefixer` 包。
 
 ### babel
 ``` js
@@ -235,7 +244,7 @@ new HtmlWebpackPlugin({
 > 注意：去掉 index 文件里 js 的引用，带有 hash 值的构建文件将会自动增加到 index 文件。
 
 ### 压缩 js 代码
-webpack 自带了 UglifyJsPlugin 插件来压缩 js 代码。
+webpack 自带了 UglifyJsPlugin 插件，来压缩 js 代码。
 
 ``` js
 var webpack = require('webpack');
@@ -363,6 +372,61 @@ module.exports = {
 ```
 
 webpack会将所有引用到的css文件打包，最终生成./css/[name].min.css文件。
+
+### CommonsChunkPlugin
+抽取公共代码，CommonsChunkPlugin 是在有多个 entry 时使用的，即在有多个入口文件时，这些入口文件可能会有一些共同的代码，我们便可以将这些共同的代码抽取出来成独立的文件。
+
+如果在多个 entry 中 require 了相同的 css 文件，我们便可以使用 CommonsChunkPlugin 来将这些共同的样式文件抽取出来为独立的样式文件。
+
+``` js
+module.exports = {
+  entry: {
+    "A": "./src/entry.js",
+    "B": "./src/entry2.js"
+  },
+  //...
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+		name: "commons", filename: "commons.js"
+	}),
+    //...
+  ]
+}
+```
+
+CommonsChunkPlugin 好像只会将所有 chunk 中都共有的模块抽取出来，如果存在如下的依赖:
+
+``` js
+// entry1.js
+var style1 = require('./style/myStyle.css')
+var style2 = require('./style/style.css')
+
+// entry2.js
+require("./style/myStyle.css")
+require("./style/myStyle2.css")
+
+// entry3.js
+require("./style/myStyle2.css")
+```
+
+使用插件后会发现，根本没有生成 commons.css 文件。如果我们只需要取前两个 chunk 的共同代码，我们可以这么做:
+
+``` js
+module.exports = {
+  entry: {
+    "A": "./src/entry.js",
+    "B": "./src/entry2.js",
+    "C": "./src/entry3.js"
+  },
+  //...
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+		name: "commons", filename: "commons.js", chunks: ['A', 'B']
+	}),
+    //...
+  ]
+}
+```
 
 ## 项目发布
 在开发的阶段，我们往往不需要让文件打包到最优状态，因为需要保证打包速度，但是在发布的时候需要打包到最优状态，这就需要我们对开发和生产两种模式做不同的处理，我是采用  cross-env 这个包获取 NODE_ENV 的值来判断当前是什么环境：
