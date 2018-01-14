@@ -157,12 +157,73 @@ var promise4 = promise.catch((reason) => {
 
 * catch 方法和 then 方法的第二个参数一样，都是为 promise 注册拒绝回调。
 
+### Promise.then() 链式写法
+``` js
+p1.then(function taskA(value) { 
+  // task A
+}).then(function taskB(vaue){
+  // task B
+}).catch(function onRejected(error){ //最后catch 统一捕捉异常
+  console.log(error);
+});
+```
+
 ## Promise静态方法
 ### Promise.resolve(value)
-返回一个以给定值解析后的 Promise 对象。但如果这个值是个 thenable（即带有then方法），返回的 promise 会“跟随”这个 thenable 的对象，采用它的最终状态（指resolved/rejected/pending/settled）；否则以该值为成功状态返回 promise 对象。
+Promise.resolve(value) 可以认为是 new Promise() 方法的快捷方式。
 
-### Promise.reject(reason)
-返回一个用 reason 拒绝的 Promise。
+``` js
+//比如 Promise.resolve(666); 可以认为是以下代码的语法糖。
+new Promise(function(resolve){ 
+  resolve(666);
+});
+```
+
+在这段代码中的 resolve(666);会让这个 promise 对象立即进入确定(即 resolved )状态,并将 666 传递给后面 then 里所指定的 onFulfilled 函数。
+
+``` js
+Promise.resolve(666).then(
+  function (value) {
+    console.log(value)  //666
+  }
+);
+```
+
+Promise.resolve 方法另一个作用就是将 thenable 对象转换为 promise 对象。
+
+>> thenable对象：简单来说它就是一个非常类似 promise 的东西(就像我们有时称具有 `.length` 方法的非数组对象为 Arraylike 一样, thenable 指的是一个具有 `.then`  方法的对象。)  
+
+* 最简单的例子就是 `jQuery.ajax()`,它的返回值就是 thenable 的,因为 `jQuery.ajax()` 的返回值是 jqXHRObject 对象,这个对象具有 `.then` 方法；
+* 用 Promise.resolve 来转换为一个 promise 对象。变成了 promse 对象的话,就能直接使用 then 或者 catch 等这些在 ES6 Promises 里定 义的方法了。
+
+``` js
+var promise = Promise.resolve(
+  $.ajax('/json/comment.json')
+) // => promise对象 
+
+promise.then(function(value){
+  console.log(value); 
+});
+```
+
+### Promise.reject(error)
+Promise.reject(error) 是和 Promise.resolve(value) 类似的静态方法。
+
+``` js
+new Promise(
+  function (resolve,reject) { 
+    reject(new Error("出错了"));
+  }
+);
+
+// 是Promise.reject(newError("出错了"))的语法糖。
+//如下:
+Promise.reject(new Error("出错了!")).catch(
+  function(error){ 
+    console.error(error);
+  }
+);
+```
 
 ### Promise.all(iterable) 
 all 方法接受一个或多个 promsie（以数组方式传递），返回一个新 promise，该 promise 状态取决于传入的参数中的所有 promsie 的状态：
