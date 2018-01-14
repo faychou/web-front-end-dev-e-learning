@@ -1,6 +1,6 @@
 # webpack
 
-## 开始
+## 基本配置
 ``` js
 module.exports = {
   entry: './src/index.js' // 项目入口文件地址
@@ -9,30 +9,106 @@ module.exports = {
     //上面 path 也可以写成:path.join(__dirname, 'dist') 
     publicPath:publicPath,   // 静态资源相对路径
     filename: "js/"+"[name].js" // 打包后的文件名，[name]是指对应的入口文件名字，也可取任意名字
-    //filename: '[name].bundle.[hash].js'
+    //filename: '[name].[hash].js'
   }
 }
 ```
 
-NODE_ENV=production 就是将运行环境设置成生产环境
+## entry
+entry 是指项目入口文件地址，它的值可以是字符串、数组或对象。
 
-webpack.config.js 在开发环境下运行 webpack 的配置文件
-
-webpack.production.config.js 在生产环境下运行 webpack 的配置文件
-
---progress 是编译过程显示进程百分比的
-
-### 浏览器缓存资源
-给输出文件加上[hash]来添加 hash 值，这样就可以做到用户加载 html 里会去加载对应hash值得打包文件。
+### 单一的入口
+enter 项的值可以使用任意类型，最终输出的结果都是一样的。
 
 ``` js
-output: {
-  path: __dirname + "/dist",
-  filename: "[name][hash].js"
+entry: './src/index.js'
+//or
+entry: ['./src/index.js']
+//or
+entry: {
+  index:'./src/index.js'
+}
+```
+
+### enter：数组类型
+添加多个彼此不互相依赖的文件，可以使用数组格式的值。
+
+``` js
+entry: ['./src/index.js','./src/add.js']
+```
+
+### enter：混合类型
+也可以在 enter 对象里使用数组类型，例如下面的配置将会生成2个文件：vender.js（包含三个文件），index.js
+
+``` js
+entry: {
+  vendor:['jquery','fullpage.js','z-tree.js'],
+  index:'./src/index.js'
+}
+```
+
+## ouput
+ouput 是指项目输出配置和输出路径。
+
+### output
+是指项目输出路径。
+
+``` js
+path:__dirname + "/dist" //__dirname 表示当前文件位置
+//上面 path 也可以写成:
+path:path.join(__dirname, 'dist') 
+```
+### publicPath
+是指静态资源相对路径。path 仅仅告诉 webpack 打包后输出到哪里，然而 publicPath 项则被许多 webpack 的插件用于在生产模式下更新内嵌到 css、html 文件里的 url 值。
+
+``` js
+publicPath:"https:www.faychou.cn"
+```
+
+例如，在开发模式下的 css 文件中边你可能用 "./app.css" 这样的 url 来加载资源，但是在生产模式下 "app.css" 文件可能会定位到 CDN 上并且你的 Node.js  服务器可能是运行在另一个服务器上。这就意味着在生产环境你必须手动更新所有文件里的 url 为 CDN 的路径。
+
+### filename
+设置打包后的文件名。
+
+``` js
+filename: "js/"+"[name].js" // [name]是指对应的入口文件名字，也可取任意名字
+//filename: '[name].[hash].js'
+```
+
+## 浏览器缓存资源
+目前 webpack 有两种设置资源缓存的方式：[hash] 和 [chunkhash]。
+
+### hash
+hash 代表每次 webpack 在编译的过程中会生成唯一的 hash 值，在项目中任何一个文件改动后就会被重新创建，然后 webpack 计算新的 hash 值。给输出文件加上 [hash] ，这样就可以做到用户加载 html 里会去加载对应 hash 值打包的文件。
+
+``` js
+module.exports = {
+  entry: __dirname + '/src/index.js',
+  output: {
+    path: __dirname + "/dist",
+    filename: "[name].[hash].js"
+  }
+}
+```
+
+### chunkhash
+chunkhash 是根据模块计算出来的 hash 值，所以某个文件的改动只会影响它本身的 hash 值，不会影响其他文件。
+
+> 备注：如果只是单纯地将所有内容打包成一个文件，那么使用 hash 即可，而如果项目涉及到拆包，分模块进行加载等，需要用 chunkhash，来保证每次更新之后只有相关的文件 hash 值发生改变。
+
+``` js
+module.exports = {
+  entry: __dirname + '/src/index.js',
+  output: {
+    path: __dirname + '/dist',
+    filename: '[name].[chunkhash:8].js',
+  }
 }
 ```
 
 ## loader
+多个 loader 可以用在同一个文件上并且被链式调用。链式调用时从右到左执行且 loader 之间用 "!" 来分割。
+
 ### enfore
 ``` js
 module.exports = {
@@ -124,8 +200,8 @@ module:{
   rules:[
     {
       test: /\.(js|jsx)$/,
-      exclude: /node_modules/, //排除
-      loader: 'babel-loader',  //注意 webpack2.x 是不支持 loader 简写
+      exclude: /node_modules/, //排除 node_modules 文件夹
+      loader: 'babel-loader'  //注意 webpack2.x 是不支持 loader 简写
     }
   ]
 },
@@ -147,6 +223,13 @@ npm install url-loader file-loader --save-dev
   test: /\.(png|jpg|gif)$/,
   loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
 }
+
+//也可以这样设置
+{
+  test: /\.(png|jpg|gif)$/,
+  loader: 'url-loader',
+  query:{limit:8192}
+}
 ```
 
 limit 设置一个阈值，小于这个值得图片就会自动启用 base64 编码的图片，大于这个值的图片会打包到 name 这参数对应的路径，图片名称就会包括8位 md5 编码 name 对应文件本来名称，ext 对应扩展名。
@@ -166,13 +249,21 @@ limit 设置一个阈值，小于这个值得图片就会自动启用 base64 编
 }
 ```
 
+### 字体
+``` js
+{
+  test: /\.(woff|woff2|eot|ttf|otf)$/,
+  use: ['file-loader']
+},
+```
+
 ### webpack-dev-server
-服务器。
+这是一个基于 Express.js 框架开发的 web server，默认监听 8080 端口。提供了热更新 "Live Reload" 以及热替换 "Hot Module Replacement"（HMR）。
 
 第一步、安装：
 
 ``` bash
-npm i webpack-dev-server --save-dev
+npm install webpack-dev-server --save-dev
 ```
 
 第二步、配置：
@@ -184,20 +275,55 @@ devServer: {
   //historyApiFallback: true, //非hash模式路由不刷新（适用于单页面开发调试）
   noInfo:true,
   host:'192.168.102.103',
-  port:'4001'
+  port:'4001', //设置端口号
+  inline: true, //热更新 
+  hot:true //热替换
 },
 ```
 
+> 注意：直接在 devServer 配置项中设置 hot: true 和 inline: true 可能不生效，所以使用第三步中的方式向 CLI 传递参数会更好。
+
+> 如果 hot inline 两个参数都传入，当资源改变时，webpack-dev-server 将会先尝试HRM，如果失败则重新加载整个入口页面。
+
+第三步、运行：
+
+``` js
+// 方式 1：终端输入
+webpack-dev-server --inline --hot
+
+// 方式 2：在 package.json 的 scripts 中添加以下字段
+//--progress 是编译过程显示进程百分比的
+//-color 显示颜色
+"scripts": {
+ "dev": "webpack-dev-server --inline --hot --progress -color"
+ }
+ 
+// 然后终端中运行以下命令： 
+$ npm run dev
+
+// 最后在浏览器中预览以下地址：
+http://localhost:4001
+```
+
 > 注意：webpack-dev-server 打包的文件是存在内存中的，所以只用来在开发环境使用。
+
+## devtool
+``` js
+module.exports = {
+  //...
+  devtool: 'inline-source-map',//生成内页source map 文件
+  //...
+}
+```
 
 ## resolve
 
 ``` js
 resolve: {
-    extensions: [".js", ".vue", ".json"], // 可以导入的时候忽略的拓展名范围
+    extensions: [".js", ".vue", ".json"], // 导入的时候忽略文件的扩展名
     alias: { //也就是路径别名
       vue$: "vue/dist/vue.esm.js",  
-      "@": resolve("src"),  // 这里就是别名了,比如@就代表直接从/src 下开始找起!!!
+      "@": resolve("src"),  // 这里就是别名了,比如@就代表直接从/src 下开始找起
       "~": resolve("src/components")
     }
   },
@@ -282,61 +408,8 @@ plugins: [
 ]
 ```
 
-### 拆分文件
-我们在使用的js库如vue或者react等的时候，webpack会将它们一起打包，react和react-dom文件就好几百k，全部打包成一个文件，可想而知，这个文件会很大，用户在首次打开时就往往会出现白屏等待时间过长的问题，这时，我们就需要将这类文件抽离出来。
-
-``` js
-externals: {
-  "react": "React",
-  "react-dom": "ReactDOM"
-},
-```
-
-externals 和 plugins 是平级。左侧 key 表示依赖，右侧 value 表示文件中使用的对象。比如在 react 开发中，我们常常会这样在文件头部写 import React from 'react'，这里大家可以和上面对号入座下。
-
-然后对这个文件进行单独的引入使用了，在 index.html 中添加如下代码：
-
-``` html
-<script src="./node_modules/react/umd/react.xxx.js"></script>
-<script src="./node_modules/react-dom/umd/react-dom.xxx.js"></script>
-```
-
-写到这，我们就已经将文件拆分了。
-不过，我们在项目上线的时候不可能会带有node_modules,所以我们就需要使用一个copy插件将react和react-dom文件复制出来
-
-``` js
-new CopyWebpackPlugin([ // from是要copy的文件，to是生成出来的文件
-  { 
-    from: "node_modules/react/umd/react.xxx.js", to: "js/react.min.js" 
-  },{ 
-    from: "node_modules/react-dom/umd/react-dom.xxx.js", to: "js/react-dom.min.js" 
-  },{ 
-    from: "public/favicon.ico", to: "favicon.ico" 
-  }
-])
-```
-
-这样我们的index.html文件中就要写成下面这种形式:
-
-``` html
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-  <meta charset="UTF-8">
-  <link rel="icon" href="favicon.ico">
-  <title>Projection-Web</title>   
-</head>
-<body>
-  <div id="root"></div>
-  
-  <script src="js/react.min.js"></script>
-  <script src="js/react-dom.min.js"></script>
-</body>
-</html>
-```
-
 ### 拆分css
-我们也可以将css文件单独拆分出来，这样的好处就是打包的css文件我们可以放到cdn上，然后缓存到浏览器客户端中。这样就尽可能的减小文件的体积，以及不必要的资源重新加载，浪费带宽。
+我们也可以将 css 文件单独拆分出来，这样的好处就是打包的 css 文件我们可以放到 cdn 上，然后缓存到浏览器客户端中。这样就尽可能的减小文件的体积，以及不必要的资源重新加载，浪费带宽。
 
 第一步、安装插件：
 
@@ -357,7 +430,7 @@ module.exports = {
       test: /\.css$/,
       use: ExtractTextPlugin.extract({
         fallback: "style-loader",
-        use: "css-loader!postcss-loader!sass-loader"
+        use: ["css-loader","postcss-loader","sass-loader"]
       })
     }]
   },
@@ -371,10 +444,66 @@ module.exports = {
 }
 ```
 
-webpack会将所有引用到的css文件打包，最终生成./css/[name].min.css文件。
+webpack 会将所有引用到的 css 文件打包，最终生成 ./css/[name].min.css 文件。
 
-### CommonsChunkPlugin
-抽取公共代码，CommonsChunkPlugin 是在有多个 entry 时使用的，即在有多个入口文件时，这些入口文件可能会有一些共同的代码，我们便可以将这些共同的代码抽取出来成独立的文件。
+### 分离业务代码和第三方的代码
+我们在使用 vue 或者 react 等第三方库的时候，webpack 会将自己写的业务代码和引用的第三方库一起打包成一个 js 文件，一是会导致这个文件很大，用户在首次打开时可能会出现白屏等待时间过长的问题，二是业务代码更新频率高，而第三方库更新迭代速度慢，如果将第三方库进行抽离，这样可以充分利用浏览器的缓存来加载第三方库。
+
+``` js
+externals: {
+  "react": "React",
+  "react-dom": "ReactDOM"
+},
+```
+
+externals 和 plugins 是平级。左侧 key 表示依赖，右侧 value 表示文件中使用的对象。比如在 react 开发中，我们常常会这样在文件头部写 import React from 'react'，这里大家可以和上面对号入座下。
+
+然后对这个文件进行单独的引入使用了，在 index.html 中添加如下代码：
+
+``` html
+<script src="./node_modules/react/umd/react.xxx.js"></script>
+<script src="./node_modules/react-dom/umd/react-dom.xxx.js"></script>
+```
+
+写到这，我们就已经将文件拆分了。
+不过，我们在项目上线的时候不可能会带有 node_modules ,所以我们就需要使用一个 copy 插件将 react 和 react-dom 文件复制出来
+
+``` js
+new CopyWebpackPlugin([ // from是要copy的文件，to是生成出来的文件
+  { 
+    from: "node_modules/react/umd/react.xxx.js", to: "js/react.min.js" 
+  },{ 
+    from: "node_modules/react-dom/umd/react-dom.xxx.js", to: "js/react-dom.min.js" 
+  },{ 
+    from: "public/favicon.ico", to: "favicon.ico" 
+  }
+])
+```
+
+这样我们的 index.html 文件中就要写成下面这种形式:
+
+``` html
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="favicon.ico">
+  <title>Projection-Web</title>   
+</head>
+<body>
+  <div id="root"></div>
+  
+  <script src="js/react.min.js"></script>
+  <script src="js/react-dom.min.js"></script>
+</body>
+</html>
+```
+
+### 按需加载
+比如在使用 React-Router 的时候，当用户需要访问到某个路由的时候再去加载对应的组件，那么用户没有必要在一开始的时候就将所有的路由组件下载到本地。
+
+### 抽取公共代码(CommonsChunkPlugin)
+抽取公共代码：是指在有多个 entry 时（多页面应用），这些入口文件可能会有一些共同的代码，我们便可以将这些共同的代码抽取出来成独立的文件。比如 header, footer 等等，这样页面在进行跳转的时候这些公共模块因为存在于缓存里，就可以直接进行加载了，而不是再进行网络请求了。
 
 如果在多个 entry 中 require 了相同的 css 文件，我们便可以使用 CommonsChunkPlugin 来将这些共同的样式文件抽取出来为独立的样式文件。
 
@@ -387,7 +516,8 @@ module.exports = {
   //...
   plugins: [
     new webpack.optimize.CommonsChunkPlugin({
-		name: "commons", filename: "commons.js"
+      name: "commons", 
+      filename: "commons.js"
 	}),
     //...
   ]
@@ -421,9 +551,100 @@ module.exports = {
   //...
   plugins: [
     new webpack.optimize.CommonsChunkPlugin({
-		name: "commons", filename: "commons.js", chunks: ['A', 'B']
+      name: "commons", 
+      filename: "commons.js", 
+      chunks: ['A', 'B']
 	}),
     //...
+  ]
+}
+```
+
+#### 例子
+最后来一个综合按需加载、拆分第三方库、分离公共库、分离 css 的案例：
+
+``` js
+// src/pageA.js
+import componentA from './common/componentA';
+
+// 使用到 jquery 第三方库，需要抽离，避免业务打包文件过大
+import $ from 'jquery';
+
+// 加载 css 文件，一部分为公共样式，一部分为独有样式，需要抽离
+import './css/common.css'
+import './css/pageA.css';
+
+console.log(componentA);
+console.log($.trim('    do something   '));
+
+// src/pageB.js
+// 页面 A 和 B 都用到了公共模块 componentA，需要抽离，避免重复加载
+import componentA from './common/componentA';
+import componentB from './common/componentB';
+import './css/common.css'
+import './css/pageB.css';
+
+console.log(componentA);
+console.log(componentB);
+
+// 用到异步加载模块 asyncComponent，需要抽离，加载首屏速度
+document.getElementById('xxxxx').addEventListener('click', () => {
+  import( /* webpackChunkName: "async" */
+    './common/asyncComponent.js').then((async) => {
+      async();
+  })
+})
+
+// 公共模块文件中基本长这样
+export default "component X";
+```
+
+```js
+// webpack 配置
+const path = require('path');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+module.exports = {
+  entry: {
+    pageA: [path.resolve(__dirname, './src/pageA.js')],
+    pageB: path.resolve(__dirname, './src/pageB.js'),
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    filename: 'js/[name].[chunkhash:8].js',
+    chunkFilename: 'js/[name].[chunkhash:8].js'
+  },
+  module: {
+    rules: [
+      {
+        // 用正则去匹配要用该 loader 转换的 CSS 文件
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: ["css-loader"]
+        })  
+      }
+    ]
+  },
+  plugins: [
+    //抽离公共模块
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      //某个模块被加载两次即以上，移到 common chunk 里
+      minChunks: 2,
+    }),
+    //提取第三方代码
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: ({ resource }) => (
+        //判断资源是否来自 node_modules，并且是以 .js 结尾的话，则说明是第三方模块
+        resource && resource.indexOf('node_modules') >= 0 && resource.match(/\.js$/)
+      )
+    }),
+    //将 css 从打包好的 js 文件中抽离，生成独立的 css 文件
+    new ExtractTextPlugin({
+      filename: `css/[name].[chunkhash:8].css`,
+    }),
   ]
 }
 ```
@@ -484,4 +705,24 @@ module.exports = {
     })
   ]
 }
+```
+
+### 开发 VS 生产
+一般情况下 webpack 的配置文件分为两种：开发模式、生产模式。在不同模式下的配置是稍微有一些区别的。
+
+webpack.development.config.js 是在开发环境下运行 webpack 的配置文件。
+
+webpack.production.config.js 是在生产环境下运行 webpack 的配置文件。
+
+而区别这两种模式的方法就是依据 NODE_ENV 的值。比如说设置 `NODE_ENV=production` 就是将运行环境设置成生产环境。
+
+然后在 package.json 文件加入如下的 scripts 项来运行 webpack：
+
+``` js
+"scripts": {
+  // 运行npm run build 来编译生成生产模式下的bundles
+  "build": "webpack --config webpack.production.config.js",
+  // 运行npm run dev 来生成开发模式下的 bundles 以及启动本地 server
+  "dev": "webpack-dev-server --progress"
+ }
 ```
