@@ -1,6 +1,17 @@
 # npm
+npm 是随同 NodeJS 一起安装的包管理工具。
 
-## 常用命令
+## 使用场景
+* 允许用户从NPM服务器下载别人编写的第三方包到本地使用；
+
+* 允许用户从NPM服务器下载并安装别人编写的命令行程序到本地使用；
+
+* 允许用户将自己编写的包或命令行程序上传到NPM服务器供别人使用。
+
+## 安装 npm
+安装好 nodejs 后就自带 npm 了。
+
+## npm 常用命令
 ### 全局安装
 ``` bash
 npm install -g <package-name>
@@ -41,19 +52,24 @@ sudo chown -R faychou /usr/local/{lib/node_modules,bin,share}
 然后再次全局安装，如：npm install -g express
 
 
-### 本地安装
+### 局部安装
 ``` bash
 npm install <package-name>
 
 # 下载安装特定版本号的包
 npm install <package-name>@<version>
 
-# 下载安装包并添加到生产环境依赖
+# 下载安装包并添加到生产环境依赖，即将信息写入 package.json 的 dependencies 字段中
 npm install <package-name> --save
 
-# 下载安装包并添加到开发环境依赖
+# 下载安装包并添加到开发环境依赖，即将信息写入 package.json 的 devdependencies 字段中
 npm install <package-name> --save-dev
+
+# 强制安装（模块无论是否安装过，npm 都要强制重新安装，可以使用 -f 或 –force 参数）
+npm install <name> -f
 ```
+
+> 注意：在 Linux 或 Mac，全局安装路径 默认是用户主目录下的 node_modules，局部安装路径就是命令运行所在路径下的 node_modules。
 
 ### 搜索
 ``` bash
@@ -147,17 +163,41 @@ npm publish
 2. npm publish
 
 ## package.json
-用于存放模块的名称、版本、作者、机构、模块入口、依赖项等信息。首先我们通过 `npm init` 命令在当前工作目录下以用户引导的方式创建一个全新的 package.json 文件。
+用于记录项目的名称、版本号、作者、模块入口、项目依赖等信息。通过以下命令在当前项目目录下创建一个 package.json 文件。
 
+``` bash
+# 首先在终端(即cmd)中进入项目所在路径
+cd 项目路径
+
+# 然后执行以下命令，生成 package.json 文件
+npm init
+
+# 接着按照命令提示填写信息即可
+```
+
+### 以下是常见的 package.json 的字段
 * name：必选项，表示模块名称。命名时不能包含 js、node、和 url 中需要转义的字符，不能以 `.` 和 `_` 为开头。
+
 * version：必选项，表示模块的版本号。版本号以 主版本号 (Major).副版本号(Minor).补丁版本号(Patch) 构成（如1.2.0）。
+
 * main：必选项，模块入口文件相对路径（相对于模块根目录）。
-* description：可选项，表示模块功能描述，显示在 `npm search <package-name>` 中
-* keywords：可选项，数组类型，表示模块的关键字，显示在 `npm search <package-name>` 中
-* author：可选项，表示发起者信息。
+
+* description：可选项，表示模块功能描述，显示在 `npm search <package-name>` 中。
+
+* homepage：项目的官网 url。
+
+* keywords：可选项，数组类型，表示模块的关键字，显示在 `npm search <package-name>` 中。
+
+* author：可选项，表示项目作者。
+
+* contributors：可选项，项目的其他贡献者姓名。
+
 * engines：可选项，依赖的 node 版本。
-* repository：可选项，源码托管地址。
+
+* repository：可选项，源码托管地址，可以是 git 或 svn。
+
 * scripts：可选项，自定义在 cli 中输入 `npm <script>` 时实际执行的程序。npm 默认提供大量的 script 供我们调用。
+
 * dependencies 和 devDependencies：可选项，用于配置模块的生产环境依赖包和开发环境依赖包。当执行 `npm install` 时，npm 会根据这两个配置项的值去下载安装相关的依赖包。两者的区别是 devDependencies 是模块开发过程的依赖包（如：grunt 只在开发时有用的模块），并且当其他模块需要依赖当前模块时，当通过 `npm install <package-name>` 时会自动下载安装 dependencies 的包而不会下载 devDependencies 的包。
 
 ## cnpm
@@ -216,7 +256,7 @@ $ nrm ls
   rednpm -- http://registry.mirror.cqupt.edu.cn
   skimdb -- https://skimdb.npmjs.com/registry
   
-#切换
+# 使用 use 来切换当前使用哪个仓库
 nrm use cnpm
 ```
 
@@ -236,6 +276,32 @@ nrm test
 ```
 
 > 注意： nrm只是一个源管理器，也不能使用publish命令。
+
+## 发布第三方包
+第一步：在官网注册账号： https://www.npmjs.com/signup 。
+也可以通过以下命令 ，根据提示注册用户；
+
+``` bash
+npm adduser
+```
+
+第二步：在终端中登录：
+
+``` bash
+npm login
+```
+
+第三步：发布，发布过程会把整个目录发布,不想发布的内容模块, 可以通过 .gitignore 或 .npmignore 文件忽略。发布的时候，仓库要设置回 http://registry.npmjs.org；
+
+``` bash
+npm publish
+```
+
+第四步：如果包有修改，先更新 package.json 中的版本号，然后再执行以下命令：
+
+``` bash
+npm version <版本号>
+```
 
 ## 常见问题
 ### 使用 npm 安装模块的时候，出现 npm ERR! network connect ETIMEDOUT 的几种解决方案：
