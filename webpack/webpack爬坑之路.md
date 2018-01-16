@@ -662,6 +662,41 @@ module.exports = {
 }
 ```
 
+### 引入第三方库（如：jQuery）
+第一步、在 html 模板中直接引入 cdn 地址：
+
+``` html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>vue demo</title>
+</head>
+<body>
+  <div id="app">
+  </div>
+
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
+</body>
+</html>
+```
+
+第二步、在 webpack.config.js 配置中加一项“外部引入”（externals）：
+
+``` js
+// webpack.config.js
+externals:{
+  'jquery':'window.jQuery'
+}
+```
+
+第三步、在需要使用的地方引入：
+
+``` js
+//app.vue中引入
+import $ from 'jquery'
+```
+
 ## 项目发布
 ### 谈谈 NODE_ENV
 我们经常在工程代码中见到如下使用方法：
