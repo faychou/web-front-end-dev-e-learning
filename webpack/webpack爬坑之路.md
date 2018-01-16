@@ -220,41 +220,36 @@ npm install url-loader file-loader --save-dev
 
 ``` js
 {
-  test: /\.(png|jpg|gif)$/,
-  loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
+  test: /\.(png|jpe?g|gif)$/,
+  loader: 'url-loader?limit=8192&name=images/[name].[hash:8].[ext]'
 }
 
 //也可以这样设置
 {
-  test: /\.(png|jpg|gif)$/,
-  loader: 'url-loader',
-  query:{limit:8192}
+  test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+  loader: "url-loader",
+  options: {
+    limit: 8192,
+    name: path.join(__dirname, 'src/images/[name].[hash:8].[ext]')
+  }
 }
 ```
 
-limit 设置一个阈值，小于这个值得图片就会自动启用 base64 编码的图片，大于这个值的图片会打包到 name 这参数对应的路径，图片名称就会包括8位 md5 编码 name 对应文件本来名称，ext 对应扩展名。
+使用 url-loader 对引入的图片进行编码,将小于 limit 设置的阈值 8192 字节(8kb)的图片转为 DataURL(base64),大于 limit 字节的会自动调用 file-loader 进行处理，name 对应文件本来名称，以及 8 位 md5 编码， ext 对应扩展名。
 
-在网速不好的时候先于内容加载和减少http的请求次数来减少网站服务器的负担。
+在网速不好的时候先于内容加载和减少 http 的请求次数来减少网站服务器的负担。
 
-### svg
+### svg 和字体
 很多时候我们会引入 svg 图片来减小体积或者使用字体图标，在下载的素材文件里，会有一些 `.woff、.svg、.eot` 的文件，则必须对这些文件进行处理：
 
 ``` js
 { 
-  test: /\.(woff|svg|eot|ttf)?$/, 
+  test: /\.(woff|woff2|svg|eot|ttf)?$/, 
   loader: "file-loader",
   options: {
     name: 'source/[name].[ext]?[hash]' //该参数是打包后的文件名
   }
 }
-```
-
-### 字体
-``` js
-{
-  test: /\.(woff|woff2|eot|ttf|otf)$/,
-  use: ['file-loader']
-},
 ```
 
 ### webpack-dev-server
@@ -272,12 +267,15 @@ npm install webpack-dev-server --save-dev
 ``` js
 devServer: {
   contentBase: "./dist",//本地服务器所加载的页面所在的目录
-  //historyApiFallback: true, //非hash模式路由不刷新（适用于单页面开发调试）
+  //historyApiFallback: true, //依赖于HTML5 history API，非hash模式路由不刷新（适用于单页面开发调试）
   noInfo:true,
-  host:'192.168.102.103',
-  port:'4001', //设置端口号
+  host:'192.168.102.103', //主机名
+  port:'4001', //端口号
   inline: true, //热更新 
-  hot:true //热替换
+  hot:true, //热替换
+  open: true, //自动打开浏览器
+  proxy: 192.168.0.0:8080, //配置反向代理解决跨域
+  compress: true, //代码压缩
 },
 ```
 
@@ -311,7 +309,7 @@ http://localhost:4001
 ``` js
 module.exports = {
   //...
-  devtool: 'inline-source-map',//生成内页source map 文件
+  devtool: 'inline-source-map',//生成sourceMaps(方便调试)
   //...
 }
 ```
@@ -322,7 +320,9 @@ module.exports = {
 resolve: {
     extensions: [".js", ".vue", ".json"], // 导入的时候忽略文件的扩展名
     alias: { //也就是路径别名
-      vue$: "vue/dist/vue.esm.js",  
+      // import Vue from 'vue/dist/vue.js'可以写成 import Vue from 'vue'
+      // 键后加上$,表示精准匹配！
+      vue$: "vue/dist/vue.js",  
       "@": resolve("src"),  // 这里就是别名了,比如@就代表直接从/src 下开始找起
       "~": resolve("src/components")
     }
