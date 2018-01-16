@@ -152,6 +152,7 @@ module: {
         path.join(__dirname, 'src')
       ], 
       use: ["style-loader", "css-loader", "sass-loader"]
+      //也可以写成 loader："style-loader!css-loader!sass-loader"
     }
   ]
 }
@@ -235,7 +236,7 @@ npm install url-loader file-loader --save-dev
 }
 ```
 
-使用 url-loader 对引入的图片进行编码,将小于 limit 设置的阈值 8192 字节(8kb)的图片转为 DataURL(base64),大于 limit 字节的会自动调用 file-loader 进行处理，name 对应文件本来名称，以及 8 位 md5 编码， ext 对应扩展名。
+使用 url-loader 对引入的图片进行编码,将小于 limit 设置的阈值 8192 字节(8kb)的图片转为 DataURL(base64) 格式直接写入 src 里面，可以降低网络请求次数。大于 limit 字节的会自动调用 file-loader 进行处理，name 对应文件本来名称，以及 8 位 md5 编码， ext 对应扩展名。
 
 在网速不好的时候先于内容加载和减少 http 的请求次数来减少网站服务器的负担。
 
@@ -247,9 +248,19 @@ npm install url-loader file-loader --save-dev
   test: /\.(woff|woff2|svg|eot|ttf)?$/, 
   loader: "file-loader",
   options: {
-    name: 'source/[name].[ext]?[hash]' //该参数是打包后的文件名
+    name: 'fonts/[name].[ext]?[hash]' //该参数是打包后的文件名
   }
-}
+},
+
+//或者使用下面这种方式也行
+{
+  test:/\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+  loader:"url-loader",
+  options:{
+    limit:10000,
+    name:'fonts/[name].[ext]?[hash]'
+  }
+},
 ```
 
 ### webpack-dev-server
@@ -319,11 +330,12 @@ module.exports = {
 ``` js
 resolve: {
     extensions: [".js", ".vue", ".json"], // 导入的时候忽略文件的扩展名
-    alias: { //也就是路径别名
+    alias: {
       // import Vue from 'vue/dist/vue.js'可以写成 import Vue from 'vue'
       // 键后加上$,表示精准匹配！
-      vue$: "vue/dist/vue.js",  
-      "@": resolve("src"),  // 这里就是别名了,比如@就代表直接从/src 下开始找起
+      vue$: "vue/dist/vue.js",
+      //用@直接指引到src目录下，如：'./src/main'可以写成、'@/main' 
+      "@": resolve("src"),
       "~": resolve("src/components")
     }
   },
@@ -350,7 +362,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 //使用插件
 new HtmlWebpackPlugin({
   favicon: './src/favicon.ico', //favicon路径，会同时可以生成hash值,可选
-  title: "hello webpack", //html 文件title
+  title: "hello webpack", //title标签的内容
   filename: 'index.html'  //最终生成的文件名
   template: 'path.join(__dirname, 'src/index.html')',  //html 文件模版，可选
   inject: true, //js 插入的位置，true：插入到 head，false：插入到 body 底部
@@ -651,20 +663,6 @@ module.exports = {
 ```
 
 ## 项目发布
-在开发的阶段，我们往往不需要让文件打包到最优状态，因为需要保证打包速度，但是在发布的时候需要打包到最优状态，这就需要我们对开发和生产两种模式做不同的处理，我是采用  cross-env 这个包获取 NODE_ENV 的值来判断当前是什么环境：
-
-``` js
-if (process.env.NODE_ENV === 'production') {
-  //生产模式下进行打包优化
-}
-```
-
-如何来改变 NODE_ENV 的值呢？ cross-env 可以帮助我们通过命令来修改, 执行以下命令，就能将 process.env.NODE_ENV 的值变为 'development'
-
-``` bash
-cross-env NODE_ENV=development
-```
-
 ### 谈谈 NODE_ENV
 我们经常在工程代码中见到如下使用方法：
 
@@ -702,7 +700,7 @@ const webpack = require('webpack');
 module.exports = {
   plugins: [
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': '"development"'
+      'process.env.NODE_ENV': 'development'
     })
   ]
 }
@@ -726,4 +724,38 @@ webpack.production.config.js 是在生产环境下运行 webpack 的配置文件
   // 运行npm run dev 来生成开发模式下的 bundles 以及启动本地 server
   "dev": "webpack-dev-server --progress"
  }
+```
+
+### cross-env
+上面这种运行不同文件的方式显然不是很智能，所以通常做法是通过 cross-env 这个包来改变 NODE_ENV 的值来实现的。
+
+所以首先第一步安装 cross-env ：
+
+``` bash
+npm install --save cross-env
+```
+
+接着如何来改变 NODE_ENV 的值呢？ cross-env 可以帮助我们通过命令来修改, 执行以下命令，就能将 process.env.NODE_ENV 的值变为 'development'
+
+``` bash
+cross-env NODE_ENV=development
+```
+
+所以我们经常可以看到 package.json 有这样的配置：
+
+``` json
+"scripts": {
+  "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+  "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+}
+```
+
+在运行 webpack 命令之前运行了 cross-env NODE_ENV=develpoment 或者 production,这就是给环境变量赋值的过程。
+
+然后在 webpack.config.js 中通过获取 NODE_ENV 的值来判断当前的环境：
+
+``` js
+if (process.env.NODE_ENV === 'production') {
+  //生产模式下进行打包优化
+}
 ```

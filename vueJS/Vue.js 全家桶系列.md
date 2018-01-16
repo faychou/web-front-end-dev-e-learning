@@ -1323,10 +1323,15 @@ Props：
 ## 十三、辅助工具
 vue-devtools
 	
-## 十四、手动创建Vue的开发环境
-webpack 配置：
+## 十四、手动创建 Vue 的开发环境
+vue-loader 是必须的，vue-template-compiler 是 vue-loader 必须的依赖。
+
+``` bash
+npm install --save-dev vue-loader vue-template-compiler
+```
 
 ``` js
+//webpack 配置
 module: {
   rules: [
     {
