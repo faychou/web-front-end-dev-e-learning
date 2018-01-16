@@ -170,7 +170,7 @@ postcss 是目前 css 兼容性的解决方案，会自动加入前缀，使 css
 第一步、下载：
 
 ``` bash
-npm i postcss-loader
+npm install postcss-loader autoprefixer --save-dev
 ```
 
 第二步、修改 webpack 配置文件：
@@ -342,6 +342,15 @@ resolve: {
 ```
 
 ## 插件
+### 热替换
+热替换是指修改文件内容之后不用手动刷新页面，修改的部分会自动刷新，webpack 内部已经支持，不需要下载，直接在 plugins 中添加以下代码就行：
+
+``` js
+plugins:[
+  new webpack.HotModuleReplacementPlugin()
+]
+```
+
 ### HtmlWebpackPlugin
 这个插件能在构建过程中自动在你的 HTML 文件里插入对构建文件的引用。
 
@@ -360,27 +369,83 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 //...
 
 //使用插件
+plugins: [
 new HtmlWebpackPlugin({
   favicon: './src/favicon.ico', //favicon路径，会同时可以生成hash值,可选
   title: "hello webpack", //title标签的内容
-  filename: 'index.html'  //最终生成的文件名
+  filename: 'index.html'  //最终生成的文件名，默认为 index.html
   template: 'path.join(__dirname, 'src/index.html')',  //html 文件模版，可选
-  inject: true, //js 插入的位置，true：插入到 head，false：插入到 body 底部
-  chunksSortMode: 'dependency',
-  hash: true, //为静态资源生成hash值
-  chunks: [item[0].slice(0,-5),'common'],//需要引入的chunk，不配置就会引入所有页面的资源
+  inject: true, //js 插入的位置
+  hash: true, //为静态资源生成 hash 值
   minify: { //压缩HTML文件
     removeComments: true, //移除HTML中的注释
     collapseWhitespace: true, //删除空白符与换行符
+    removeAttributeQuotes: true // 移除属性的引号
     ignoreCustomFragments:[
       // regexp  //不处理 正则匹配到的 内容
     ]
-  },
-  minify: false //不压缩
+  }
 })
+]
 ```
 
-> 注意：去掉 index 文件里 js 的引用，带有 hash 值的构建文件将会自动增加到 index 文件。
+其他几个属性指介绍：
+#### inject
+有四个选项值：
+
+* true：默认值，script标签位于html文件的 body 底部
+* body：同 true
+* head：script 标签位于 head 标签内
+* false：不插入生成的 js 文件，只是单纯的生成一个 html 文件
+
+#### cache
+默认值是 true。表示只有在内容变化时才生成一个新的文件。
+
+#### showErrors
+showErrors 的作用是，如果 webpack 编译出现错误，webpack会将错误信息包裹在一个 pre 标签内，属性的默认值为 true ，也就是显示错误信息。
+
+#### chunks
+chunks 选项的作用主要是针对多入口(entry)文件。当你有多个入口文件的时候，对应就会生成多个编译后的 js 文件。那么 chunks 选项就可以决定是否都使用这些生成的 js 文件。
+
+``` js
+// webpack.config.js
+entry: {
+  index: path.resolve(__dirname, './src/index.js'),
+  index1: path.resolve(__dirname, './src/index1.js'),
+  index2: path.resolve(__dirname, './src/index2.js')
+}
+//...
+plugins: [
+  new HtmlWebpackPlugin({
+    //...
+    chunks: ['index','index2']
+  })
+]
+```
+
+如果没有指定 chunks 选项，默认会在生成的 html 文件中引用所有的 js 文件。但是通过以上的方式指定，在生成的 index.html 文件中，只引用了 index.js 和 index2.js 。
+
+#### excludeChunks
+跟 chunks 是相反的，排除引入某些 js 文件。 如
+
+``` js
+excludeChunks: ['index1.js']
+```
+
+#### chunksSortMode
+这个选项决定了 script 标签的引用顺序。默认有四个选项:
+
+* dependency：按照不同文件的依赖关系来排序。
+* auto：默认值，插件的内置的排序方式。
+* none：无序。
+* {function}：提供一个函数。
+
+``` js
+chunksSortMode: 'dependency'
+```
+
+#### xhtml
+一个布尔值，默认值是 false ，如果为 true ,则以兼容 xhtml 的模式引用文件。
 
 ### 压缩 js 代码
 webpack 自带了 UglifyJsPlugin 插件，来压缩 js 代码。
