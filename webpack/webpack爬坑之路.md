@@ -359,7 +359,7 @@ new HtmlWebpackPlugin({
   chunks: [item[0].slice(0,-5),'common'],//需要引入的chunk，不配置就会引入所有页面的资源
   minify: { //压缩HTML文件
     removeComments: true, //移除HTML中的注释
-    collapseWhitespace: false, //删除空白符与换行符
+    collapseWhitespace: true, //删除空白符与换行符
     ignoreCustomFragments:[
       // regexp  //不处理 正则匹配到的 内容
     ]
