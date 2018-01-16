@@ -277,22 +277,11 @@ npm install webpack-dev-server --save-dev
 
 ``` js
 devServer: {
-  contentBase: "./dist",//本地服务器所加载的页面所在的目录
-  //historyApiFallback: true, //依赖于HTML5 history API，非hash模式路由不刷新（适用于单页面开发调试）
-  noInfo:true,
-  host:'192.168.102.103', //主机名
   port:'4001', //端口号
-  inline: true, //热更新 
-  hot:true, //热替换
   open: true, //自动打开浏览器
-  proxy: 192.168.0.0:8080, //配置反向代理解决跨域
-  compress: true, //代码压缩
+  compress: true, //启用 gzip 压缩
 },
 ```
-
-> 注意：直接在 devServer 配置项中设置 hot: true 和 inline: true 可能不生效，所以使用第三步中的方式向 CLI 传递参数会更好。
-
-> 如果 hot inline 两个参数都传入，当资源改变时，webpack-dev-server 将会先尝试HRM，如果失败则重新加载整个入口页面。
 
 第三步、运行：
 
@@ -302,9 +291,9 @@ webpack-dev-server --inline --hot
 
 // 方式 2：在 package.json 的 scripts 中添加以下字段
 //--progress 是编译过程显示进程百分比的
-//-color 显示颜色
+//--color 显示颜色
 "scripts": {
- "dev": "webpack-dev-server --inline --hot --progress -color"
+ "dev": "webpack-dev-server --inline --hot --progress --color"
  }
  
 // 然后终端中运行以下命令： 
@@ -315,6 +304,150 @@ http://localhost:4001
 ```
 
 > 注意：webpack-dev-server 打包的文件是存在内存中的，所以只用来在开发环境使用。
+
+> 如果 hot、inline 两个参数都传入，当资源改变时，webpack-dev-server 将会先尝试HRM，如果失败则重新加载整个入口页面。
+
+其他配置项：
+#### contentBase
+本地服务器所在的目录，默认为当前目录，推荐使用绝对路径。
+
+``` js
+devServer: {
+  contentBase: path.join(__dirname, "dist")
+  //也可以设置多个目录
+  //contentBase: [path.join(__dirname, "dist"), path.join(__dirname, "assets")]
+}
+```
+
+#### host
+设置主机名，默认是 localhost。
+
+``` js
+devServer: {
+  host:'192.168.102.103'
+}
+```
+
+#### inline
+热更新。
+
+#### hot
+热替换。
+
+``` js
+devServer: {
+  inline: true,
+  hot:true
+}
+```
+
+> 注意：直接在 devServer 配置项中设置 hot: true 和 inline: true 可能不生效，所以最好的方式是直接在 CLI 中设置。
+
+#### historyApiFallback
+依赖于 HTML5 history API，非 hash 模式路由不刷新（适用于单页面开发调试）。也就是说当设置为 true 时，任意的 404 响应都可能需要被替代为 index.html。
+
+``` js
+devServer: {
+  historyApiFallback: true
+}
+```
+
+通过传入一个对象，此行为可进一步地控制：
+
+``` js
+devServer: {
+  historyApiFallback: {
+    rewrites: [
+      { from: /^\/$/, to: '/views/landing.html' },
+      { from: /^\/subpage/, to: '/views/subpage.html' },
+      { from: /./, to: '/views/404.html' }
+    ]
+  }
+}
+```
+
+#### proxy
+配置代理。
+
+``` js
+devServer: {
+  proxy: {
+    "/api": "http://localhost:3000"
+  }
+}
+```
+
+请求到 /api/users 会被代理到 http://localhost:3000/api/users。如果不想传递 /api ：
+
+``` js
+devServer: {
+  proxy: {
+    "/api": {
+      target: "http://localhost:3000",
+      pathRewrite: {"^/api" : ""}
+    }
+  }
+}
+```
+
+默认情况下，不接受 HTTPS ，且使用了无效证书的后端服务器。如果想要接受，修改配置如下：
+
+``` js
+proxy: {
+  "/api": {
+    target: "https://other-server.example.com",
+    secure: false
+  }
+}
+```
+
+解决跨域。
+
+``` js
+devServer: {
+  proxy: 192.168.0.0:8080
+}
+```
+
+#### allowedHosts
+设置访问白名单。
+
+``` js
+devServer: {
+  allowedHosts: [
+    'host1.com',
+    'host2.com'
+  ]
+}
+```
+
+#### https
+默认情况下，dev-server 通过 HTTP 提供服务。也可以选择带有 HTTPS 的 HTTP/2 提供服务。
+
+``` js
+devServer: {
+  https: true
+}
+```
+
+使用以下设置自签名证书：
+
+``` js
+devServer: {
+  https: {
+    key: fs.readFileSync("/path/to/server.key"),
+    cert: fs.readFileSync("/path/to/server.crt"),
+    ca: fs.readFileSync("/path/to/ca.pem"),
+  }
+}
+```
+
+#### noInfo
+启用 noInfo 后，诸如「启动时和每次保存之后，那些显示的 webpack 包(bundle)信息」的消息将被隐藏。错误和警告仍然会显示。
+
+``` js
+noInfo: true
+```
 
 ## devtool
 ``` js
