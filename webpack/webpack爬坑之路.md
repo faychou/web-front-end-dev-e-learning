@@ -350,9 +350,10 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 //使用插件
 new HtmlWebpackPlugin({
   favicon: './src/favicon.ico', //favicon路径，会同时可以生成hash值,可选
+  title: "hello webpack", //html 文件title
   filename: 'index.html'  //最终生成的文件名
   template: 'path.join(__dirname, 'src/index.html')',  //html 文件模版，可选
-  inject: true, //js插入的位置，true/'head'/'body'/false
+  inject: true, //js 插入的位置，true：插入到 head，false：插入到 body 底部
   chunksSortMode: 'dependency',
   hash: true, //为静态资源生成hash值
   chunks: [item[0].slice(0,-5),'common'],//需要引入的chunk，不配置就会引入所有页面的资源

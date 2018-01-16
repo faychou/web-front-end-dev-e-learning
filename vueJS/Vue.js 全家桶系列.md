@@ -1324,49 +1324,7 @@ Props：
 vue-devtools
 	
 ## 十四、手动创建Vue的开发环境
-前提条件依旧是安装 Node.js 。
-
-	npm install vue --save
-	# 编译模块
-	npm install vue-template-compiler --save
-	
-简单例子：
-
-``` js
-// index.js
-import Vue from 'vue'
-import AppContainer from './AppContainer'
-
-const app = new Vue({
-    render: h => h(AppContainer),
-}).$mount('#app')
-```
-
-``` js
-// AppContainer.vue
-<template>
-    <div>
-        {{msg}}
-    </div>
-</template>
-<style>
-    body{
-        background-color:#ff0000;
-    }
-</style>
-<script>
-    export default{
-        data(){
-            return{
-                msg:'hello vue'
-            }
-        }
-    }
-</script>
-```
-
-### vue-loader
-vue-loader 的 webpack 配置：
+webpack 配置：
 
 ``` js
 module: {
@@ -1376,10 +1334,56 @@ module: {
       loader: 'vue-loader',
       options: {
         loaders: {
-          // Override the default loaders
-        }
+          css: ["vue-style-loader", "css-loader"],
+          less: ["vue-style-loader", "css-loader", "postcss-loader", "less-loader"]
+        },
+        cssSourceMap: true
       }
     },
+    //使用vue-style-loader!css-loader!postcss-loader 处理以 css 结尾的文件！
+    {
+      test: /\.css$/,
+      use: [
+        "vue-style-loader",
+          {
+            loader: "css-loader",
+	         options: {
+	         sourceMap: true
+	       }
+	     },
+	     {
+	       loader: "postcss-loader",
+	       options: {
+	         sourceMap: true
+	       }
+	     }
+	   ]
+	 },
+	 //使用vue-style-loader!css-loader!postcss-loader处理以less结尾的文件！
+    {
+      test: /\.less$/,
+      use: [
+        "vue-style-loader",
+        {
+          loader: "css-loader",
+          options: {
+            sourceMap: true
+          }
+        },
+        {
+          loader: "less-loader",
+          options: {
+            sourceMap: true
+          }
+        },
+        {
+          loader: "postcss-loader",
+          options: {
+            sourceMap: true
+          }
+        }
+      ]
+    }
   ]
 }
 ```
