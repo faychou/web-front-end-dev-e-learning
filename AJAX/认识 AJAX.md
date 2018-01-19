@@ -47,6 +47,72 @@
 404	未找到资源,可以设置个性”404页面”	Not Found
 500	服务器内部错误	internal Server Error
 
+## 认识 AJAX
+### 生成时间戳
+为了防止缓存(304)，调用open时，在第二个参数请求地址后添加一个随机数，保证每次访问的地址不同，避免因为缓存导致请求的文件发生改变，而页面并未随之改变(因为使用了缓存的数据)。
+
+``` js
+xhr.open("get", "url?" + Math.random(), true);
+```
+
+### post请求和get请求的区别
+``` js
+xhr.open("post", "请求文件", true);
+
+//设置请求头部发送时的文本格式，因为post方法只能通过表单格式发送
+xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+//send方法中的参数是报文体，而post方法传递是通过报文体，调用send方法传递的参数是以kv对形式的字符串，类似query string
+xhr.send("k=v&k=v");
+```
+
+原生的post是将传递的参数放到send()中以form data形式传递，而原生的get方法是将数据放到第二个参数的路径?后面，以查询字符串的形式传递，这和jQuery的传递方法不同，jQuery中的$.get()和$.post()都是通过第二个参数以json的形式传递到接口页面的。
+
+但是通常参数是以json形式传递的，如何将json对象转换为键值对形式的字符串？
+
+``` js
+var data = {
+	"names": "Tom",
+	"age": 19,
+	"sex": "男"
+}
+
+//封装一个格式转换函数
+function changeToString(JSON){
+	var tempArr = [];
+	for(var k in JSON){
+		//url只允许英文、数字和特殊字符，当有中文或其他国家语言出现时，要通过uri(统一资源标识符)来转换
+		tempArr.push(k + "=" + encodeURIComponent(JSON[k]));
+	}
+	return temp.join("&");
+}
+
+//调用函数转换格式
+xhr.send(changeToString(data));
+```
+
+### 数据转化
+从后台发送来的数据，前端并不知道数据是什么格式，也就不能直接拿来就使用，要先进行判断。
+
+方法一：使用JSON.parse()方法将字符串转换为json对象，但是有兼容问题存在，IE6，7，8不兼容这个方法。
+
+``` js
+//data是从后台传回的response数据，要先判断是JSON对象还是JSON对象形式的字符串
+var dataObj = typeof data == "object" ? data : JSON.parse(data);
+```
+
+方法二：使用eval()方法，没有兼容问题，eval()可以将str变成执行语句，但是转换对象形式的字符串要注意，字符串外面必须加括号。
+
+``` js
+var dataObj = typeof data == "object" ? data : eval("("+ data +")");
+```
+
+方法三：使用内置构造函数Function(), 通过构造函数new的实例立即执行返回json对象。
+
+``` js
+var dataObj = typeof data == "object" ? data : (new Function("return" + data))();
+```
+
 ## AJAX封装
 ### 简单的 GET 请求封装
 ``` js
