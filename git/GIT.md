@@ -103,6 +103,8 @@ git status
 
 要查看尚未暂存的文件更新了哪些部分，不加参数直接输入 `git diff` 。
 
+`git diff --staged` 或 `git diff --cached` 可查看已暂存文件和上次提交的区别
+
 ### 移除文件
 要从 Git 中移除某个文件，就必须要从已跟踪文件清单中移除（确切地说，是从暂存区域移除），然后提交。
 
@@ -126,9 +128,21 @@ git rm --cached <文件>
 git mv file-from file-to
 ```
 
-## 查看提交历史
-在提交了若干更新，又或者克隆了某个项目之后，你也许想回顾下提交历史。 完成这个任务最简单而又有效的工具是 git log 命令。
+## 查看提交历史记录的命令
+在提交了若干更新，又或者克隆了某个项目之后，你也许想回顾下提交历史。 完成这个任务最简单而又有效的命令是：
 
+``` bash
+git log
+```
+
+而 `git reflog` 的功能是查看本地操作记录，可以看到本地的commit, merge, rebase等操作记录，并带有版本号。
+
+## 回退
+git reset HEAD {filename}: 取消暂存文件，恢复到已修改未暂存状态。
+
+git reset HEAD~{n}: 表示回退到n个提交之前。它也可以用来合并提交，下面的写法与 git commit --amend 结果是一样的。
+
+git reset {version}: 后面带版本号，直接回退到指定版本。
 
 
 # GitHub
