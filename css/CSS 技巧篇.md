@@ -43,3 +43,31 @@ css3 中用于控制一段文字的行数显示，只适用于WebKit浏览器及
 [demo](http://jsbin.com/juxihisisu/edit?html,css,js,output)
 
 ## 表单
+
+## 滚动
+### 滚动缓冲
+``` css
+-webkit-overflow-scrolling: auto  |  touch;
+
+/* 兼容写法 */
+over-flow: auto;     /* winphone8和android4+ */
+-webkit-overflow-scrolling: touch;    /* ios5+ */
+```
+
+* auto： 普通滚动，当手指从触摸屏上移开，滚动立即停止
+* touch：滚动回弹效果，当手指从触摸屏上移开，内容会保持一段时间的滚动效果，继续滚动的速度和持续的时间和滚动手势的强烈程度成正比。同时也会创建一个新的堆栈上下文。
+
+> 可能会出现的bug：
+
+* 父级元素加上定位 `position: absolute|relative`，滑动几次后可滚动区域会卡主，不能在滑动；
+* 快速滑动页面会出现空白，滑动停止后内容才显示
+
+``` css
+/* 给父级元素设置 */
+//解决第一个bug
+z-index:1;    
+
+//解决第二个bug
+-webkit-backface-visibility: hidden;    
+-webkit-transform: translate3d(0,0,0);
+```
