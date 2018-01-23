@@ -7,6 +7,12 @@
 ``` js
 let values = [2, 3, 4];
 let verbose = [1, ...values, 5];
+
+//数组拼接
+const one = ['a', 'b', 'c']
+const two = ['d', 'e', 'f']
+const three = ['g', 'h', 'i']
+const result = [...one, ...two, ...three]
 ```
 
 对对象属性的展开符的使用，而不必再使用Object.assign进行对象的扩展：
@@ -26,11 +32,55 @@ var array = [33, 2, 9];
 var maxValue = Math.max.apply(null, array)
 ```
 
-而使用展开符，我们就可以：
+而使用展开符：
 
 ``` js
-var array = [33, 2, 9];
-var maxValue = Math.max(...array);
+const maxValue = (arr) => Math.max(...arr)
+maxValue([33, 22, 9]) // 33
+```
+
+很容易的实现数组和对象的 拷贝：
+
+``` js
+const obj = { ...oldObj }
+const arr = [ ...oldArr ]
+```
+
+## 数组扩展
+### 解构
+利用数组解构来实现值的互换。
+
+``` js
+let a = 'world', b = 'hello'
+[a, b] = [b, a]
+console.log(a) // -> hello
+console.log(b) // -> world
+```
+
+### reduce
+``` js
+// 计算数组的总和
+const sum = (arr) => arr.reduce((a, b) => (a + b), 0)
+sum([1, 2, 3, 4]) // 10
+```
+
+## 对象扩展
+使得函数声明和函数的调用更加可读。
+
+``` js
+// 一般写法
+const getState = (id, force, verbose) => {
+  //...do something
+}
+// 当调用函数时， 对这里的参数不明所以
+getStuffNotBad(150, true, true)
+
+// 优化
+const getState = ({id, force, verbose}) => {
+  //...do something
+}
+// 完美
+getStuffAwesome({ id: 150, force: true, verbose: true })
 ```
 
 ## 函数扩展
