@@ -1,15 +1,54 @@
 # 水平居中
 ## 行内元素居中
-父元素设置 `text-align: center;`
+``` css
+/* 父元素设置 */
+.father {
+  text-align: center;
+}
+```
 
 ## 块状元素居中
 ### 宽度固定
-对该元素设置 `margin: auto` 或 `margin: 0 auto`;
+``` css
+/* 一般写法 */
+div {
+  margin: 0 auto;
+  /* 也可以这样写 margin: auto; */
+}
+
+/* 最佳写法 */
+div {
+  margin-left: auto;
+  margin-right: auto;
+}
+```
+
+> 优点：兼容性好。缺点: 需要指定宽度。
 
 ### 宽度不固定
-#### 加table标签设置 margin:0 auto
+#### 使用 inline-block
+``` css
+.parent {
+  text-align: center;
+}
+.child {
+  display: inline-block;
+}
+```
 
-缺点是加了不少的无用标签，代码看起来比较臃肿。
+> 优点：兼容性好。缺点：需要同时设置子元素和父元素。
+
+#### 使用 table 实现 
+``` css
+div {
+  display: table; 
+  margin: 0 auto;
+}
+
+/* 或者给该 div 嵌套表格标签*/
+```
+
+> 优点:只需要对自身进行设置。缺点：IE6,7 需要调整结构。
 
 #### 定位
 ``` html
@@ -29,19 +68,63 @@
 </div>
 ```
 
+#### 使用位移
+``` css
+div {
+  position: absolute; 
+  left: 50%; 
+  transform: translate(-50%,0);
+  /*或者实用margin-left的负值为盒子宽度的一半也可以实现，不过这样就必须知道盒子的宽度，但兼容性好*/
+}
+```
+
+#### 使用 flex
+``` css
+div {
+  display: flex; 
+  justify-content: center;
+}
+```
+
 # 垂直居中
 ## 单行文本居中
-设置 `line-height` = `height` 即可，但是无法实现两行文本的垂直居中对齐。
+设置 `line-height` 和 `height` 相等即可，但是无法实现两行文本的垂直居中对齐。
+
+``` css
+div {
+  height: 200px;
+  line-height: 200px;
+}
+```
 
 ## 块级元素高度固定
-### 方法一：定位
+### vertical-align
+只有该元素属于 inline 或是 inline-block（table-cell 也可以理解为 inline-block），vertical-align 属性才会起作用。
+
+在使用 vertical-align 的时候，由于对齐的基线是用行高的基线作为标记，故需要设置 line-height 或设置 display:table-cell。
+
+``` css
+/*第一种方法*/
+div {
+  display: table-cell;
+  vertical-align: middle;
+  height:20px;
+}
+
+/*第二种方法*/
+div {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 20px;
+}
+```
+
+### 定位
 ``` html
 <style>
 .main {
   position: absolute;
-  left: 50%;
   top: 50%;
-  margin-left: -150px;
   margin-top: -150px;
   width: 300px;
   height: 300px;
@@ -51,25 +134,23 @@
 <div class="main"></div>
 ```
 
-缺点是无法自适应内容的高度。
+> 缺点：无法自适应内容的高度。
 
-### 方法二：calc
+### 使用 calc
 ``` html
 <style>
 .main {
   position: absolute;
-  left: calc(50% - 150px);
   top: calc(50% - 150px);
   width: 300px;
   height: 300px;
-  border: 1px solid red;
 }
 </style>
 
 <div class="main"></div>
 ```
 
-### 方法三：空标签 + float
+### 空标签 + float
 ``` html
 <style>
 .space {
@@ -104,7 +185,7 @@
 <div class="main"></div>
 ```
 
-缺点：元素脱离文档流。如果需要居中的元素已经在高度上超过了视口，那它的顶部会被视口裁切掉。
+> 缺点：元素脱离文档流。如果需要居中的元素已经在高度上超过了视口，那它的顶部会被视口裁切掉。
 
 ### 结合 vh 和 transform
 ``` html
@@ -159,4 +240,60 @@
 <div class="main">
   <div class="inner"></div>
 </div>
+```
+
+# 水平垂直居中
+### 使用 vertical-align
+``` css
+.parent {
+  display: table-cell; 
+  vertical-align: middle; 
+  text-align: center;
+}
+.child {
+  display: inline-block;
+}
+```
+
+### 绝对定位
+``` css
+/* 方法一 */
+div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin-left: -100px;
+  margin-top: -100px;
+}
+
+/* 方法二 */
+div {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
+}
+```
+
+### 使用位移
+``` css
+div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+```
+
+### 使用 flex
+``` css
+div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 ```
