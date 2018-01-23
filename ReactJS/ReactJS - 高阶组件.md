@@ -1,5 +1,7 @@
-# 高阶组件
-高阶组件就是一个函数，它接受一个组件作为参数，返回一个新的组件。这个新的组件会使用传给它的组件作为子组件。
+# 高阶组件(HOC)
+Higher-Order function（高阶函数），是函数式编程中的一个基本概念，它描述了一种函数接受函数作为输出，或者输出一个函数。比如常用的工具方法 reduce，map 等都是高阶函数。
+
+而 Higher-Order components（高阶组件）其实也是类似于高阶函数，它接受一个组件作为参数，返回一个新的组件。这个新的组件会使用传给它的组件作为子组件。
 
 ``` javascript
 import React, { Component } from 'react'
@@ -62,3 +64,258 @@ class MyComponent2 extends Component {
 
 const MyComponentWithPersistentData = withPersistentData(MyComponent2)
 ```
+
+## 应用场景
+### 属性代理
+高阶组件通过被包裹的 React 组件来操作 props 。
+
+``` js
+import React, { Component } from 'react'
+import ExampleHoc from './example-hoc'
+
+@ExampleHoc
+export default class UseContent extends Component {
+  render() {
+    console.log('props:',this.props);
+    return (
+        <div>
+           {...this.props} //这里只是演示
+        </div>
+    )
+  }
+}
+```
+
+``` js
+import React, { Component } from 'react'
+
+const ExampleHoc = WrappedComponent => {
+  return class extends Component {
+    render() {
+       return <WrappedComponent {...this.props} />
+    }
+  }
+}
+export default ExampleHoc
+```
+
+这样的组件就可以作为参数被调用，原始组件就具备了高阶组件对它的修饰。保持单个组件封装性的同时还保留了易用性。
+
+#### 控制 props
+可以读取，编辑，增加，移除从 WrappedComponent 传来的 props，同时对高阶组件的 props 作新的命名防止混淆。
+
+``` js
+import React, { Component } from 'react'
+
+const ExampleHoc = WrappedComponent => {
+  return class extends Component {
+    render() {
+       const newProps = {
+           name: newText,
+       }
+       return <WrappedComponent {...this.props}  {...newProps}/>
+    }
+  }
+}
+export default ExampleHoc。
+```
+
+#### 通过 refs 使用引用
+在高阶组件中，可以接受 refs 使用 WrappedComponent 的引用。 
+
+``` js
+import React, { Component } from 'react'
+
+const ExampleHoc = WrappedComponent => {
+  return class extends Component {
+    proc = wrappedComponentInstance => {
+        wrappedComponentInstance.method()
+    }
+    render() {
+       const newProps = Object.assign({}, this.props,{
+           ref: this.proc,
+       })
+       return <WrappedComponent {...this.newProps} />
+    }
+  }
+}
+export default ExampleHoc
+```
+
+当 WrappedComponent 被渲染的时候，refs 回调函数就会被执行，这样就会拿到一份 WrappedComponent 的实例的引用。这样就可以方便地用于读取和增加实例 props，并调用实例。
+
+#### 抽象state
+通过 WrappedComponent 提供 props 和回调函数抽象 state。可以把原组件抽象为展示型组件，分离内部状态，搞成无状态组件。
+
+``` js
+import React, { Component } from 'react';
+
+const ExampleHoc = WrappedComponent => {
+  return class extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+         name: '',
+        }
+    }
+    onNameChange = e => {
+        this.setState({
+            name: e.target.value,
+        })
+    }
+    render() {
+       const newProps = {
+         name: {
+            value: this.state.name,
+            onChange: this.onNameChange,
+         }
+       }
+       return <WrappedComponent {...this.props} {...newProps} />
+    }
+  }
+}
+export default ExampleHoc
+```
+
+通过把 input 的 name prop 和 onchange 方法提到了高阶组件中，这样有效的抽象了同样的 state 操作。
+
+``` js
+//用法：
+import React, { Component } from 'react'
+import ExampleHoc from './example-hoc'
+
+//@ExampleHoc
+export default class UseContent extends Component {
+  render() {
+    console.log('props:',this.props);
+    return (
+        <input name="name" {this.props.name} />
+    )
+  }
+}
+//这样就是一个受控组件
+```
+
+#### 其它元素包裹 WrappedComponent
+可以使用其它元素包裹 WrappedComponent ，这样既可以增加样式，也可以方便布局。
+
+``` js
+import React, { Component } from 'react'
+
+const ExampleHoc = WrappedComponent => {
+  return class extends Component {
+    render() {
+       return (
+            <div style={{display: 'flex'}}>
+                <WrappedComponent {...this.props} />
+            </div>
+       )
+    }
+  }
+}
+export default ExampleHoc
+```
+
+### 反向继承
+高阶组件继承于被包裹的 React 组件。 
+
+``` js
+const ExampleHoc = WrappedComponent => {
+  return class extends WrappedComponent {
+    render() {
+       return super.render()
+    }
+  }
+}
+```
+
+高阶组件返回的组件继承与 WrappedComponent，因为被动继承了 WrappedComponent ，所有的调用都是反向。它通过继承 WrappedComponent 来实现，方法可以通过 super 来顺序调用。在反向继承中，高阶函数可以使用 WrappedComponent 的引用，这意味着可以使用 WrappedComponent 的 state，props,生命周期和 render 方法。但它并不能保证完整的子组件树被解析。
+
+#### 渲染劫持
+渲染劫持就是高阶组件可以控制 WrappedComponent 的渲染过程，并渲染各种各样的结果。我们可以在这个过程中任何 React 元素的结果中读取，增加，修改，删除 props,或者修改 React 的元素树，又或者用样式控制包裹这个 React 元素树。
+
+``` js
+const ExampleHoc = WrappedComponent => {
+  return class extends WrappedComponent {
+    render() {
+      if(this.props.loggedIn) { //当登录了就渲染
+           return super.render()
+      } else {
+          return null
+      }
+      
+    }
+  }
+}
+```
+
+#### 控制 state
+高阶组件是可以读取，修改，删除 WrappedComponent 实例的 state，如果需要的话，也可以增加 state，但这样你的 WrappedComponent 会变得一团糟。因此大部分的高阶组件多都应该限制读取或者增加 state，尤其是增加 state，可以通过重新命名 state，以防止混淆。
+
+``` js
+const ExampleHoc = WrappedComponent => {
+  return class extends WrappedComponent {
+    render() {
+      <div>
+       <h3>HOC debugger</h3>
+       <p>Props <pre>{JSON.stringfy(this.props,null,1)}</pre></p>
+       <p>State <pre>{JSON.stringfy(this.state,null,2)}</pre></p>
+       {super.render()}
+      </div>
+    }
+  }
+}
+```
+
+### 高阶组件接受其它参数
+举个列子，我把用户信息存在本地 LocalStorage 中，当然里面有很多 key，但是我不需要用到所有，我希望按照我的喜好得到我自己想要的。
+
+``` js
+import React, { Component } from 'react'
+
+const ExampleHoc = (key) => (WrappedComponent) => {
+
+  return class extends Component {
+    componentWillMount() {
+      let data = localStorage.getItem(key);
+        this.setState({data});
+    }
+
+    render() {
+      return <WrappedComponent data={this.state.data} {...this.props} />
+    }
+  }
+}
+```
+
+``` js
+import React, { Component } from 'react'
+
+class MyComponent2 extends Component {  
+  render() {
+    return <div>{this.props.data}</div>
+  }
+
+}
+
+const MyComponent2WithHOC = ExampleHoc(MyComponent2, 'data')
+
+export default MyComponent2WithHOC
+```
+
+``` js
+import React, { Component } from 'react'
+
+class MyComponent3 extends Component {  
+  render() {
+    return <div>{this.props.data}</div>
+  }
+}
+const MyComponent3WithHOC = ExampleHoc(MyComponent3, 'name')
+
+export default MyComponent3WithHOC
+```
+
+实际上，此时的 ExampleHoc 和我们最初对高阶组件的定义已经不同。它已经变成了一个高阶函数，但这个高阶函数的返回值是一个高阶组件。我们可以把它看成高阶组件的变种形式。这种形式的高阶组件大量出现在第三方库中。
+
+
