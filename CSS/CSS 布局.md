@@ -1,7 +1,7 @@
 # CSS 布局
 
-## 1 两列布局
-### 左边固定、右边自适应
+## 一、两列布局
+### 情形一：左边宽度固定、右边宽度自适应
 #### 方法一：左边左浮动，右边宽度100%
 ``` html
 <style>
@@ -36,7 +36,7 @@
 <div class="right">右边自适应</div>
 ```
 
-#### 方法三:父容器设置 display：flex；right 设置 flex：1
+#### 方法三：使用 flex
 ``` html
 <style>
 .father {
@@ -56,7 +56,24 @@
 </div>
 ```
 
-### 左边自适应、右边固定
+#### 方法四：使用 table
+``` css
+.parent {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+.left {
+  width: 100px;
+}
+.right,
+.left {
+  display: table-cell;
+}
+```
+
+### 情形二：左边自适应、右边固定
+#### 方法一：使用 float + margin
 ``` html
 <style>
 .wrap {
@@ -79,36 +96,77 @@
 <div class="right"></div>
 ```
 
-## 2 三列布局
-以下是我们常见的三列布局：
+或者：
+
+``` css
+.left {
+  float:left;
+  width: 100%;
+  margin-right: -100px;
+}
+.right {
+  float: right;
+  width: 100px;
+}
+```
+
+#### 方法二：使用 table
+``` css
+.parent {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+.left {
+  display: table-cell;
+}
+.right {
+  display: table-cell;
+  width: 100px;
+}
+```
+
+#### 方法三：使用 flex
+``` css
+.parent {
+  display: flex;
+}
+.left {
+  flex: 1;
+}
+.right {
+  width: 100px;
+}
+```
+
+## 二、三列布局
+以下是我们常见的三列布局，左右两侧宽度固定，中间宽度自适应：
 
 ![三列布局](mdImgs/three.jpg)
 
-一般情况下，我们的布局框架使用以下写法，从上到下，从左到右。
-
-``` html
-<header>header</header>
-<section>
-  <aside>left</aside>
-  <section>main</section>
-  <aside>right</aside>
-</section>
-<footer>footer</footer>
+### 使用 table
+``` css
+.parent {
+  display: table;
+  width: 100%;
+  table-layout: fixed
+}
+.left,
+.main,
+.right {
+  display: table-cell;
+}
+.left {
+  width: 100px;
+}
+.right {
+  width: 100px;
+}
 ```
 
-然而，如果我们希望中部 main 部分优先显示的话，是可以做布局优化的。将 `<section>main</section>` 部分提前即可优先渲染。
+### 绝对定位
+如果我们希望中部 main 部分优先显示的话，是可以做布局优化的。将 main 部分提前即可优先渲染。
 
-``` html
-<header>header</header>
-<section>
-    <section>main</section>
-    <aside>left</aside>
-    <aside>right</aside>
-</section>
-<footer>footer</footer>
-```
-
-### 2.1 绝对定位
 ``` html
 <style>
 .center {
@@ -129,7 +187,7 @@
 ```
 绝对定位是最简单的一种三列布局方式，但是也存在一定的问题。那就是高度不可控，如果 left 部分的高度高于 center ，left 就没有能力撑起整个 wrap 。而以下「圣杯」和「双飞翼」两种方式就能解决这个问题。
 
-### 2.2 浮动
+### 浮动
 ``` html
 <style>
 .left,.right{
@@ -153,7 +211,7 @@
 ```
 注意：center 的 div 需要放在最后面。
 
-### 2.3 圣杯
+### 圣杯布局
 ``` html
 <style>
 .center {
@@ -190,7 +248,7 @@
 
 于是，淘宝针对「圣杯」的缺点做了优化，并提出「双飞翼」布局。
 
-### 2.4 双飞翼
+### 淘宝双飞翼
 ``` html
 <style>
 .wrap {
@@ -220,7 +278,7 @@
 
 同样使用了 float 和 负值 margin,不同的是，并没有使用 relative 相对定位 而是增加了 dom 结构，增加了一个层级。确实解决了圣杯布局的缺陷。当然双飞翼布局存在 dom 结构多余，增加渲染树生成的计算量。
 
-### 2.5 flex布局
+### flex 布局
 ``` html
 <style>
 .wrap{
@@ -246,3 +304,108 @@
 ```
 
 所以最后总结一下，那就是对症下药，没有最好的方案，只有最适合的。
+
+## 三、多列等分布局
+类似于如下的四列等分布局：
+
+``` html
+<div class="parent">
+  <div class="column">1</div>
+  <div class="column">2</div>
+  <div class="column">3</div>
+  <div class="column">4</div>
+</div>
+```
+
+### 方法一：使用 float
+``` css
+.column {
+  float: left;
+  width: 25%;
+  box-sizing: border-box;
+}
+.column+.column {
+  padding-left: 20px; /*列间距为20px*/
+}
+```
+
+### 方法二：使用 table
+``` css
+.parent {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+.column {
+  display: table-cell;
+}
+.column+.column {
+  margin-left: 20px;
+}
+```
+
+### 方法三：使用 flex
+``` css
+.parent {
+  display: flex;
+}
+.column {
+  flex: 1;
+}
+.column+.column {
+  margin-left: 20px;
+}
+```
+
+## 四、九宫格布局
+### 方法一：使用 table
+``` html
+<div class="parent">
+  <div class="row">
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+  </div>
+  <div class="row">
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+  </div>
+  <div class="row">
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+  </div>
+</div>
+```
+
+``` css
+.parent {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+.row {
+  display: table-row;
+}
+.item {
+  display: table-cell;
+  width: 33.33%;
+  height: 200px;
+}
+```
+
+### 方法二：使用 flex
+``` css
+.parent {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  display: flex;
+  height: 100px;
+}
+.item {
+  width:100px;
+}
+```
