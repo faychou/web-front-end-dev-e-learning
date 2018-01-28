@@ -19,6 +19,8 @@
 <div class="right">右边自适应</div>
 ```
 
+> 注意：IE6 中会有 3 像素的 BUG，解决方法可以在 .left 加入 margin-left:-3px。
+
 #### 方法二：右边宽度使用 calc
 ``` html
 <style>
@@ -71,6 +73,28 @@
   display: table-cell;
 }
 ```
+
+#### 方法五：使用 float + overflow
+``` html
+<div class="left">
+  <p>left</p>
+</div>
+<div class="right">
+  <p>right</p>
+</div>
+```
+
+``` css
+.left {
+  float: left;
+  width: 100px;
+}
+.right {
+  overflow: hidden;
+}
+```
+
+设置 overflow: hidden 会触发 BFC 模式（Block Formatting Context）块级格式上下文。BFC 是什么呢。用通俗的来讲就是，随便你在BFC 里面干啥，外面都不会受到影响 。此方法样式简单但不支持 IE 6。
 
 ### 情形二：左边自适应、右边固定
 #### 方法一：使用 float + margin
@@ -357,7 +381,99 @@
 }
 ```
 
-## 四、九宫格布局
+## 四、等高布局
+### 方法一：table
+``` html
+<div class="parent">
+  <div class="left">
+    <p>left</p>
+  </div>
+  <div class="right">
+    <p>right</p>
+    <p>right</p>
+  </div>
+</div>
+```
+
+``` css
+.parent {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.left {
+  display: table-cell;
+  width: 100px;
+}
+.right {
+  display: table-cell
+  /*宽度为剩余宽度*/
+}
+```
+
+### 方法二：使用 flex
+``` html
+<div class="parent">
+  <div class="left">
+    <p>left</p>
+  </div>
+  <div class="right">
+    <p>right</p>
+    <p>right</p>
+  </div>
+</div>
+```
+
+``` css
+.parent {
+  display: flex;
+}
+.left {
+  width: 100px;
+  margin-left: 20px;
+}
+.right {
+  flex: 1;
+}
+```
+
+flex 默认的 align-items 的值为 stretch。
+
+### 方法三：使用 float
+``` html
+<div class="parent">
+  <div class="left">
+    <p>left</p>
+  </div>
+  <div class="right">
+    <p>right</p>
+    <p>right</p>
+  </div>
+</div>
+```
+
+``` css
+.parent {
+  overflow: hidden;
+}
+.left,
+.right {
+  padding-bottom: 9999px;
+  margin-bottom: -9999px;
+}
+.left {
+  float: left;
+  width: 100px;
+  margin-right: 20px;
+}
+.right {
+  overflow: hidden;
+}
+```
+
+此方法为伪等高（只有背景显示高度相等），左右真实的高度其实不相等，但兼容性较好。
+
+## 五、九宫格布局
 ### 方法一：使用 table
 ``` html
 <div class="parent">
