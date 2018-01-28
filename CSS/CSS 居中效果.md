@@ -99,23 +99,16 @@ div {
 
 ## 块级元素高度固定
 ### vertical-align
-只有该元素属于 inline 或是 inline-block（table-cell 也可以理解为 inline-block），vertical-align 属性才会起作用。
-
-在使用 vertical-align 的时候，由于对齐的基线是用行高的基线作为标记，故需要设置 line-height 或设置 display:table-cell。
+``` html
+<div class="parent">
+  <div class="child">demo</div>
+</div>
+```
 
 ``` css
-/*第一种方法*/
-div {
+.parent {
   display: table-cell;
   vertical-align: middle;
-  height:20px;
-}
-
-/*第二种方法*/
-div {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 20px;
 }
 ```
 
@@ -244,6 +237,12 @@ div {
 
 # 水平垂直居中
 ### 使用 vertical-align
+``` html
+<div class="parent">
+  <div class="child">demo</div>
+</div>
+```
+
 ``` css
 .parent {
   display: table-cell; 
