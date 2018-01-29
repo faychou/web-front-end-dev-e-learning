@@ -26,7 +26,7 @@ pending 是对象创建后的初始状态，当对象操作成功时变为 fulfi
 Promise 对象拥有两个实例方法`then()`和`catch()`。 
 
 ### Promise.prototype.then(resolve, reject) 
-一个 promise 必须提供一个 then 方法，通过初始化返回的 promise 实例对象的 then 方法添加之后的异步操作，如果是 resolve 会进入成功回调，如果是 reject 会进入失败回调：
+每一个 promise 都会提供一个 then 方法，用于链式调用,每次执行时都会返回一个新的 promise 对象：
 
 ``` js
 var promise = new Promise(function (resolve, reject) {
@@ -226,7 +226,7 @@ Promise.reject(new Error("出错了!")).catch(
 ```
 
 ### Promise.all(iterable) 
-all 方法接受一个或多个 promsie（以数组方式传递），返回一个新 promise，该 promise 状态取决于传入的参数中的所有 promsie 的状态：
+接受一个或多个 promsie（以数组方式传递），返回一个新 promise，该 promise 状态取决于传入的参数中的所有 promsie 的状态：
 
 * 当所有 promise 都完成是，返回的 promise 完成，其最终值为由所有完成 promsie 的最终值组成的数组；
 * 当某一 promise 被拒绝时，则返回的 promise 被拒绝，其拒绝原因为第一个被拒绝 promise 的拒绝原因；
