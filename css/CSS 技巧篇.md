@@ -1,5 +1,39 @@
 # CSS 技巧篇
 ## 文本字体
+### vertical-align
+vertival-align 代表垂直方向的对齐方式，默认值对齐的是字母的基线，也就是字母 a 落在的那个底线，所以它跟父元素的 font-size 和 line-height 都有关系。
+他的取值如下：
+
+* 长度  通过距离升高（正值）或降低（负值）元素。'0cm'等同于'baseline'
+* 百分值  通过距离（相对于1line-height1值的百分大小）升高（正值）或降低（负值）元素。'0%'等同于'baseline'
+* baseline  默认。元素的基线与父元素的基线对齐。
+* sub  降低元素的基线到父元素合适的下标位置。
+* super  升高元素的基线到父元素合适的上标位置。
+* top  把对齐的子元素的顶端与line box顶端对齐。
+* text-top  把元素的顶端与父元素内容区域的顶端对齐。
+* middle  元素的中垂点与 父元素的基线加1/2父元素中字母x的高度 对齐。
+* bottom  把对齐的子元素的底端与line box底端对齐。
+* text-bottom	  把元素的底端与父元素内容区域的底端对齐。
+* inherit  采用父元素相关属性的相同的指定值。
+
+vertival-align 只对 inline 元素和 inline-block 元素（或者变种）有效。
+
+#### 案例1
+logo + 标题，或者头像 + 名字，使它们垂直居中。
+
+``` html
+<div>
+  <img src="logo.png">
+  <span>faychou</span>
+</div>
+```
+
+解决方案：是同时对 img 和 span 设置：`vertical-align: middle;`。原因在于每个元素都要分别设置才能统一实现垂直居中。
+
+当然也可以在父元素上设置 `vertical-align: middle;`，然后在每一个行内元素上写 `vertical-align: inherit;`，因为 vertical-align 默认是不继承的。
+
+需要注意的是父元素上不能设置高度（或者说父元素的高度高于任何一个子元素的高度），那么以上方法也会失效的。解决办法是直接在父级上设置高度等于行高，或者再增加一个子元素 span ，给该 span 设置高度等于父元素高度，宽度为 1 。
+
 ### 文本截断
 #### 1、text-overflow: ellipsis
 单行文本截断。
