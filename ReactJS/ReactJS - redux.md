@@ -71,7 +71,7 @@ store.dispatch(addTodo('Learn Redux'))
 ```
 
 #### Reducer
-Action 只是一个描述事件的简单对象，而 dispatch 方法只是触发了一个动作，通知我们该更新 state 了，但是并没有告诉应用该如何更新 state，而这正是 reducer 函数的工作，它会根据不同的 Action 来决定返回一个新的 state。
+Action 只是一个描述事件的简单对象，而 dispatch 方法只是触发了一个动作，通知我们该更新 state 了，但是并没有告诉应用该如何更新 state，而这正是 reducer 函数的工作，它会根据不同的 Action 来决定返回一个新的 state。接收两个参数，第一个参数是当前的 state，第二个参数是 action。
 
 ``` javascript
 var defaultState = 'This language is JavaScript'
