@@ -1,34 +1,34 @@
 # react-redux
 React-Redux 是 Redux 的 React 版，Redux 本身独立于其他框架而存在，又可以结合其他视图框架使用。
 
-React-Redux 将所有组件分成两大类：UI 组件（presentational component）和容器组件（container component）。也就是说 UI 组件负责 UI 的呈现，容器组件负责管理数据和逻辑。
+React-Redux 将所有组件分成两大类：UI 组件（presentational component）和容器组件（container component）。也就是说 UI 组件负责 UI 的呈现，不处理逻辑，容器组件负责管理数据和逻辑。
 
-#### UI组件特点
-* 只负责UI显示，不带任何逻辑
+### UI组件特点
+* 只负责 UI，不带任何逻辑
 * 无状态组件
 * 所有数据都是通过 props 提供
 * 不使用任何 Redux API
 
-#### 容器组件特点
-* 负责管理数据和业务逻辑，不负责UI显示
+### 容器组件特点
+* 负责管理数据和业务逻辑，不负责 UI
 * 带有内部状态
 * 使用 Redux API
 
-如果遇到一个组件既有UI和业务逻辑时，需要拆分成下面的结构：
-外面是一个容器组件，里面包了一个UI 组件。前者负责与外部的通信，将数据传给后者，由后者渲染出视图。
+但是很多时候我们发现有的组件又负责 UI 又负责处理逻辑，所以一般做法是在外面封装一层，将逻辑和 UI 分离，外层是容器组件负责写逻辑，内层是 UI 组件负责渲染出视图。
 
-#### 安装
+## 安装
 ``` bash
 npm install --save react-redux
 ```
 
-#### 引入
+### 引入
 ``` javascript
   import { Provider, connect } from 'react-redux'
 ```
 
-#### Provider
-这个 Provider 其实就是一个中间件，他是在原有 App Container 上面再包一层，他的作用就是接收 store 里面的 store 作为 props，这样一来，App的所有子组件就默认都可以拿到state了。
+## 使用方法
+### Provider
+这个 Provider 其实就是一个中间件，他是在原有组件上面再包一层，作用就是接收 store 里面的 store 作为 props，这样一来，App 的所有子组件就默认都可以拿到 state 了。
 
 ``` javascript
 import { createStore } from 'redux'
@@ -51,24 +51,25 @@ Provider 是一个 react 组件，提供了一个参数 store，然后渲染了�
 </Provider>
 ```
 
-#### connect()
-React-Redux 提供connect方法，用于从 UI 组件生成容器组件。通俗的讲就是 connect 将 state 上的 props（属性）和 方法（dispatch）添加到对应的 UI组件上。
+### connect()
+React-Redux 提供 connect 方法，用于从 UI 组件生成容器组件。这样 UI 组件就可以直接通过 `this.props` 拿到容器组件上所有的属性和方法了。
 
 ``` javascript
 import {connect} from 'react-redux'
 import {TodoList} from './TodoList'
 
-function mapStateToProps(state){
-  return{
-    // do something
+function mapStateToProps(state) {
+  return {
+    todo:state.todo
   }
 }
 
-function mapDispatchToProps(dispatch){
-  return{
-    // do something
+function mapDispatchToProps(dispatch) {
+  return {
+    add:() => dispatch({type: 'ADD'})
   }
 }
+
 export default connect(
   mapStateToProps,
   mapDispatchToProps
@@ -76,15 +77,20 @@ export default connect(
 ```
 说明：
 
-TodoList是 UI 组件，通过 React-Redux 的 connect 方法自动生成为容器组件。
+TodoList 是 UI 组件，通过 React-Redux 的 connect 方法自动生成为容器组件，在 UI 组件中通过调用 `this.props.add` 就会触发对应的 dispatch，从而更新状态。
 
-##### connect方法接受两个参数，定义了 UI 组件的业务逻辑：
+#### connect 参数
+connect 是一个高阶函数，接受两个参数，定义了 UI 组件的业务逻辑。
 
-1、 mapStateToProps（输入逻辑）：外部的数据（即state对象）如何转换为 UI 组件的 props；
+#### mapStateToProps
+该函数是属于输入逻辑，接收一个从 reducer 传递过来的 state 作为参数，定义从 state 转换成 UI 组件 props 的规则，并返回 props 对象。
 
-2、 mapDispatchToProps（输出逻辑）：用户发出的动作如何变为 Action 对象，从 UI 组件传出去。
+此函数还可以接收第二个 ownProps 参数，代表直接在 UI 组件上声明的 props。
 
-#### 案例
+#### mapDispatchToProps
+该函数是属于输出逻辑，接收 Store 中的  dispatch 方法作为参数，用户发出的动作如何变为 Action 对象，从 UI 组件传出去，并返回 props 对象。
+
+### 案例
 ``` javascript
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
@@ -97,11 +103,11 @@ import { Provider, connect } from 'react-redux'
 // onIncreaseClick 向外发出的 Action
 class Counter extends Component {
   render() {
-    const { value, onIncreaseClick } = this.props
+    const { value, onIncrease } = this.props
     return (
       <div>
         <span>{value}</span>
-        <button onClick={onIncreaseClick}>Increase</button>
+        <button onClick={onIncrease}>Increase</button>
       </div>
     )
   }
@@ -109,7 +115,7 @@ class Counter extends Component {
 
 Counter.propTypes = {
   value: PropTypes.number.isRequired,
-  onIncreaseClick: PropTypes.func.isRequired
+  onIncrease: PropTypes.func.isRequired
 }
 
 // Store
@@ -136,10 +142,10 @@ function mapStateToProps(state) {
   }
 }
 
-// onIncreaseClick 到 dispatch 的映射
+// onIncrease 到 dispatch 的映射
 function mapDispatchToProps(dispatch) {
   return {
-    onIncreaseClick: () => dispatch(increaseAction)
+    onIncrease: () => dispatch(increaseAction)
   }
 }
 
