@@ -28,7 +28,7 @@ npm install --save react-redux
 
 ## 使用方法
 ### Provider
-这个 Provider 其实就是一个中间件，他是在原有组件上面再包一层，作用就是接收 store 里面的 store 作为 props，这样一来，App 的所有子组件就默认都可以拿到 state 了。
+Provider 组件一般作为 React Redux 应用最顶层的组件，作用就是接收全局 store 作为 props，这样所有子组件就默认都可以拿到 state 了。
 
 ``` javascript
 import { createStore } from 'redux'
