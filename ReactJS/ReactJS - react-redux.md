@@ -1,4 +1,6 @@
-# react-redux（react绑定库）
+# react-redux
+React-Redux 是 Redux 的 React 版，Redux 本身独立于其他框架而存在，又可以结合其他视图框架使用。
+
 React-Redux 将所有组件分成两大类：UI 组件（presentational component）和容器组件（container component）。也就是说 UI 组件负责 UI 的呈现，容器组件负责管理数据和逻辑。
 
 #### UI组件特点

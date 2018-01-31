@@ -1,22 +1,18 @@
 # redux（状态管理）
-容器组件:
-
-UI组件:
 
 ### （一）、原则
-* 单一数据源、
-* state 是只读的
-* 使用纯函数进行更改
+* 单向数据流；
+* state 是只读的；
+* 使用纯函数进行更改。
 
 ### （二）、环境安装
-
-```
-npm install --save redux
+``` bash
+npm install redux --save
 ```
 
 ### （三）、概念
 #### Store
-Store 就是保存数据的地方，用来存放整个应用的 state，换句话说 Store 是应用状态 state 的管理者，相当于一个容器，整个应用只能有一个 Store。用来将 action 和 reducer 联系起来。
+Store 是一个对象，用来存放整个应用的 state，相当于一个保存数据的容器，且整个应用只能有一个 Store。
 
 ``` javascript
 import { createStore } from 'redux'
@@ -34,7 +30,7 @@ const state = store.getState()
 ```
 
 #### Action
-是一个描述事件的简单对象，它是改变 store 中 state 的唯一方法。其中的type属性是必须的，表示将要执行的动作。其他属性可以自由设置。
+是一个描述事件的简单对象，它是改变 store 中 state 的唯一方法。其中的 type 属性是必须的，表示将要执行的动作，其他属性可以自由设置。
 
 ``` javascript
 const action = {
@@ -55,44 +51,44 @@ function addTodo(text) {
 ```
 
 #### store.dispatch()
-store.dispatch() 将 action 发送到 reducer 函数中，进行状态的更新，这是触发 state 改变的唯一途径。
+dispatch 方法是触发 state 改变的唯一途径，它将 action 发送到 reducer 函数中，进行状态的更新。
 
 ``` javascript
 import { createStore } from 'redux'
 
 const store = createStore(reducer)
+
+//生成 Action 的函数
 function addTodo(text) {
   return {
     type: ADD_TODO,
     text
   }
 }
+
+//触发更新
 store.dispatch(addTodo('Learn Redux'))
 ```
 
 #### Reducer
-Action 只是一个描述事件的简单对象，并没有告诉应用该如何更新 state，而这正是 reducer 的工作，负责更新并返回一个新的 state。
-
-用户每次 dispatch(action) 后，都会触发 reducer 的执行。Reducer 是一个纯函数，根据 action.type 来更新 state 并返回 nextState
-最后会用 reducer 的返回值 nextState 完全替换掉原来的 state。
+Action 只是一个描述事件的简单对象，而 dispatch 方法只是触发了一个动作，通知我们该更新 state 了，但是并没有告诉应用该如何更新 state，而这正是 reducer 函数的工作，它会根据不同的 Action 来决定返回一个新的 state。
 
 ``` javascript
-var defaultState = 'JavaScript'
+var defaultState = 'This language is JavaScript'
 function reducer(previousState = defaultState, action) {
   switch (action.type) {
-      case 'IOS':
-          return action.language;
-      case 'WEB':
-          return action.language;
-      case 'SNACK':
-          return action.language;
-      default:
-          return previousState;
+    case 'HTML':
+      return 'This language is HTML';
+    case 'CSS':
+      return 'This language is CSS';
+    default:
+      return previousState;
   }
-};
+}
 ```
 
-纯函数：
+这里需要注意的是 reducer 是一个纯函数：
+
 * 不要修改传入的参数
 * 不要执行有副作用的操作，如 API 请求或路由跳转
 * 不要调用非纯函数，如 Date.now() 或 Math.random() 等。
@@ -134,32 +130,8 @@ function reducer(state = initialState, action) {
 }
 ```
 
-#### store.subscribe()
-Store 允许使用store.subscribe方法设置监听函数，一旦 State 发生变化，就自动执行这个函数。
+所以基本思路是：用户每次 dispatch(action) 后，都会触发 reducer 的执行。Reducer 是一个纯函数，根据 action.type 来更新 state 并返回新的 state。最后会用 reducer 的返回值 nextState 来替换掉原来的 state。
 
-``` javascript
-// 注册监听器，在每次 state 更新时，打印日志
-const unsubscribe = store.subscribe(() =>
-    console.log(store.getState())
-    // 或则state更新时，重新渲染视图
-)
-```
-
-#### 分散Reducer
-随着业务量的增加，Reducer必定也会越来越大，就需要按模块的不同来拆分Reducer，通过combineReducers方法将多个Reducer合并。
-
-需要特别注意，使用combineReducers来合并reducer，需要子reducer的名字跟对应要接收的state的key一致。
-
-``` javascript
-import { combineReducers, createStore } from 'redux'
-const mainReducer = combineReducers({
-    homeReducer,
-    profileReducer
-})
-let store = createStore(mainReducer);
-```
-
-#### 简单案例：
 ``` javascript
 import { createStore } from 'redux'
 /** 生成 Action */
@@ -197,6 +169,33 @@ console.log( store.getState() ); // { counter: 2 }
 
 store.dispatch(dec());
 console.log( store.getState() ); // { counter: 1 }
+```
+
+规则：Action => dispatch 触发 => Reducer 根据 Action 返回数据 => Store 被更新 => View 被更新。
+
+#### store.subscribe()
+Store 允许使用store.subscribe方法设置监听函数，一旦 State 发生变化，就自动执行这个函数。
+
+``` javascript
+// 注册监听器，在每次 state 更新时，打印日志
+const unsubscribe = store.subscribe(() =>
+    console.log(store.getState())
+    // 或则state更新时，重新渲染视图
+)
+```
+
+#### 分散Reducer
+随着业务量的增加，Reducer必定也会越来越大，就需要按模块的不同来拆分Reducer，通过combineReducers方法将多个Reducer合并。
+
+需要特别注意，使用combineReducers来合并reducer，需要子reducer的名字跟对应要接收的state的key一致。
+
+``` javascript
+import { combineReducers, createStore } from 'redux'
+const mainReducer = combineReducers({
+    homeReducer,
+    profileReducer
+})
+let store = createStore(mainReducer);
 ```
 
 #### 中间件 applyMiddleware（异步操作）
