@@ -227,7 +227,7 @@ git push origin master
 touch .gitignore
 ```
 
-> 注意：该文件一定要在提交之前创建，否则即使该规则添加进 .gitignore 文件，也不会生效，这种情况下我们必须通过以下命令来实现：
+> 注意：该文件内的规则一定要在 git 管理之前创建，否则即使添加规则，也不会生效，这种情况下我们必须通过以下命令来实现忽略掉已经被 git 管理的文件：
 
 ``` bash
 git rm --cached FILENAME
