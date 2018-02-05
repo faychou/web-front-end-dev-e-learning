@@ -1,7 +1,7 @@
 # react-redux
-React-Redux 是 Redux 的 React 版，Redux 本身独立于其他框架而存在，又可以结合其他视图框架使用。
+redux 和 react 之间没有关系，redux 本身是可以结合其他视图框架使用，但是又独立于其他框架而存在，而我们可以通过 react-redux 这个库将他们绑定起来。
 
-React-Redux 将所有组件分成两大类：UI 组件（presentational component）和容器组件（container component）。也就是说 UI 组件负责 UI 的呈现，不处理逻辑，容器组件负责管理数据和逻辑。
+react-redux 将所有组件分成两大类：UI 组件（presentational component）和容器组件（container component）。也就是说 UI 组件负责 UI 的呈现，不处理逻辑，容器组件负责管理数据和逻辑。
 
 ### UI组件特点
 * 只负责 UI，不带任何逻辑
@@ -27,8 +27,10 @@ npm install --save react-redux
 ```
 
 ## 使用方法
+react-redux 提供一个组件 Provider 和一个方法 connect。
+
 ### Provider
-Provider 组件一般作为 React Redux 应用最顶层的组件，作用就是接收全局 store 作为 props，这样所有子组件就默认都可以拿到 state 了。
+Provider 组件一般作为 React Redux 应用最顶层的组件，它的作用就是接收全局 store 作为 props，将 store 放在 context 里，这样所有子组件就都可以拿到 state 了。
 
 ``` javascript
 import { createStore } from 'redux'

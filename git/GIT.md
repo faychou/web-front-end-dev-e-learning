@@ -166,7 +166,7 @@ ssh-keygen
 
 4、在 Settings 页面中选择左边菜单里的 SSH and GPG keys，然后点击右上角的 New SSH key 按钮，填写 Title 和 Key，然后点击 Add SSH key 按钮提交。
 
-## 克隆远程仓库到本地
+## 克隆仓库
 1. 首先到远程仓库中，点击 Clone or download 按钮，选择使用 Use SSH，然后点击复制链接按钮;
 2. 首先到远程仓库中，点击 Clone or download 按钮，选择使用 Use SSH，然后点击复制链接按钮.
 
@@ -175,15 +175,72 @@ ssh-keygen
 $ git clone git@github.com:faychou/ceshi.git
 ```
 
-## 推送改动到远程仓库中
+## 推送
 1. 在仓库的每一次改动操作之后，推送同步到远程仓库之前，都需要对这一次或这一批次的操作做提交，命令为 git commit，用法是 git commit -m "你的提交备注"，只有做好提交动作，才可以开始推送改动到远程仓库同步;
 
 2. 当我们提交了仓库的改动后，就可以开始推送改动的内容到远程仓库了，可以使用 git push 命令来推送，用法是 git push [-u] origin <分支名>，分支名默认是 master ;
 
 > 注意：第一次推送改动可以使用 -u 参数，使用之后会绑定你这一次的仓库分支名，这样的话下一次推送就不需要加上分支名了。
 
+具体步骤：
+
+``` bash
+# 绑定账户
+##第一步：创建 SSH Key
+ssh-keygen -t rsa -C email@example.com
+
+##第二步：登陆 GitHub，打开 "Account settings" => "SSH Keys"
+
+##第三步：点 "Add SSH Key"，填上任意 Title，在 Key 文本框里粘贴 id_rsa.pub 文件的内容
+
+##第四步：点 "Add Key" 完成公钥的添加
+
+# 添加远程仓库
+##第一步：登陆 GitHub，创建一个新仓库
+
+##第二步：关联远程仓库
+git remote add origin git@github.com:faychou/ceshi.git
+
+##第三步：同步远程仓库到本地，注意再次之前本地不要提交修改
+git pull --rebase origin master
+
+##第四步：第一次将本地库的内容推送到远程仓库，注意在此之前要提交所有修改
+git push -u origin master
+
+##之后每次推送的时候直接运行以下命令即可
+git push origin master
+
+
+
+```
+
 # 三、.gitignore
 一般我们总会有些文件无需纳入 Git 的管理，也不希望它们总出现在未跟踪文件列表。 通常都是些自动生成的文件，比如日志文件，或者编译过程中创建的临时文件等。 在这种情况下，我们可以创建一个名为 .gitignore 的文件，列出要忽略的文件。
+
+## 创建方法
+### 方法一
+进入项目根目录，然后新建 `.gitignore` 文件即可。
+
+### 方法二
+在终端中进入项目目录；然后输入以下命令创建：
+
+``` bash
+touch .gitignore
+```
+
+> 注意：该文件一定要在提交之前创建，否则即使该规则添加进 .gitignore 文件，也不会生效，这种情况下我们必须通过以下命令来实现：
+
+``` bash
+git rm --cached FILENAME
+```
+
+### 创建全局的 .gitignore 文件
+我们可以通过创建全局的 .gitignore 文件，这样每一个 git 仓库就都会生效该规则。
+
+``` bash
+# 在终端输入以下命令
+git config --global core.excludesfile ~/.gitignore_global
+```
 
 ## 配置语法：
 * 所有空行或者以 ＃ 开头的行都会被忽略(相当于注释)
