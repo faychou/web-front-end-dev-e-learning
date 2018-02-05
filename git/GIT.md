@@ -167,12 +167,11 @@ ssh-keygen
 4、在 Settings 页面中选择左边菜单里的 SSH and GPG keys，然后点击右上角的 New SSH key 按钮，填写 Title 和 Key，然后点击 Add SSH key 按钮提交。
 
 ## 克隆仓库
-1. 首先到远程仓库中，点击 Clone or download 按钮，选择使用 Use SSH，然后点击复制链接按钮;
-2. 首先到远程仓库中，点击 Clone or download 按钮，选择使用 Use SSH，然后点击复制链接按钮.
+远程仓库中，点击 Clone or download 按钮，选择使用 Use SSH，然后点击复制链接按钮.
 
 ``` bash
 #git clone "你复制的仓库链接"
-$ git clone git@github.com:faychou/ceshi.git
+git clone git@github.com:faychou/ceshi.git
 ```
 
 ## 推送
