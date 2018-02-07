@@ -164,3 +164,19 @@ ReactDOM.render(
   document.getElementById('app')
 )
 ```
+
+### 多 reducer 返回的 state
+在只有一个 reducer 的情况下，容器组件的 mapStateToProps 函数接收到的 state 是唯一 reducer 返回的对象。而如果有多个 reducer ，就会有多个返回值。这时候容器组件的 mapStateToProps 函数接收到的 state 是包含所有 reducer 返回值的对象。可以用 key 值来区，这个 key 值就是在 combineReducers 时传入的。
+
+``` js
+const mapStateToProps = (state) => {
+  const homeReducer = state.homeReducer;
+  const otherReducer = state.otherReducer;
+  return {
+    value1: homeReducer.value,
+    value2: otherReducer.value
+  };
+}
+
+export default connect(mapStateToProps)(Counter);
+```

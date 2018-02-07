@@ -1,17 +1,17 @@
 # redux（状态管理）
 
-### （一）、原则
+## 一、原则
 * 单向数据流；
 * state 是只读的；
 * 使用纯函数进行更改。
 
-### （二）、环境安装
+## 二、环境安装
 ``` bash
 npm install redux --save
 ```
 
-### （三）、概念
-#### store
+## 三、概念
+### store
 store 是一个对象，用来存放整个应用的 state，相当于一个保存数据的容器，且整个应用只能有一个 store。
 
 ``` javascript
@@ -20,7 +20,7 @@ const store = createStore(reducer)
 ```
 这里的 createStore 函数只能被调用一次，createStore 方法还可以接受第二个参数，表示 State 的最初状态。注意，如果提供了这个参数，它会覆盖 Reducer 函数的默认初始值。
 
-#### state
+### state
 当前时刻的 state，可以通过 `store.getState()` 拿到：
 
 ``` javascript
@@ -29,7 +29,7 @@ const store = createStore(fn)
 const state = store.getState()
 ```
 
-#### action
+### action
 是一个描述事件的简单对象，它是改变 store 中 state 的唯一方法。其中的 type 属性是必须的，表示将要执行的动作，其他属性可以自由设置。
 
 ``` javascript
@@ -50,7 +50,7 @@ function addTodo(text) {
 }
 ```
 
-#### store.dispatch()
+### store.dispatch()
 dispatch 方法是触发 state 改变的唯一途径，它将 action 发送到 reducer 函数中，进行状态的更新。
 
 ``` javascript
@@ -70,7 +70,7 @@ function addTodo(text) {
 store.dispatch(addTodo('Learn Redux'))
 ```
 
-#### reducer
+### reducer
 action 只是一个描述事件的简单对象，而 dispatch 方法只是触发了一个动作，通知我们该更新 state 了，但是并没有告诉应用该如何更新 state，而这正是 reducer 函数的工作，它会根据不同的 action 来决定返回一个新的 state。接收两个参数，第一个参数是当前的 state，第二个参数是 action。
 
 ``` javascript
@@ -173,7 +173,7 @@ console.log( store.getState() ); // { counter: 1 }
 
 规则：view => 触发 dispatch(action)  => reducer 根据 action.type 返回数据 => store 被更新 => view 被更新。
 
-#### subscribe()
+### subscribe()
 store 允许使用 `store.subscribe()` 方法设置监听函数，一旦 state 发生变化，就自动执行这个函数。
 
 ``` javascript
@@ -184,29 +184,36 @@ const unsubscribe = store.subscribe(() =>
 )
 ```
 
-#### 分散 reducer
-随着业务量的增加，reducer 必定也会越来越大，就需要按模块的不同来拆分 reducer，通过 combineReducers 方法将多个 reducer合并。
-
-需要特别注意，使用 combineReducers 来合并 reducer，需要子 reducer 的名字跟对应要接收的 state 的 key 一致。
+### 分散 reducer
+随着业务量的增加，reducer 必定也会越来越大，就需要按模块来拆分 reducer，有利于模块化开发，降低耦合度。通过 redux 提供的 combineReducers 方法可以将多个 reducer 进行组合。
 
 ``` javascript
 import { combineReducers, createStore } from 'redux'
+import homeReducer from './homeReducer'
+import otherReducer from './otherReducer'
+
 const mainReducer = combineReducers({
     homeReducer,
-    profileReducer
+    otherReducer
 })
 let store = createStore(mainReducer);
 ```
 
-#### 中间件 applyMiddleware（异步操作）
+> 需要特别注意，使用 combineReducers 来合并 reducer，需要子 reducer 的名字跟对应要接收的 state 的 key 一致。同时注意每发出一个事件，所有 reducer 都会收到。
+
+## 中间件
+中间件的位置很明确，就是在 action 到达 reducer 之前做一些操作。
+
+### applyMiddleware（异步操作）
 createStore() 方法包含了参数 applyMiddleware() ,它是 Redux 的原生方法，作用是将所有的中间件组成一个数组，依次执行。
 
 操作流程：
-* 操作开始时，dispatch action，触发State更新为正在操作状态；
-* 操作结束后 再次 dispatch action,获取结果。
+
+* 操作开始时，dispatch(action)，触发 state 更新为正在操作状态；
+* 操作结束后 再次 dispatch(action)，获取结果。
 
 解决方案：
-写出一个返回函数的 Action Creator，然后使用redux-thunk中间件改造store.dispatch。
+写出一个返回函数的 Action Creator，然后使用 redux-thunk 中间件改造 `store.dispatch`。
 
 ``` javascript
 import {createStore, applyMiddleware} from 'redux'
@@ -246,3 +253,5 @@ export function requstAync() {
   }
 }
 ```
+
+### redux-thunk
