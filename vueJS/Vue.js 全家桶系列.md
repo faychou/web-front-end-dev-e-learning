@@ -29,9 +29,9 @@ hello world 事例：
 ```
 
 ## 三、Vue 实例
-所有的vue程序都需要实例化之后使用，实例主要有两种，一个是Vue实例，一个是组件实例。
+所有的 vue 程序都需要实例化之后使用，实例主要有两种，一个是 Vue 实例，一个是组件实例。
 ### 构造器
-Vue实例是作用于某一个HTML元素上的，这个元素可以是HTML的body元素，也可以是指定了id的某个元素。每个vue.js应用的起步都是通过构造函数Vue创建一个Vue的根实例:
+Vue 实例是作用于某一个HTML元素上的，这个元素可以是HTML的 body 元素，也可以是指定了id的某个元素。每个vue.js应用的起步都是通过构造函数Vue创建一个Vue的根实例:
 
 ``` js
 var vm = new Vue({
@@ -49,13 +49,13 @@ var vm = new Vue({
 })
 
 const app = new Vue({
-    render: h => h(AppContainer),
+  render: h => h(AppContainer),
 }).$mount('#app')
 
 
 // new Vue({
-//     el:'#app',
-//     render: h => h(App)
+//   el:'#app',
+//   render: h => h(App)
 // })
 ```
 
@@ -132,7 +132,7 @@ vm.$watch('a', function (newVal, oldVal) {
 ### 实例生命周期
 每个 Vue 实例在被创建之前都要经过一系列的初始化过程。在这个过程中，实例也会调用一些 生命周期钩子 ，这就给我们提供了执行自定义逻辑的机会。
 
-与 react 中监听 props 和 state 属性变化不同的是，在vue中是只监听data属性的变化。
+与 react 中监听 props 和 state 属性变化不同的是，在 vue 中是只监听 data 属性的变化。
 
 ![生命周期](https://cn.vuejs.org/images/lifecycle.png)
 
@@ -230,7 +230,7 @@ v-bind 指令可以在其名称后面带一个参数，中间放一个冒号隔�
 </script>
 ```
 
-v-bind指令可以缩写为一个冒号：
+v-bind 指令可以缩写为一个冒号：
 
 ``` html
 <!-- 完整语法 -->
@@ -405,7 +405,39 @@ new Vue({
 })
 ```
 
-Vue2.0把过滤器这块移除是有道理的，他们希望你更多使用computed，而不是过滤器。
+Vue2.0 把过滤器这块移除是有道理的，他们希望你更多使用 computed，而不是过滤器。
+
+### 全局过滤器
+一个项目中，可能要用到很多过滤器来处理数据，多个组件公用的，可以注册全局过滤器。单个组件使用的，就挂载到实例 filters 中。
+
+项目做的多了以后，可以整理一套常用的 filters ，不用反复的写。比如：时间等各种操作，数据格式转化，单位换算，部分数据的 md5 加密等...
+
+``` js
+//filters.js 过滤器文件
+export function formatDateTime (date) {
+    //格式化时间戳
+  var y = date.getFullYear()
+  var m = date.getMonth() + 1
+  m = m < 10 ? ('0' + m) : m
+  var d = date.getDate()
+  d = d < 10 ? ('0' + d) : d
+  var h = date.getHours()
+  var minute = date.getMinutes()
+  minute = minute < 10 ? ('0' + minute) : minute
+  return y + '-' + m + '-' + d + ' ' + h + ':' + minute
+}
+export function test (a) {
+   return `${a}aaaa`
+}
+......
+//main.js 入口js文件
+import Vue from 'vue'
+import * as filters from './filters'
+
+Object.keys(filters).forEach(key => {
+  Vue.filter(key, filters[key])
+});
+```
 
 ## 八、指令
 指令（Directives）是带有 v- 前缀的特殊属性。它们作用于HTML元素，当其表达式的值改变时相应地将某些行为应用到 DOM 上，Vue.js 的指令是以v-开头的。
@@ -1776,6 +1808,32 @@ const router = new VueRouter({
 </script>
 ```
 
+### 路由切换动效
+``` html
+<!--app.vue 根组件-->
+<template>
+  <div id="app">
+        <transition name="fade" mode="out-in">
+        <router-view></router-view>
+        </transition>
+    </div>
+</template>
+<script>
+  export default {
+      name: 'app',
+    components: {}
+  }
+</script>
+<style>
+    .fade-enter-active,.fade-leave-active {
+        transition: opacity .2s ease;
+    }
+    .fade-enter,.fade-leave-active {
+        opacity: 0;
+    }
+</style>
+```
+
 ### 路由拦截
 ``` js
 router.beforeEach((to, from, next) => {
@@ -1793,6 +1851,15 @@ router.beforeEach((to, from, next) => {
 //如果访问非登陆页，判断是否有保存的user信息，如果没有，则判断为非法访问，重定向到登录页面
 });
 ```
+
+* to: 即将要进入的目标路由对象
+* from: 当前导航正要离开的路由
+* next: 一定要调用该方法来 resolve 这个钩子。执行效果依赖 next 方法的调用参数。
+  * `next()`: 进行管道中的下一个钩子。如果全部钩子执行完了，则导航的状态就是 confirmed （确认的）。
+  * `next(false)`: 中断当前的导航。如果浏览器的 URL 改变了（可能是用户手动或者浏览器后退按钮），那么 URL 地址会重置到 from 路由对应的地址。
+  * `next('/')` 或者 `next({ path: '/' })`: 跳转到一个不同的地址。当前的导航被中断，然后进行一个新的导航。
+
+确保要调用 next 方法，否则钩子就不会被 resolved。
 
 ### http拦截器
 拦截器是全局的，拦截器可以在请求发送前和发送请求后做一些处理。拦截器在一些场景下会非常有用，比如请求发送前在 headers 中设置 access_token  ，或者在请求失败时，提供通用的处理方式。
@@ -1831,63 +1898,93 @@ axios.interceptors.response.use(
     });
 ```
 
-### 路由切换动效
-``` html
-<!--app.vue 根组件-->
-<template>
-  <div id="app">
-        <transition name="fade" mode="out-in">
-        <router-view></router-view>
-        </transition>
-    </div>
-</template>
-<script>
-  export default {
-      name: 'app',
-    components: {}
-  }
-</script>
-<style>
-    .fade-enter-active,.fade-leave-active {
-        transition: opacity .2s ease;
-    }
-    .fade-enter,.fade-leave-active {
-        opacity: 0;
-    }
-</style>
-```
-
-### 全局过滤器
-一个项目中，可能要用到很多过滤器来处理数据，多个组件公用的，可以注册全局过滤器。单个组件使用的，就挂载到实例 filters 中。
-
-项目做的多了以后，可以整理一套常用的 filters ，不用反复的写。比如：时间等各种操作，数据格式转化，单位换算，部分数据的 md5 加密等...
+### 路由拦截案例
+#### 第一步：定义路由
+在定义路由的时候多添加一个自定义字段 requireAuth，用于判断该路由的访问是否需要登录。如果用户已经登录，则顺利进入路由， 否则就进入登录页面。
 
 ``` js
-//filters.js 过滤器文件
-export function formatDateTime (date) {
-    //格式化时间戳
-  var y = date.getFullYear()
-  var m = date.getMonth() + 1
-  m = m < 10 ? ('0' + m) : m
-  var d = date.getDate()
-  d = d < 10 ? ('0' + d) : d
-  var h = date.getHours()
-  var minute = date.getMinutes()
-  minute = minute < 10 ? ('0' + minute) : minute
-  return y + '-' + m + '-' + d + ' ' + h + ':' + minute
-}
-export function test (a) {
-   return `${a}aaaa`
-}
-......
-//main.js 入口js文件
-import Vue from 'vue'
-import * as filters from './filters'
-
-Object.keys(filters).forEach(key => {
-  Vue.filter(key, filters[key])
-});
+const routes = [
+    {
+        path: '/',
+        name: '/',
+        component: Index
+    },
+    {
+        path: '/repository',
+        name: 'repository',
+        meta: {
+            requireAuth: true,  // 该字段来判断该路由是否需要登录权限
+        },
+        component: Repository
+    },
+    {
+        path: '/login',
+        name: 'login',
+        component: Login
+    }
+];
 ```
+
+#### 第二步：路由拦截
+利用钩子函数 beforeEach() 对路由进行判断。
+
+``` js
+router.beforeEach((to, from, next) => {
+    if (to.meta.requireAuth) {  // 判断该路由是否需要登录权限
+        if (store.state.token) {  // 通过 vuex state 获取当前的 token 是否存在
+            next();
+        }
+        else {
+            next({
+                path: '/login',
+                query: {redirect: to.fullPath}  // 将跳转的路由 path 作为参数，登录成功后跳转到该路由
+            })
+        }
+    }
+    else {
+        next();
+    }
+})
+```
+
+#### 第三步：拦截器
+此时只是简单的前端路由控制，并不能真正阻止用户访问需要登录权限的路由。还有可能当前 token 失效，但是本地依然保存了 token。此时去访问需要登录权限的路由时，应该让用户重新登录。 这时候就需要结合 http 拦截器 + 后端接口返回的 http 状态码来判断。这里使用 axios 的拦截器。通过配置 http response inteceptor，当后端接口返回 401 Unauthorized（未授权），让用户重新登录。
+
+``` js
+// http request 拦截器
+axios.interceptors.request.use(
+    config => {
+        if (store.state.token) {  // 判断是否存在token，如果存在的话，则每个http header都加上token
+            config.headers.Authorization = `token ${store.state.token}`;
+        }
+        return config;
+    },
+    err => {
+        return Promise.reject(err);
+    });
+
+// http response 拦截器
+axios.interceptors.response.use(
+    response => {
+        return response;
+    },
+    error => {
+        if (error.response) {
+            switch (error.response.status) {
+                case 401:
+                    // 返回 401 清除token信息并跳转到登录页面
+                    store.commit(types.LOGOUT);
+                    router.replace({
+                        path: 'login',
+                        query: {redirect: router.currentRoute.fullPath}
+                    })
+            }
+        }
+        return Promise.reject(error.response.data)   // 返回接口返回的错误信息
+    });
+```
+
+对应的，如果是登出的话，清除当前 token，再跳转到首页即可。
 
 ## 十九、AJAX
 ### vue-resource(作者已停止更新)
@@ -2011,7 +2108,7 @@ store.commit('increment')
 console.log(store.state.count) // -> 1
 ```
 
-### State
+### state
 state 定义了应用状态的数据结构，同样可以在这里设置默认的初始状态。
 
 ``` js
@@ -2178,7 +2275,7 @@ Action 类似于 mutation，不同在于：
 * Action 是触发 mutation 修改数据，而不是直接变更状态。
 * Action 可以包含任意异步操作。
 
-常见的例子有从服务端获取数据，在数据获取完成后会调用store.commit()来调用更改 Store 中的状态。可以在组件中使用dispatch来发出 Actions。
+常见的例子有从服务端获取数据，在数据获取完成后会调用 store.commit() 来调用更改 Store 中的状态。可以在组件中使用 dispatch 来发出 Actions。
 
 ``` js
 const store = new Vuex.Store({
@@ -2408,7 +2505,8 @@ export default {
 export default {
   inject: {
     foo: {
-      from: 'bar',      default: () => [1, 2, 3]
+      from: 'bar',
+      default: () => [1, 2, 3]
     }
   }
 }
