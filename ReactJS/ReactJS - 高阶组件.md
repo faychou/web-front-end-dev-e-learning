@@ -1,7 +1,7 @@
 # 高阶组件(HOC)
 Higher-Order function（高阶函数），是函数式编程中的一个基本概念，它描述了一种函数接受函数作为输出，或者输出一个函数。比如常用的工具方法 reduce，map 等都是高阶函数。
 
-而 Higher-Order components（高阶组件）其实也是类似于高阶函数，它接受一个组件作为参数，返回一个新的组件。这个新的组件会使用传给它的组件作为子组件。
+而 Higher-Order components（高阶组件）其实也是类似于高阶函数，它接受一个或多个组件作为参数，返回一个全新的组件。这个新的组件会使用传给它的组件作为子组件。一般在开发过程中，当需要在多个组件类复用时，就可以创建一个高阶组件。
 
 ``` javascript
 import React, { Component } from 'react'
@@ -17,15 +17,14 @@ export default (WrappedComponent) => {
 }
 ```
 
-做为一个高阶组件，可以在原有组件的基础上，对其增加新的功能和行为。我们一般希望编写的组件尽量纯净或者说其中的业务逻辑尽量单一。但是如果各种组件间又需要增加新功能，如打印日志，获取数据和校验数据等和展示无关的逻辑的时候，这些公共的代码就会被重复写很多遍。因此，我们可以抽象出一个高阶组件，用以给基础的组件增加这些功能，类似于插件的效果。
+我们一般希望编写的组件尽量纯净或者说其中的业务逻辑尽量单一。但是如果各种组件间又需要增加新功能，如打印日志，获取数据和校验数据等和展示无关的逻辑的时候，这些公共的代码就会被重复写很多遍。因此，我们可以抽象出一个高阶组件，可以在原有组件的基础上，对其增加新的功能和行为，如读取、添加、编辑、删除传给 WrappedComponent 的 props，也可以用其它元素包裹 WrappedComponent，用来实现封装样式、添加布局或其它操作。
 
-假设我有一个组件，需要从LocalStorage中获取数据，然后渲染出来。于是我们可以这样写组件代码：
+假设我有一个组件，需要从 LocalStorage 中获取数据，然后渲染出来。于是我们可以这样写组件代码：
 
 ``` js
 import React, { Component } from 'react'
 
 class MyComponent extends Component {
-
   componentWillMount() {
     let data = localStorage.getItem('data');
     this.setState({data});
@@ -37,7 +36,7 @@ class MyComponent extends Component {
 }
 ```
 
-代码很简单，但当我有其他组件也需要从LocalStorage中获取同样的数据展示出来时，我需要在每个组件都重复componentWillMount中的代码，这显然是很冗余的。下面让我们来看看使用高阶组件可以怎么改写这部分代码：
+代码很简单，但当我有其他组件也需要从 LocalStorage 中获取同样的数据展示出来时，我需要在每个组件都重复 componentWillMount 中的代码，这显然是很冗余的。下面让我们来看看使用高阶组件可以怎么改写这部分代码：
 
 ``` js
 import React, { Component } from 'react'
@@ -46,7 +45,7 @@ function withPersistentData(WrappedComponent) {
   return class extends Component {
     componentWillMount() {
       let data = localStorage.getItem('data');
-        this.setState({data});
+      this.setState({data});
     }
 
     render() {
@@ -65,6 +64,40 @@ class MyComponent2 extends Component {
 const MyComponentWithPersistentData = withPersistentData(MyComponent2)
 ```
 
+## 案例
+### 组合方式
+如果用户已经登录则显示主页面，否则显示登录界面；又或者在渲染列表时，传入 List 和 Loading 组件，为新组件添加加载中的行为。
+
+``` js
+const HoC = (HomeComponent, LoginView) => {
+  const NewComponent = () => {
+    const {user} = this.props
+    if (user) {
+      return <HomeComponent {...this.props} />
+    } else {
+      return <LoginView {...this.props} />
+    }
+  }
+  return NewComponent
+}
+```
+
+### 组件继承
+``` js
+const HoC = (WrappendComponent) => {
+  class NewComponent extends WrappendComponent {
+    render() (
+      const {user, ...otherProps} = this.props
+      this.props = otherProps
+      return super.render()
+    }
+  }
+  return NewComponent
+}
+```
+
+NewComponent 是一个新组件，它继承自 WrappendComponent，共享父级的函数和属性。可以使用 super.render() 或者 super.componentWillUpdate() 调用父级的生命周期函数，但是这样会让两个组件耦合在一起，降低组件的复用性。
+
 ## 应用场景
 ### 属性代理
 高阶组件通过被包裹的 React 组件来操作 props 。
@@ -79,7 +112,7 @@ export default class UseContent extends Component {
     console.log('props:',this.props);
     return (
         <div>
-           {...this.props} //这里只是演示
+           {...this.props}
         </div>
     )
   }
@@ -110,10 +143,10 @@ import React, { Component } from 'react'
 const ExampleHoc = WrappedComponent => {
   return class extends Component {
     render() {
-       const newProps = {
-           name: newText,
-       }
-       return <WrappedComponent {...this.props}  {...newProps}/>
+      const newProps = {
+        name: newText,
+      }
+      return <WrappedComponent {...this.props}  {...newProps}/>
     }
   }
 }
