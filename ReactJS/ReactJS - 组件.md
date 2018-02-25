@@ -105,7 +105,13 @@ function ExpandableForm({ onExpand, expanded = false, children, onSubmit }) {
 #### componentWillReceiveProps(newProps)
 当组件获取新属性的时候，可以根据新的属性来修改组件状态，注意首次渲染组件时不会调用。
 #### shouldComponentUpdate(nextProps, nextState)
-接收到新属性或者新状态的时候在 render 前会被调用，该方法让我们有机会决定是否重渲染组件，如果返回 false，那么不会重渲染组件，借此可以优化应用性能。
+接收到新属性或者新状态的时候在 render 前会被调用，该方法让我们决定是否重渲染组件，默认返回 true，也就是每次更新都会重新渲染。如果返回 false，那么不会重渲染组件，借此可以优化应用性能。
+
+``` js
+shouldComponentUpdate() {
+  return false;
+}
+```
 #### componentWillUpdate(nextProps, nextState)
 当组件确定要更新，在 render 之前调用，(?方法中不能使用 setState ，setState 的操作应该在 componentWillReceiveProps 方法中调用)。
 #### componentDidUpdate(prevProps,prevState)
