@@ -366,6 +366,9 @@ devServer: {
 }
 ```
 
+#### disableHostCheck: 
+设置为 true, 为了手机可以访问。
+
 #### proxy
 配置代理。
 
