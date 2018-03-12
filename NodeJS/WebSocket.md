@@ -3,7 +3,8 @@ WebSocket 是 HTML5 开始提供的一种浏览器与服务器进行全双工通
 
 那么在 WebSocket 出现之前，主要有以下的解决方案：
 
-#### 传统轮询
+## 传统通信方案
+### 传统轮询
 采取 setInterval 或者 setTimeout 来实现，这是一种比较常见的持续通信方案。
 
 ``` js
@@ -28,7 +29,7 @@ function poll() {
 }
 ```
 
-#### 长轮询
+### 长轮询
 传统的轮询方式都存在一个严重缺陷：在每次请求时都会新建一个 HTTP 请求，然而并不是每次都能返回所需的新数据。当同时发起的请求达到一定数目时，会对服务器造成较大负担。这时我们可以采用长轮询方式解决这个问题。
 
 长轮询的基本思想是在每次客户端发出请求后，服务器检查上次返回的数据与此次请求时的数据之间是否有更新，如果有更新则返回新数据并结束此次连接，否则服务器 hold 住此次连接，直到有新数据时再返回相应。而这种长时间的保持连接可以通过设置一个较大的 HTTP timeout 实现。
@@ -79,7 +80,7 @@ function longPoll (timestamp) {
 }
 ```
 
-#### 服务器发送事件
+### 服务器发送事件
 服务器发送事件（以下简称 SSE）是 HTML 5 规范的一个组成部分，可以实现服务器到客户端的单向数据通信。通过 SSE ，客户端可以自动获取数据更新，而不用重复发送 HTTP 请求。一旦连接建立，“事件”便会自动被推送到客户端。服务器端 SSE 通过 事件流(Event Stream) 的格式产生并推送事件。
 
 事件流对应的 MIME类型 为 text/event-stream ，包含四个字段：
@@ -141,7 +142,7 @@ SSE 相较于轮询具有较好的实时性，使用方法也非常简便。然�
 * 数据格式比较轻量，性能开销小，通信高效。
 * 可以发送文本，也可以发送二进制数据。
 * 没有同源限制，客户端可以与任意服务器通信。
-* 协议标识符是 ws（如果加密，则为 wss），服务器网址就是 URL。
+* 协议标识符是 ws（如果加密，则为 wss），服务器网址就是 URL，如：`ws://example.com:80/path`。
 
 ### 简单例子
 #### 服务端 
@@ -358,6 +359,7 @@ ws.ping('', false, true);
 * Sec-WebSocket-Key 主要目的并不是确保数据的安全性，因为 Sec-WebSocket-Key、Sec-WebSocket-Accept 的转换计算公式是公开的，而且非常简单，最主要的作用是预防一些常见的意外情况（非故意的）。
 
 ``` js
+//验证前面的返回结果
 const crypto = require('crypto');
 const magic = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 const secWebSocketKey = 'w4v7O6xFTi36lq3RNcgctw==';
@@ -372,3 +374,163 @@ console.log(secWebSocketAccept);
 
 ### 数据掩码的作用
 WebSocket 协议中，数据掩码的作用是增强协议的安全性。但数据掩码并不是为了保护数据本身，因为算法本身是公开的，运算也不复杂。
+
+## 客户端 API
+### WebSocket 构造函数
+WebSocket 对象提供了用于创建和管理 WebSocket 连接，以及可以通过该连接发送和接收数据的 API。
+
+``` js
+new WebSocket(url, protocols);
+```
+
+* url：表示要连接的 URL，这个URL应该为响应 WebSocket 的地址。
+
+* protocols：可选参数，可以是一个单个的协议名字字符串或者包含多个协议名字字符串的数组。这些字符串用来表示子协议，这样做可以让一个服务器实现多种 WebSocket 子协议（例如你可能希望通过制定不同的协议来处理不同类型的交互）。如果没有制定这个参数，它会默认设为一个空字符串。
+
+#### webSocket.binaryType
+一个字符串表示被传输二进制的内容的类型。取值应当是"blob"或者"arraybuffer"。"blob"表示使用DOM Blob 对象，而"arraybuffer"表示使用 ArrayBuffer 对象。
+
+#### webSocket.bufferedAmount
+只读，调用 send() 方法将多字节数据加入到队列中等待传输，但是还未发出。该值会在所有队列数据被发送后重置为 0。而当连接关闭时不会设为 0。如果持续调用 send()，这个值会持续增长。
+
+#### webSocket.extensions
+服务器选定的扩展。目前这个属性只是一个空字符串，或者是一个包含所有扩展的列表。
+
+#### webSocket.protocol
+一个表明服务器选定的子协议名字的字符串。这个属性的取值会被取值为构造器传入的 protocols 参数。
+
+#### webSocket.url
+只读，传入构造器的 URL。它必须是一个绝对地址的 URL。
+
+#### webSocket.readyState
+只读，连接的当前状态。
+
+* CONNECTING：值为 0 ，表示 连接还没开启。
+* OPEN：值为 1	 ，表示 连接已开启并准备好进行通信。
+* CLOSING：值为 2，表示 连接正在关闭的过程中。
+* CLOSED：值为 3 ，表示 连接已经关闭，或者连接无法建立。
+
+#### webSocket.onopen
+用于指定连接成功后的回调函数，当 readyState 的值变为 OPEN 的时候会触发该事件。该事件表明这个连接已经准备好接受和发送数据。这个监听器会接受一个名为 open 的事件对象。
+
+``` js
+var ws = new WebSocket('ws://localhost:8080');
+
+ws.onopen = function () {
+  ws.send('Hello Server!');
+}
+```
+
+如果要指定多个回调函数，可以使用 addEventListener 方法:
+
+``` js
+ws.addEventListener('open', function (event) {
+  ws.send('Hello Server!');
+});
+```
+
+#### webSocket.onclose
+用于指定连接关闭后的回调函数，当 WebSocket 对象的 readyState 状态变为 CLOSED 时会触发该事件。这个监听器会接收一个叫 close 的 CloseEvent 对象。
+
+``` js
+ws.addEventListener("close", function(event) {
+  var code = event.code;
+  var reason = event.reason;
+  var wasClean = event.wasClean;
+  // handle close event
+});
+```
+
+#### webSocket.onmessage
+用于指定收到服务器数据后的回调函数，这一事件当有消息到达的时候该事件会触发。这个 Listener 会被传入一个名为 message 的 MessageEvent 对象。
+
+``` js
+ws.addEventListener("message", function(event) {
+  var data = event.data;
+  // 处理数据
+});
+```
+
+服务器数据可能是文本，也可能是 二进制数据（blob 对象或 Arraybuffer 对象）:
+
+``` js
+ws.onmessage = function(event) {
+  if(typeof event.data === String) {
+    console.log("Received data string");
+  }
+
+  if(event.data instanceof ArrayBuffer) {
+    var buffer = event.data;
+    console.log("Received arraybuffer");
+  }
+}
+```
+
+除了动态判断收到的数据类型，也可以使用 binaryType 属性，显式指定收到的二进制数据类型。
+
+``` js
+// 收到的是 blob 数据
+ws.binaryType = "blob";
+ws.onmessage = function(e) {
+  console.log(e.data.size);
+};
+
+// 收到的是 ArrayBuffer 数据
+ws.binaryType = "arraybuffer";
+ws.onmessage = function(e) {
+  console.log(e.data.byteLength);
+};
+```
+
+#### webSocket.onerror
+当错误发生时用于监听 error 事件的事件监听器。会接受一个名为 error 的 event 对象。
+
+#### close()
+关闭 WebSocket 连接或停止正在进行的连接请求。如果连接的状态已经是 closed，这个方法不会有任何效果。
+
+``` js
+close(code, reason);
+```
+
+* code：可选,一个数字值表示关闭连接的状态号，表示连接被关闭的原因。如果这个参数没有被指定，默认的取值是1000 （表示正常连接关闭）。
+
+* reason：可选，一个可读的字符串，表示连接被关闭的原因。这个字符串必须是不长于123字节的 UTF-8 文本（不是字符）。
+
+异常提示：
+
+* INVALID_ACCESS_ERR：选定了无效的code。
+* SYNTAX_ERR：reason 字符串太长或者含有 unpaired surrogates。
+
+#### send()
+通过 WebSocket 连接向服务器发送数据。支持三种数据类型：DOMString、ArrayBuffer、Blob。
+
+``` js
+/* 发送文本 */
+ws.send('your message');
+
+/* 发送 Blob 对象 */
+var file = document
+  .querySelector('input[type="file"]')
+  .files[0];
+ws.send(file);
+
+/* 发送 ArrayBuffer 对象 */
+var img = canvas_context.getImageData(0, 0, 400, 320);
+var binary = new Uint8Array(img.data.length);
+for (var i = 0; i < img.data.length; i++) {
+  binary[i] = img.data[i];
+}
+ws.send(binary.buffer);
+```
+
+异常提示：
+
+* INVALID_STATE_ERR：当前连接的状态不是OPEN。
+* SYNTAX_ERR：数据是一个包含 unpaired surrogates 的字符串。
+
+## 服务端的实现
+常用的 Node 实现有以下三种。
+
+* [Socket.IO](https://socket.io)
+* [µWebSockets](https://github.com/uNetworking/uWebSockets)
+* [WebSocket-Node](https://github.com/theturtle32/WebSocket-Node)
