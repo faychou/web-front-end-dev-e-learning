@@ -28,28 +28,29 @@ hello world 事例：
 </script>
 ```
 
+el 属性提供一个在页面上存在的 DOM 元素 id，然后在 DOM 节点上就可以使用双大括号 `{{}}`
 ## 三、Vue 实例
 所有的 vue 程序都需要实例化之后使用，实例主要有两种，一个是 Vue 实例，一个是组件实例。
 ### 构造器
-Vue 实例是作用于某一个HTML元素上的，这个元素可以是HTML的 body 元素，也可以是指定了id的某个元素。每个vue.js应用的起步都是通过构造函数Vue创建一个Vue的根实例:
+Vue 实例是作用于某一个 HTML 元素上的，这个元素可以是 HTML 的 body 元素，也可以是指定了 id 的某个元素。每个 vue.js 应用的起步都是通过构造函数 Vue 创建一个 Vue 的根实例:
 
 ``` js
 var vm = new Vue({
-  // 选项
+  // 属性
 })
 ```
 
-实例化Vue时需要传入选项对象，例如数据（data）、模板（template）、挂载元素（el）、方法（method）、生命周期钩子等选项。
+实例化 Vue 时需要传入一个对象，该对象中可以包含以下属性：el（挂载元素）、data（数据）、template（模板）、method（方法）、生命周期钩子等。
 
 ``` js
-var vm = new Vue({
+const vm = new Vue({
   data:{
     message:'hello vue'
  }
-})
+});
 
 const app = new Vue({
-  render: h => h(AppContainer),
+  render: h => h(AppContainer)
 }).$mount('#app')
 
 
