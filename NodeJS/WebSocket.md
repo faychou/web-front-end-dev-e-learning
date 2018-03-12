@@ -1,7 +1,7 @@
 # WebSocket
 WebSocket 是 HTML5 开始提供的一种浏览器与服务器进行全双工通讯的网络技术，属于应用层协议。它基于 TCP 传输协议，并复用 HTTP 的握手通道。WebSocket 的出现，使得浏览器具备了持续的实时双向通信的能力。
 
-那么在 WebSocket 出现之前，主要有以下的解决方案：
+那么在 WebSocket 出现之前，为了保持客户端和服务端持续的通讯以保证双方信息的同步，主要有以下的解决方案：
 
 ## 传统通信方案
 ### 传统轮询
@@ -377,11 +377,13 @@ WebSocket 协议中，数据掩码的作用是增强协议的安全性。但数�
 
 ## 客户端 API
 ### WebSocket 构造函数
-WebSocket 对象提供了用于创建和管理 WebSocket 连接，以及可以通过该连接发送和接收数据的 API。
+WebSocket 对象作为一个构造函数，用于新建 WebSocket 实例，提供了很多可以通过该连接发送和接收数据的 API。
 
 ``` js
 new WebSocket(url, protocols);
 ```
+
+执行上面语句之后，客户端就会与服务器进行连接。
 
 * url：表示要连接的 URL，这个URL应该为响应 WebSocket 的地址。
 
@@ -391,7 +393,18 @@ new WebSocket(url, protocols);
 一个字符串表示被传输二进制的内容的类型。取值应当是"blob"或者"arraybuffer"。"blob"表示使用DOM Blob 对象，而"arraybuffer"表示使用 ArrayBuffer 对象。
 
 #### webSocket.bufferedAmount
-只读，调用 send() 方法将多字节数据加入到队列中等待传输，但是还未发出。该值会在所有队列数据被发送后重置为 0。而当连接关闭时不会设为 0。如果持续调用 send()，这个值会持续增长。
+只读属性，调用 send() 方法将多字节数据加入到队列中等待传输，但是还未发出。该值会在所有队列数据被发送后重置为 0。而当连接关闭时不会设为 0。如果持续调用 send()，这个值会持续增长。简单理解就是还有多少字节的二进制数据没有发送出去。它可以用来判断发送是否结束。
+
+``` js
+var data = new ArrayBuffer(10000000);
+ws.send(data);
+
+if (ws.bufferedAmount === 0) {
+  // 发送完毕
+} else {
+  // 发送还没结束
+}
+```
 
 #### webSocket.extensions
 服务器选定的扩展。目前这个属性只是一个空字符串，或者是一个包含所有扩展的列表。
@@ -400,18 +413,38 @@ new WebSocket(url, protocols);
 一个表明服务器选定的子协议名字的字符串。这个属性的取值会被取值为构造器传入的 protocols 参数。
 
 #### webSocket.url
-只读，传入构造器的 URL。它必须是一个绝对地址的 URL。
+只读属性，传入构造器的 URL。它必须是一个绝对地址的 URL。
 
 #### webSocket.readyState
-只读，连接的当前状态。
+只读属性，返回实例对象连接的当前状态。
 
-* CONNECTING：值为 0 ，表示 连接还没开启。
-* OPEN：值为 1	 ，表示 连接已开启并准备好进行通信。
-* CLOSING：值为 2，表示 连接正在关闭的过程中。
+* CONNECTING：值为 0 ，表示 正在连接。
+* OPEN：值为 1	 ，表示 连接成功，可以通信了。
+* CLOSING：值为 2，表示 连接正在关闭。
 * CLOSED：值为 3 ，表示 连接已经关闭，或者连接无法建立。
 
+``` js
+switch (ws.readyState) {
+  case WebSocket.CONNECTING:
+    // do something
+    break;
+  case WebSocket.OPEN:
+    // do something
+    break;
+  case WebSocket.CLOSING:
+    // do something
+    break;
+  case WebSocket.CLOSED:
+    // do something
+    break;
+  default:
+    // this never happens
+    break;
+}
+```
+
 #### webSocket.onopen
-用于指定连接成功后的回调函数，当 readyState 的值变为 OPEN 的时候会触发该事件。该事件表明这个连接已经准备好接受和发送数据。这个监听器会接受一个名为 open 的事件对象。
+实例对象的 onopen 属性，用于指定连接成功后的回调函数，当 readyState 的值变为 OPEN 的时候会触发该事件。该事件表明这个连接已经准备好接受和发送数据。这个监听器会接受一个名为 open 的事件对象。
 
 ``` js
 var ws = new WebSocket('ws://localhost:8080');
@@ -430,7 +463,7 @@ ws.addEventListener('open', function (event) {
 ```
 
 #### webSocket.onclose
-用于指定连接关闭后的回调函数，当 WebSocket 对象的 readyState 状态变为 CLOSED 时会触发该事件。这个监听器会接收一个叫 close 的 CloseEvent 对象。
+实例对象的 onclose 属性，用于指定连接关闭后的回调函数，当 WebSocket 对象的 readyState 状态变为 CLOSED 时会触发该事件。这个监听器会接收一个叫 close 的 CloseEvent 对象。
 
 ``` js
 ws.addEventListener("close", function(event) {
@@ -442,7 +475,7 @@ ws.addEventListener("close", function(event) {
 ```
 
 #### webSocket.onmessage
-用于指定收到服务器数据后的回调函数，这一事件当有消息到达的时候该事件会触发。这个 Listener 会被传入一个名为 message 的 MessageEvent 对象。
+实例对象的 onmessage 属性，用于指定收到服务器数据后的回调函数，这一事件当有消息到达的时候该事件会触发。这个 Listener 会被传入一个名为 message 的 MessageEvent 对象。
 
 ``` js
 ws.addEventListener("message", function(event) {
@@ -485,6 +518,12 @@ ws.onmessage = function(e) {
 #### webSocket.onerror
 当错误发生时用于监听 error 事件的事件监听器。会接受一个名为 error 的 event 对象。
 
+``` js
+ws.addEventListener("error", function(event) {
+  // handle error event
+});
+```
+
 #### close()
 关闭 WebSocket 连接或停止正在进行的连接请求。如果连接的状态已经是 closed，这个方法不会有任何效果。
 
@@ -501,7 +540,7 @@ close(code, reason);
 * INVALID_ACCESS_ERR：选定了无效的code。
 * SYNTAX_ERR：reason 字符串太长或者含有 unpaired surrogates。
 
-#### send()
+#### webSocket.send()
 通过 WebSocket 连接向服务器发送数据。支持三种数据类型：DOMString、ArrayBuffer、Blob。
 
 ``` js
