@@ -1,15 +1,60 @@
-# Express入门
+# Express 入门
 Express 是一个基于 Node.js 平台的极简、灵活的 web 应用开发框架，它提供一系列强大的特性，帮助你创建各种 Web 和移动设备应用。
 
 ## 安装
-``` dash
+``` bash
 # 本地项目安装
 npm i express --save
 ```
 
+## 入门案例
+1、新建文件夹并在终端中进入该文件夹；
+
+2、执行 npm init 命令，创建一个 package.json 文件；
+
+3、在终端中运行 `npm install express --save` 来安装 Express ；
+
+4、创建 app.js 文件：
+
+``` js
+/* app.js */
+
+//引入 express 模块
+const express = require('express'),
+  app = express();
+
+//程序运行时的环境所设置的，如果没有这个设置，默认 3000.
+app.set('port', process.env.PORT || 3000);
+
+//设置路由
+app.get('/', (request,response)=> {
+  response.send('Home page');
+});
+
+app.get('/about',(request,response)=> {
+  response.send('About page');
+});
+
+//设置错误中间件
+app.use((request,response)=> {
+  response.type('text/plain');
+  response.status(505);
+  response.send('Error page');
+});
+
+//设置端口号
+app.listen(3000, ()=> {
+  console.log('Express server started at port 3000');
+});
 ```
+
+5、在终端中通过以下命令运行文件：
+
+``` bash
 node app.js
 ```
+
+6、打开浏览器，输入 127.0.0.1:3000 进行访问，然后在 url 地址的最后添加 '/about'，观察页面变化。
 
 ## app
 ### app.get
@@ -127,7 +172,7 @@ app.listen(3000);
 ```
 
 #### res.sendFile
-用于发送文件,注意必须使用完整路径。需要express版本高于4.8.0
+用于发送文件,注意必须使用完整路径。需要 express 版本高于 4.8.0
 
 ``` js
 var express = require('express');
@@ -904,5 +949,3 @@ var newUser = new User({
   email: req.body.email
 });
 ```
-
-## jsonwebtoken
