@@ -8,9 +8,11 @@
 * 类：对象的类型模板
 * 实例：根据类创建的对象
 
-从上面可以看到，在传统的编程语言中，面向对象都有一个类的概念，通过类可以创建任意多个具有相同属性和方法的对象。但是在 ES6 出现之前， JavaScript 是没有类的概念，而是使用构造函数（constructor）来作为对象的模板。而要理解原型，首先从创建对象开始：
-
+从上面可以看到，在传统的编程语言中，面向对象都有一个类的概念，通过类可以创建任意多个具有相同属性和方法的对象。但是在 ES6 出现之前， JavaScript 是没有类的概念，而是使用构造函数（constructor）来作为对象的模板。
+## 理解对象
+对象是属性的集合，而属性包含了一系列内部特性，这些特性描述了属性的特征。
 ## 创建对象
+创建对象包括了几种经典的模式；工厂模式，构造函数模式，原型模式，混合构造函数/原型模式，动态原型模式，寄生构造函数模式等。
 
 ### 创建 Object 实例
 ``` js
@@ -23,15 +25,13 @@ var person = new Object();person.firstname = "Fay";person.lastname = "Chou";p
 var person = {  firstname:"Fay",  lastname:"Chou",  age:18,  eyeColor:"black"};```
 
 ### 工厂模式
-不难发现的一点是，通过上面的方法定义的对象，缺少了复用性。也就是说，我们每次都要写 firstname、lastname、age 等等，才能创建一个新的对象实例，这肯定是不合理的。为了能够得到更好的封装效果，我们可以通过一个 function 来统一地构建一个对象的实例。
+通过上面的方法定义的对象，缺少了复用性。也就是说，我们每次都要写 firstname、lastname、age 等，才能创建一个新的对象实例，这肯定是不合理的。为了能够得到更好的封装效果，我们可以通过一个 function 来统一地构建一个对象的实例。
 
 ``` js
 function createPerson(firstname,lastname,age) {  var person = new Object();  person.firstname = firstname;  person.lastname = lastname;  person.age = age;  return person;};
 var newPerson = createPerson("fay","chou",18);  //实例化alert(newPerson.age);  //调用```
 
-而这种方法就是工厂模式，它就是一个函数，然后放入参数，返回对象，实现流水线的工作。
-
-但是工厂模式存在一个问题，就是不能解决对象识别。
+而这种方法就是工厂模式，它就是一个函数，然后放入参数，返回对象，实现流水线的工作。但是工厂模式存在一个问题，就是不能解决对象识别。
 
 ``` js
 function createPerson1(firstname,lastname,age) {  var person = new Object();  person.firstname = firstname;  person.lastname = lastname;  person.age = age;  return person;};
@@ -44,7 +44,7 @@ alert(newPerson2 instanceof Object);  //true
 ```
 
 ### 构造函数
-上面的 createPerson 并不是真正的构造函数，JavaScript 中提供了真正的构造函数，它的语法和定义一个 function 其实是一样的：
+原理是像原生的构造函数 Object, Array 一样，创建自定义的构造函数，从而自定义对象的属性与方法。上面的 createPerson 并不是真正的构造函数，构造函数的语法和定义一个 function 其实是一样的：
 
 ``` js
 function Person(firstname,lastname,age) {  this.firstname = firstname;
@@ -59,7 +59,7 @@ function Person(firstname,lastname,age) {  this.firstname = firstname;
 * 函数名第一个字母必须大写；
 * 必须使用 new 运算符来实例化构造函数。
 
-同时构造函数也能解决对象识别问题：
+与工厂模式相比，构造函数没有显示创建 Object 实例，而且可以解决对象识别问题：
 
 ``` js
 function Person1(firstname,lastname,age) {  this.firstname = firstname;
@@ -80,11 +80,12 @@ alert(person1 instanceof Person2);  //false
 ```
 
 #### new
-来看看 new 关键字做了哪些事？
+我们知道构造函数并没有显示创建 Object 实例，那对象是如何生成的勒，来看看 new 关键字做了哪些事？
 
-* 创建一个空对象，用 this 变量引用该对象并继承该函数的原型；
-* 属性和方法加入到 this 的引用对象中；
-* 新创建的对象由 this 所引用，并且最后隐式的返回 this。
+* 创建一个空对象；
+* 将构造函数作用域赋予新对象（因此 this 指向新对象）
+* 执行构造函数中的代码（为新对象添加属性）；
+* 返回新对象。
 
 > 注意：构造函数内部有 return 语句的时候，如果 return 后面跟着一个对象，new 命令返回 return 指定的对象；否则不管 return 语句直接返回 this。
 
@@ -123,9 +124,9 @@ function Person(firstname,lastname,age) {  this.firstname = firstname;
 由此可以看出 Person 函数中有一个 prototype 属性，并且在 prototype 上定义的成员，可以在每个实例中引用，并且是共用的。
 
 ## JavaScript 原型
-Js 所有的函数在创建的时候都自动添加了 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
+Js 所有的函数在创建的时候都会自动为其添加一个 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
 
-所以 JavaScript 也是一种基于原型的面向对象语言，即每一个对象都有一个原型，对象从原型中继承属性和方法。
+所以 JavaScript 是一种基于原型的面向对象语言，即每一个对象都有一个原型，对象从原型中继承属性和方法。
 
 ### why we use prototype? -> 便于方法的重用。
 
@@ -203,7 +204,10 @@ console.log(a.__proto__.__proto__); // null
 * 构造函数通过 prototype 属性访问原型对象；
 * 浏览器实现了 `__proto__` 属性用于实例对象访问原型对象。
 
-### 原型继承
+### hasOwnProperty() 
+可以知道属性是否属于对象实例。
+
+## 原型继承
 ``` js
 function Animal(){
   this.super = 'animal';
