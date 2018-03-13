@@ -33,3 +33,35 @@ Array.prototype.min = function() {
 [1, 2, 3].max() // => 3
 [1, 2, 3].min() // => 1
 ```
+
+### 从数组中随机选取元素
+从数组中随机取出一个元素：
+
+``` js
+var items = ['1','2','4','5','6'];
+var item = items[Math.floor(Math.random()*items.length)];
+```
+
+从数组中随机取出几个元素：
+
+``` js
+function getRandomArrayElements(arr, count) {
+  var shuffled = arr.slice(0), 
+  i = arr.length, 
+  min = i - count, 
+  temp, 
+  index;
+  
+  while (i-- > min) {
+    index = Math.floor((i + 1) * Math.random());
+    temp = shuffled[index];
+    shuffled[index] = shuffled[i];
+    shuffled[i] = temp;
+  }
+  return shuffled.slice(min);
+}
+
+var items = ['1','2','4','5','6'];
+console.log( getRandomArrayElements(items, 3));
+```
+
