@@ -4,61 +4,83 @@
 ### 情形一：左边宽度固定、右边宽度自适应
 #### 方法一：左边左浮动，右边宽度100%
 ``` html
-<style>
-  .left {
-    width:300px;
-    float: left;
-  }
-  .right {
-    width: 100%;
-    margin-left:300px;
-  }
-</style>
-
 <div class="left">左边固定</div>
 <div class="right">右边自适应</div>
+```
+
+``` css
+.left {
+  width: 300px;
+  float: left;
+  }
+.right {
+  width: 100%;
+  margin-left: 300px;
+}
 ```
 
 > 注意：IE6 中会有 3 像素的 BUG，解决方法可以在 .left 加入 margin-left:-3px。
 
+还有另一种写法，使用 overflow:hidden ：
+
+``` css
+.left {
+  float: left;
+  width: 300px;
+  margin-right: 10px;
+}
+.right {
+  overflow: hidden;
+}
+```
+
+* 优点：简单；
+* 缺点：不支持 ie6。
+
 #### 方法二：右边宽度使用 calc
 ``` html
-<style>
-  .left {
-    width:300px;
-    float: left;
-  }
-  .right {
-    float: left;
-    width: calc(100vw - 200px);
-  }
-</style>
-
 <div class="left">左边固定</div>
 <div class="right">右边自适应</div>
 ```
 
-#### 方法三：使用 flex
-``` html
-<style>
-.father {
-  display: flex;
-}
+``` css
 .left {
-  width:300px;
+  width: 300px;
+  float: left;
 }
 .right {
-  flex:1;
+  float: left;
+  width: calc(100vw - 200px);
 }
-</style>
-
+```
+#### 方法三：使用 flex
+``` html
 <div class="wrap">
   <div class="left">左边固定</div>
   <div class="right">右边自适应</div>
 </div>
 ```
 
+``` css
+.father {
+  display: flex;
+}
+.left {
+  width: 300px;
+}
+.right {
+  flex: 1;
+}
+```
+
 #### 方法四：使用 table
+``` html
+<div class="parent">
+  <div class="left">左边固定</div>
+  <div class="right">右边自适应</div>
+</div>
+```
+
 ``` css
 .parent {
   display: table;
@@ -99,32 +121,32 @@
 ### 情形二：左边自适应、右边固定
 #### 方法一：使用 float + margin
 ``` html
-<style>
-.wrap {
-  width:100%;
-  float:left;
-}
-.left {
-  margin-right:300px;
-}
-.right {
-  float:left;
-  width:300px;
-  margin-left:-300px;
-}
-</style>
-
 <div class="wrap">
   <div class="left"></div>
 </div>
 <div class="right"></div>
 ```
 
+``` css
+.wrap {
+  width: 100%;
+  float: left;
+}
+.left {
+  margin-right: 300px;
+}
+.right {
+  float: left;
+  width: 300px;
+  margin-left: -300px;
+}
+```
+
 或者：
 
 ``` css
 .left {
-  float:left;
+  float: left;
   width: 100%;
   margin-right: -100px;
 }
@@ -135,6 +157,13 @@
 ```
 
 #### 方法二：使用 table
+``` html
+<div class="parent">
+  <div class="left">左边自适应</div>
+  <div class="right">右边固定</div>
+</div>
+```
+
 ``` css
 .parent {
   display: table;
@@ -169,6 +198,14 @@
 ![三列布局](mdImgs/three.jpg)
 
 ### 使用 table
+``` html
+<div class="parent">
+  <div class="left">左边固定</div>
+  <div class="main">中间自适应</div>
+  <div class="right">右边固定</div>
+</div>
+```
+
 ``` css
 .parent {
   display: table;
@@ -192,52 +229,59 @@
 如果我们希望中部 main 部分优先显示的话，是可以做布局优化的。将 main 部分提前即可优先渲染。
 
 ``` html
-<style>
-.center {
-  margin:0 100px;
-}
-.left, .right{
-  width: 100px;
-  position: absolute;
-  top: 0;
-}
-.left{ left: 0;}
-.right{ right: 0;}
-</style>
-
 <div class="center">center</div>
 <div class="left">left</div>
 <div class="right">right</div>
 ```
+
+``` css
+.center {
+  margin: 0 100px;
+}
+.left, .right {
+  width: 100px;
+  position: absolute;
+  top: 0;
+}
+.left { left: 0;}
+.right { right: 0;}
+```
+
 绝对定位是最简单的一种三列布局方式，但是也存在一定的问题。那就是高度不可控，如果 left 部分的高度高于 center ，left 就没有能力撑起整个 wrap 。而以下「圣杯」和「双飞翼」两种方式就能解决这个问题。
 
 ### 浮动
 ``` html
-<style>
-.left,.right{
+<div class='left'>left</div>
+<div class='right'>right</div>
+<div class='center'>center</div>
+```
+
+``` css
+.left,.right {
   width: 200px;
 }
 .left{
   float: left;
 }
-.right{
+.right {
   float: right;
 }
-.center{
+.center {
   margin: 0 210px;
   overflow: hidden;
 }
-</style>
-
-<div class='left'>left</div>
-<div class='right'>right</div>
-<div class='center'>center</div>
 ```
+
 注意：center 的 div 需要放在最后面。
 
 ### 圣杯布局
 ``` html
-<style>
+<div class="center">main</div>
+<div class="left">left</div>
+<div class="right">right</div>
+```
+
+``` css
 .center {
   position: relative;
   float: left;
@@ -257,11 +301,6 @@
   margin-left: -100px;
   right: -100px;
 }
-</style>
-
-<div class="center">main</div>
-<div class="left">left</div>
-<div class="right">right</div>
 ```
 
 使用了 relative 相对定位、float 和 负值 margin ，将 left 和 right 部分「安装」到 wrap 的两侧，顾名「圣杯」。
@@ -274,7 +313,14 @@
 
 ### 淘宝双飞翼
 ``` html
-<style>
+<div class="wrap">
+  <div class="center">center</div>
+</div>
+<div class="left">left</div>
+<div class="right">right</div>
+```
+
+``` css
 .wrap {
   width: 100%;
   float: left;
@@ -292,19 +338,20 @@
   width: 100px;
   margin-left: -100px;
 }
-</style>
-<div class="wrap">
-  <div class="center">center</div>
-</div>
-<div class="left">left</div>
-<div class="right">right</div>
 ```
 
 同样使用了 float 和 负值 margin,不同的是，并没有使用 relative 相对定位 而是增加了 dom 结构，增加了一个层级。确实解决了圣杯布局的缺陷。当然双飞翼布局存在 dom 结构多余，增加渲染树生成的计算量。
 
 ### flex 布局
 ``` html
-<style>
+<div class='wrap'>
+  <div class='left'>left</div>
+  <div class='center'>center</div>
+  <div class='right'>right</div>
+</div>
+```
+
+``` css
 .wrap{
   display: flex;
 }
@@ -318,13 +365,6 @@
 .right{
   width: 200px;
 }
-</style>
-
-<div class='wrap'>
-  <div class='left'>left</div>
-  <div class='center'>center</div>
-  <div class='right'>right</div>
-</div>
 ```
 
 所以最后总结一下，那就是对症下药，没有最好的方案，只有最适合的。
@@ -522,6 +562,181 @@ flex 默认的 align-items 的值为 stretch。
   height: 100px;
 }
 .item {
-  width:100px;
+  width: 100px;
+}
+```
+
+## 六、全屏布局
+主要是指浏览器窗口变大时，撑满窗口，变小时也能够自动缩小。
+
+### 场景一
+[](!bj-qp01.jpg)
+
+#### 定位
+``` html
+<div class="parent">
+  <div class="top">top</div>
+  <div class="left">left</div>
+  <div class="right">
+    <div class="inner">right</div>
+  </div>
+  <div class="bottom">bottom</div>
+</div>
+```
+
+``` css
+html,body,.parent {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  color: white;
+}
+.top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: blue;
+}
+.left {
+  position: absolute;
+  left: 0;
+  top: 100px;
+  bottom: 50px;
+  width: 200px;
+  background: red;
+}
+.right {
+  position: absolute;
+  left: 200px;
+  top: 100px;
+  bottom: 50px;
+  right: 0;
+  background: pink;
+  overflow: auto;
+}
+.right .inner {
+  min-height: 1000px;
+}
+.bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50px;
+  background: black;
+}
+```
+
+* 优点：兼容性好，ie6 下不支持。
+
+#### flex
+``` html
+<div class="parent">
+  <div class="top">top</div>
+  <div class="middle">
+    <div class="left">left</div>
+    <div class="right">
+      <div class="inner">right</div>
+    </div>
+  </div>
+  <div class="bottom">bottom</div>
+</div>
+```
+
+``` css
+html,body,.parent {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  color: white;
+} 
+.parent {
+  display: flex;
+  flex-direction: column;
+}
+.top {
+  height: 100px;
+  background: blue;
+}
+.bottom {
+  height: 50px;
+  background: black;
+}
+.middle {
+  flex:1;
+  display:flex;
+}
+.left {
+  width: 200px;
+  background: red;
+}
+.right {
+  flex: 1;
+  overflow: auto;
+  background: pink;
+}
+.right .inner {
+  min-height: 1000px;
+}
+```
+
+* 缺点：兼容性差，ie9 及以下不兼容。
+
+### 场景二
+[](!bj-qp02.jpg)
+
+#### flex
+``` html
+<div class="parent">
+  <div class="top">top</div>
+  <div class="middle">
+    <div class="left">left</div>
+    <div class="right">
+      <div class="inner">right</div>
+    </div>
+  </div>
+  <div class="bottom">bottom</div>
+</div>
+```
+
+``` css
+html,body,.parent {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  color: white;
+} 
+.parent {
+  display: flex;
+  flex-direction: column;
+}
+.top {
+  background: blue;
+}
+.bottom {
+  background: black;
+}
+.middle {
+  flex: 1;
+  display: flex;
+}
+.left {
+  background: red;
+}
+.right {
+  flex: 1;
+  overflow: auto;
+  background: pink;
+}
+.right .inner {
+  min-height: 1000px;
 }
 ```
