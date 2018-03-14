@@ -94,28 +94,29 @@ const alertUser = (message) => {
 }
 ```
 
-箭头函数带来的最大便利无疑是对this的绑定。
+#### 箭头函数中的 this
+箭头函数不使用 this 的四种绑定规则，而是根据外层作用域来决定 this。
 
 ``` js
 $.ajax({
-    url: url,
-    data: comment,
-    success: function(resJson) {
-        this.setState({comments: resJson})
-    }.bind(this)
+  url: url,
+  data: comment,
+  success: function(resJson) {
+    this.setState({comments: resJson})
+  }.bind(this)
 })
 ```
 
-在ES6箭头函数下，我们可以直接这样写：
+在 ES6 箭头函数下，我们可以直接这样写：
 
 ``` js
 $.ajax({
-    url: url,
-    data: comment,
-    success: (resJson) => {
-        this.setState({comments: resJson})
-    }
-})
+  url: url,
+  data: comment,
+  success: (resJson) => {
+    this.setState({comments: resJson})
+  }
+});
 ```
 
 ## Async Functions
