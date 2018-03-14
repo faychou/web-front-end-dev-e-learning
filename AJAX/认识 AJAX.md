@@ -47,7 +47,7 @@
 404	未找到资源,可以设置个性”404页面”	Not Found
 500	服务器内部错误	internal Server Error
 
-## 认识 AJAX
+## JavaScript AJAX
 ### 生成时间戳
 为了防止缓存(304)，调用open时，在第二个参数请求地址后添加一个随机数，保证每次访问的地址不同，避免因为缓存导致请求的文件发生改变，而页面并未随之改变(因为使用了缓存的数据)。
 
@@ -55,7 +55,7 @@
 xhr.open("get", "url?" + Math.random(), true);
 ```
 
-### post请求和get请求的区别
+### post 请求和 get 请求的区别
 ``` js
 xhr.open("post", "请求文件", true);
 
@@ -113,8 +113,8 @@ var dataObj = typeof data == "object" ? data : eval("("+ data +")");
 var dataObj = typeof data == "object" ? data : (new Function("return" + data))();
 ```
 
-## AJAX封装
-### 简单的 GET 请求封装
+### AJAX 封装
+#### 简单的 GET 请求封装
 ``` js
 /**
  * 一个简单的get请求
@@ -155,7 +155,7 @@ function AJAX(url, fnSucc, fnFaild) {
 }
 ```
 
-### 改造后的封装
+#### 改造后的封装
 ``` js
 /**
  * AJAX函数封装
@@ -226,3 +226,25 @@ function AJAX(url, options) {
     return oAjax;//发送请求的XMLHttpRequest对象
 }
 ```
+
+## 跨域
+### 同源策略
+
+### jsonp
+
+### CORS
+CORS（Cross-Origin Resource Sharing）中文名叫 跨域资源共享。
+
+#### Access-Control-Allow-Origin
+该头部是客户端发起的请求的一部分，包含了应用所在的域。由于安全原因，浏览器不会允许用户重写这个值。
+
+#### Access-Control-Allow-Credentials
+该头部只需要在服务器支持通过 cookie 认证的情况下出现在响应中。这种情况下，其唯一合法值就是 true。
+
+#### Access-Control-Allow-Headers
+格式为一个逗号分隔的列表，表示服务器将会支持的请求头部值。如果使用了自定义头部（比如 x-authentication-token），则应该将其置于这个头部响应中，并返回到 OPTIONS 调用中；除非该请求被阻塞了。
+
+#### Access-Control-Expose-Headers
+相似的是，该响应应包含一个头部列表，表示将在实际的响应中出现的值，并应在客户端中有效。所有其他头部则会被限制。
+
+## axios
