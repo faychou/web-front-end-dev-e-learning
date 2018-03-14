@@ -1,9 +1,10 @@
 # 环境搭建
 
-## 官网
+## window 系统
 打开 NodeJS 官网 https://nodejs.org/en/download/ ，选择对应版本下载安装即可。LTS 指稳定版本，Current 指最新版本。
 
-## Homebrew安装
+## Mac 系统
+### Homebrew安装
 1、安装 Homebrew ：
 
 ``` bash
@@ -24,6 +25,19 @@ node -v
 
 # 查看 npm 版本
 npm -v
+```
+
+## Linux 系统
+1、安装 node.js
+
+``` bash
+sudo apt-get install nodejs
+```
+
+2、安装 npm
+
+``` bash
+sudo apt-get install npm
 ```
 
 ## 使用 nvm
