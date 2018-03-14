@@ -24,7 +24,7 @@ html {fons-size: width / 100}
 p {width: 50rem} /* 50rem = 屏幕宽度的50% */
 ```
 
-如何让html字体大小一直等于屏幕宽度的百分之一呢？ 可以通过js来设置，一般需要在页面dom ready、resize和屏幕旋转中设置：
+如何让 html 字体大小一直等于屏幕宽度的百分之一呢？ 可以通过 js 来设置，一般需要在页面 DOM ready、resize 和 屏幕旋转 中设置：
 
 ``` js
 document.documentElement.style.fontSize = document.documentElement.clientWidth / 100 + 'px';
