@@ -9,6 +9,10 @@
 
 ## 块状元素居中
 ### 宽度固定
+``` html
+<div>DEMO</div>
+```
+
 ``` css
 /* 一般写法 */
 div {
@@ -27,20 +31,32 @@ div {
 
 ### 宽度不固定
 #### 使用 inline-block
+``` html
+<div class="parent">
+  <div class="child">DEMO</div>
+</div>
+```
 ``` css
 .parent {
-  text-align: center;
+  text-align:center;
 }
 .child {
-  display: inline-block;
+  display:inline-block;
 }
 ```
 
-> 优点：兼容性好。缺点：需要同时设置子元素和父元素。
+* 优点：兼容性好，甚至可以兼容 ie6、ie7；
+* 缺点：child 里的文字也会水平居中，可以在 .child 添加 `text-align:left;` 还原。
 
-#### 使用 table 实现 
+#### 使用 table 实现
+``` html
+<div class="parent">
+  <div class="child">DEMO</div>
+</div>
+```
+
 ``` css
-div {
+.child {
   display: table; 
   margin: 0 auto;
 }
@@ -48,43 +64,58 @@ div {
 /* 或者给该 div 嵌套表格标签*/
 ```
 
-> 优点:只需要对自身进行设置。缺点：IE6,7 需要调整结构。
+> 优点:只需要对自身进行设置。缺点：不支持 IE6、7 ，需要调整结构。
 
 #### 定位
 ``` html
-<style>
-  .wrap {
-    position: absolute;
-    left:50%;
-  }
-  .main {
-    position: relative;
-    left:-50%;
-  }
-</style>
-
-<div class="wrap">
-  <div class="main"></div>
+<div class="parent">
+  <div class="child">DEMO</div>
 </div>
 ```
 
-#### 使用位移
 ``` css
-div {
+.parent {
+  position: absolute;
+  left: 50%;
+}
+.child {
+  position: relative;
+  left: -50%;
+}
+```
+
+#### 使用位移
+``` html
+<div class="parent">
+  <div class="child">DEMO</div>
+</div>
+```
+
+``` css
+.parent {
+  position:relative;
+}
+.child {
   position: absolute; 
   left: 50%; 
-  transform: translate(-50%,0);
+  transform: translateX(-50%);
   /*或者实用margin-left的负值为盒子宽度的一半也可以实现，不过这样就必须知道盒子的宽度，但兼容性好*/
 }
 ```
 
+* 优点：居中元素不会对其他的产生影响；
+* 缺点：transform 属于 css3 内容，兼容性存在一定问题。
+
 #### 使用 flex
 ``` css
-div {
+.parent {
   display: flex; 
   justify-content: center;
 }
 ```
+
+* 优点：设置 parent 即可；
+* 缺点：低版本浏览器(ie6 ie7 ie8)不支持。
 
 # 垂直居中
 ## 单行文本居中
@@ -112,127 +143,144 @@ div {
 }
 ```
 
+* 优点：兼容性较好，ie8 以上均支持。
+
 ### 定位
 ``` html
-<style>
-.main {
+<div>DEMO</div>
+```
+
+``` css
+div {
   position: absolute;
   top: 50%;
   margin-top: -150px;
   width: 300px;
   height: 300px;
 }
-</style>
-
-<div class="main"></div>
 ```
 
 > 缺点：无法自适应内容的高度。
 
 ### 使用 calc
 ``` html
-<style>
-.main {
+<div>DEMO</div>
+```
+
+``` css
+div {
   position: absolute;
   top: calc(50% - 150px);
   width: 300px;
   height: 300px;
 }
-</style>
-
-<div class="main"></div>
 ```
 
 ### 空标签 + float
 ``` html
-<style>
+<div class="space"></div>
+<div class="parent">
+  <div class="child">DEMO</div>
+</div>
+```
+
+``` css
 .space {
   float: left;
   height: 50%;
   margin-top: -150px;
 }
-.main {
+.parent {
   position: relative;
   clear: left;
   height: 300px;
 }
-</style>
-
-<div class="space"></div>
-<div class="main">
-  <div class="inner"></div>
-</div>
 ```
+
+* 产生多余的空标签。
 
 ## 块级元素高度自适应
 ### 使用 css3 中的 translate
 ``` html
-<style>
-.main {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-</style>
-<div class="main"></div>
+<div class="parent">
+  <div class="child">DEMO</div>
+</div>
 ```
 
-> 缺点：元素脱离文档流。如果需要居中的元素已经在高度上超过了视口，那它的顶部会被视口裁切掉。
+``` css
+.parent {
+  position:relative;
+}
+.child {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+}
+```
+
+* 优点：居中元素不会对其他的产生影响
+* 缺点：元素脱离文档流。如果需要居中的元素已经在高度上超过了视口，那它的顶部会被视口裁切掉，其次是兼容性存在一定问题。
 
 ### 结合 vh 和 transform
 ``` html
-<style>
-.main {
+<div>DEMO</div>
+```
+
+``` css
+div {
   width: 300px;
   margin: 50vh auto 0;
   transform: translateY(-50%);
 }
-</style>
-
-<div class="main"></div>
 ```
 
 ### flex
 ``` html
-<style>
-.main {
-  display: flex;
-  height: 100vh;
-}
-.inner {
-  margin: auto;
-  /* 或者
-  justify-content: center;
-  align-items: center;
-  */
-}
-</style>
-
-<div class="main">
-  <div class="inner"></div>
+<div class="parent">
+  <div class="child"></div>
 </div>
 ```
 
-当我们使父元素display: flex时，margin: auto不仅可以水平居中，也能够实现垂直居中。这是因为auto外边距会平分水平或垂直方向上的额外空间。
+``` css
+.parent {
+  position:flex;
+  align-items:center;
+}
+```
+
+或者使用下面这个方法：
+
+``` css
+.parent {
+  display: flex;
+  height: 100vh;
+}
+.child {
+  margin: auto;
+}
+```
+
+当我们使父元素 `display: flex` 时，`margin: auto` 不仅可以水平居中，也能够实现垂直居中，这是因为 auto 外边距会平分水平或垂直方向上的额外空间。
+
+* 缺点：兼容性存在一定问题。
 
 ### 表格
 ``` html
-<style>
-.container {
-  display: table;/* 让div以表格的形式渲染 */
+<div class="parent">
+  <div class="child"></div>
+</div>
+```
+
+``` css
+.parent {
+  display: table; /* 让div以表格的形式渲染 */
   width: 100%;
 }
-.inner {
-  display: table-cell;/* 让子元素以表格的单元格形式渲染 */
+.child {
+  display: table-cell; /* 让子元素以表格的单元格形式渲染 */
   text-align: center;
   vertical-align: middle;
 }
-</style>
-
-<div class="main">
-  <div class="inner"></div>
-</div>
 ```
 
 # 水平垂直居中
@@ -253,6 +301,8 @@ div {
   display: inline-block;
 }
 ```
+
+* 优点：兼容性较好。
 
 ### 绝对定位
 ``` css
@@ -279,8 +329,17 @@ div {
 ```
 
 ### 使用位移
+``` html
+<div class="parent">
+  <div class="child>DEMO</div>
+</div>
+```
+
 ``` css
-div {
+.parent {
+  position: relative;
+}
+.child {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -288,11 +347,24 @@ div {
 }
 ```
 
+* 优点：child 元素不会对其他元素产生影响；
+* 缺点：兼容性存在一定问题。
+
 ### 使用 flex
+``` html
+<div class="parent">
+  <div class="child">DEMO</div>
+</div>
+```
+
 ``` css
-div {
+.parent {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 ```
+
+* 优点：只设置了 parent；
+* 缺点：兼容性存在一定问题。
+
