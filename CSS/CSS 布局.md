@@ -570,7 +570,7 @@ flex 默认的 align-items 的值为 stretch。
 主要是指浏览器窗口变大时，撑满窗口，变小时也能够自动缩小。
 
 ### 场景一
-[](!bj-qp01.jpg)
+![](mdImgs/bj-qp01.png)
 
 #### 定位
 ``` html
@@ -689,7 +689,7 @@ body {
 * 缺点：兼容性差，ie9 及以下不兼容。
 
 ### 场景二
-[](!bj-qp02.jpg)
+![](mdImgs/bj-qp02.png)
 
 #### flex
 ``` html
