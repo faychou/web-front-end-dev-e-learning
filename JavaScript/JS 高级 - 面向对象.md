@@ -204,15 +204,50 @@ console.log(a.__proto__.__proto__); // null
 * 构造函数通过 prototype 属性访问原型对象；
 * 浏览器实现了 `__proto__` 属性用于实例对象访问原型对象。
 
-### hasOwnProperty() 
-可以知道属性是否属于对象实例。
+### Object.create() 
+会创建一个对象并把这个对象的 Prototype 关联到指定的对象。
 
-## 原型继承
 ``` js
-function Animal(){
+var obj = {
+  a:1
+};
+
+// 创建一个关联到 obj 的对象
+var newObject = Object.create( obj );
+newObject.a; // 2
+```
+
+`Object.create(null)` 会 创 建 一 个 拥 有 空( 或 者 说 null) Prototype 链接的对象，这个对象无法进行委托。由于这个对象没有原型链，所以 instanceof 操作符(之前解释过)无法进行判断，因此总是会返回 false。 这些特殊的空 Prototype 对象通常被称作“字典”，它们完全不会受到原 型链的干扰，因此非常适合用来存储数据。
+
+#### 行为委托
+``` js
+var anotherObject = {
+    cool: function() {
+        console.log( "cool!" );
+    }
+};
+
+var myObject = Object.create( anotherObject );
+
+myObject.doCool = function() {
+    this.cool(); // 内部委托!
+};
+
+myObject.doCool(); // "cool!"
+```
+
+调用的 myObject.doCool() 是实际存在于 myObject 中的，这可以让我们的 API 设 计更加清晰。从内部来说，我们的实现遵循的是委托设计模式，通过 Prototype 委托到 anotherObject.cool()。换句话说，内部委托比起直接委托可以让 API 接口设计更加清晰。
+
+### 属性优先级
+对象 > 原型。
+
+## 原型
+### 原型继承
+``` js
+function Animal() {
   this.super = 'animal';
 }
-function Cat(name){
+function Cat(name) {
   this.name = name;
   this.food = 'fish';
 }
