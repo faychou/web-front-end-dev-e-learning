@@ -73,6 +73,7 @@ publicPath:"https:www.faychou.cn"
 ``` js
 filename: "js/"+"[name].js" // [name]是指对应的入口文件名字，也可取任意名字
 //filename: '[name].[hash].js'
+//filename: "[chunkhash].js"  //入口(entry chunk)」文件命名模版
 ```
 
 ## 浏览器缓存资源
@@ -107,7 +108,7 @@ module.exports = {
 ```
 
 ## loader
-多个 loader 可以用在同一个文件上并且被链式调用。链式调用时从右到左执行且 loader 之间用 "!" 来分割。
+由于 webpack 只能处理 javascript，所以我们需要对一些非 js 文件处理成 webpack 能够处理的模块。多个 loader 可以用在同一个文件上并且被链式调用。链式调用时从右到左执行且 loader 之间用 "!" 来分割。
 
 ### enfore
 ``` js
@@ -142,13 +143,13 @@ rules: [
 
 > 注意：之前 webpack1 中需要用到 preLoader 的地方可以改到 rules 的 enfore 中进行配置。
 
-### css/css预处理语言(less、sass、stylus)
+### css/css 预处理语言(less、sass、stylus)
 ``` js
 module: {
   rules: [
     {
       test: /\.(scss|css)$/,
-      include: [
+      include: [ // 必须匹配选项
         path.join(__dirname, 'src')
       ], 
       use: ["style-loader", "css-loader", "sass-loader"]
@@ -202,7 +203,10 @@ module:{
     {
       test: /\.(js|jsx)$/,
       exclude: /node_modules/, //排除 node_modules 文件夹
-      loader: 'babel-loader'  //注意 webpack2.x 是不支持 loader 简写
+      loader: 'babel-loader',  //注意 webpack2.x 是不支持 loader 简写
+      options: { // loader的可选项
+        presets: ["es2015"]
+      }
     }
   ]
 },
@@ -229,7 +233,7 @@ npm install url-loader file-loader --save-dev
 {
   test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
   loader: "url-loader",
-  options: {
+  options: { // loader 的可选项
     limit: 8192,
     name: path.join(__dirname, 'src/images/[name].[hash:8].[ext]')
   }
@@ -464,17 +468,21 @@ module.exports = {
 ## resolve
 
 ``` js
-resolve: {
-    extensions: [".js", ".vue", ".json"], // 导入的时候忽略文件的扩展名
-    alias: {
-      // import Vue from 'vue/dist/vue.js'可以写成 import Vue from 'vue'
-      // 键后加上$,表示精准匹配！
-      vue$: "vue/dist/vue.js",
-      //用@直接指引到src目录下，如：'./src/main'可以写成、'@/main' 
-      "@": resolve("src"),
-      "~": resolve("src/components")
-    }
-  },
+resolve: { // 解析模块的可选项
+  modules: [ // 模块的查找目录
+    "node_modules",
+    path.resolve(__dirname, "app")
+  ],
+  extensions: [".js", ".vue", ".json"], // 导入的时候可以忽略文件的扩展名
+  alias: { // 模块别名列表
+    // import Vue from 'vue/dist/vue.js'可以写成 import Vue from 'vue'
+    // 键后加上$,表示精准匹配！
+    vue$: "vue/dist/vue.js",
+    //用@直接指引到src目录下，如：'./src/main'可以写成、'@/main' 
+    "@": resolve("src"),
+    "~": resolve("src/components")
+  }
+},
 ```
 
 ## 插件
