@@ -1,7 +1,7 @@
 # Promises 详解
 Promise 的出现，原本是为了解决回调地狱的问题。它允许你为异步代码执行结果的成功和失败分别绑定相应的处理方法。这让异步方法可以像同步方法那样返回值，但是并非立即返回执行的结果，而是返回一个 Promise 对象。
 
-## 如何创建Promises
+## 如何创建 Promises
 和普通 JavaScript 对象一样，同样是通过`new`关键词来创建一个 Promise 对象实例。构造函数只接收一个参数，且该参数必须是一个函数，任何其他的值比如 undefined、null、true 等都会报一个 TypeError 的错误。同样，如果你没有通过`new`关键词创建，而是直接执行`Promise()`，同样也会报一个 TypeError 的错误。
 
 ``` js
@@ -13,7 +13,7 @@ var promise = new Promise(function(resolve, reject) {
 
 创建Promise实例时传入的函数，同时还接受两个参数，它们分别对应Promise内部实现的两个方法。
 
-## Promise的原理分析
+## Promise 的原理分析
 Promise 本质是一个状态机。每个 promise 只能是 3 种状态中的一种：
 
 * pending：初始状态；
@@ -26,7 +26,7 @@ pending 是对象创建后的初始状态，当对象操作成功时变为 fulfi
 Promise 对象拥有两个实例方法`then()`和`catch()`。 
 
 ### Promise.prototype.then(resolve, reject) 
-每一个 promise 都会提供一个 then 方法，用于链式调用,每次执行时都会返回一个新的 promise 对象：
+每一个 promise 都会提供一个 then 方法，用于链式调用，每次执行时都会返回一个新的 promise 对象：
 
 ``` js
 var promise = new Promise(function (resolve, reject) {
@@ -46,7 +46,7 @@ promise.then(function(result) {
 });
 ```
 
-从上面这个例子可以看出 then() 接收两个参数，且通常都是函数。第二个参数是可选的，不一定要提供。当 promise 状态 fulfilled 时，会把 resolve(value) 中的 value 值传给 then 的第一个参数中，同理，当 promise 状态 reject 时，会把 reject(reason) 中的 reason 值传给 then 的第二个参数。
+从上面这个例子可以看出 `then()` 接收两个参数，且通常都是函数。第二个参数是可选的，不一定要提供。当 promise 状态 fulfilled 时，会把 `resolve(value)` 中的 value 值传给 then 的第一个参数中，同理，当 promise 状态 reject 时，会把 `reject(reason)` 中的 reason 值传给 then 的第二个参数。
 
 
 
@@ -167,6 +167,8 @@ p1.then(function taskA(value) {
   console.log(error);
 });
 ```
+
+> 总结：调用 `.then()` 和 `.catch()` 时都会创建一个新的 Promise。这个新的 Promise 可以继续使用 then 或者 catch 方法。
 
 ## Promise静态方法
 ### Promise.resolve(value)
