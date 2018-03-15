@@ -52,7 +52,9 @@ dog === cat // true
 
 ### 数据类型检测
 #### typeof
-typeof 只有在基本类型的检测上面才好使，在引用类型(Function除外)里面他返回的都是object，另 typeof null === "object"。
+typeof 只有在基本类型的检测上面才好使，在引用类型（Function 除外）里面他返回的都是 object，另 typeof null === "object"，why?
+
+不同的对象在底层都表示为二进制，在 JavaScript 中二进制前三位都为 0 的话会被判断为 object 类型，null 的二进制表示是全 0，自然前三位也是 0，所以执行 typeof 时会返回 object 。
 
 #### 对象检测
 检测一个对象的类型，强烈推荐使用 `Object.prototype.toString` 方法，这是唯一一个可依赖的方式。
