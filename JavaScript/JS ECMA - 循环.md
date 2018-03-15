@@ -16,9 +16,15 @@ for (var v of myArray) {
 // 3
 ```
 
-### forEach
+### forEach()
 
-### map
+### map()
+
+### every()
+
+### some()
+
+### reduce()
 
 ### while
 

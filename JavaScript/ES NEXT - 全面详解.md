@@ -94,6 +94,15 @@ const alertUser = (message) => {
 }
 ```
 
+使用可选参数：
+
+``` js
+var add = (...nums) => {
+  var numArr = [].concat(nums)
+  return numArr.reduce((acc, v) => acc += v)
+}
+```
+
 #### 箭头函数中的 this
 箭头函数不使用 this 的四种绑定规则，而是根据外层作用域来决定 this。
 
