@@ -485,6 +485,22 @@ resolve: { // 解析模块的可选项
 },
 ```
 
+``` js
+// alias 使用案例
+alias: {
+  'src': path.resolve(__dirname, '../src'),
+  'components': path.resolve(__dirname, '../src/components'),
+  'api': path.resolve(__dirname, '../src/api'),
+  'utils': path.resolve(__dirname, '../src/utils'),
+  'store': path.resolve(__dirname, '../src/store'),
+  'router': path.resolve(__dirname, '../src/router')
+}
+
+//使用
+import stickTop from 'components/stickTop'
+import getArticle from 'api/article'
+```
+
 ## 插件
 ### 热替换
 热替换是指修改文件内容之后不用手动刷新页面，修改的部分会自动刷新，webpack 内部已经支持，不需要下载，直接在 plugins 中添加以下代码就行：

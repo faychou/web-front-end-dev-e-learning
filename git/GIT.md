@@ -294,6 +294,7 @@ fd1/*
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+.project
 
 # Files for the Dalvik VM
 *.dex
