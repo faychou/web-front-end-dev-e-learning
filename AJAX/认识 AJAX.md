@@ -48,11 +48,11 @@ XMLHttpRequest 是 AJAX 的核心机制，它是在 IE5 中首先引入的，是
 ### 媒体格式类型
 * application/json： JSON数据格式
 
-* application/xhtml+xml：XHTML格式
+* application/x-www-form-urlencoded：url 参数形式
 
-* application/xml： XML数据格式
+* multipart/form-data：from表单
 
-* application/atom+xml：Atom XML聚合格式
+* text/plain：纯文本的方式
 
 ## 理解同步和异步
 * 同步: 客户端发起请求 –> 等待 –> 服务器端处理 —> 等待 –> 响应 –> 页面载入 (请求错误时全部重新载入)。
