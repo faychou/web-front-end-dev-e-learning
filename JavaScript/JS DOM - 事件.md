@@ -185,6 +185,17 @@ var target = event.target || event.srcElement;
 ### type
 返回当前事件的名称。
 
+### keyCode
+获取按下的键盘按键所对应的代码。
+
+``` js
+document.onkeydown = function(e) {
+  console.log(e.keyCode + "  " + String.fromCharCode(e.keyCode))
+}
+```
+
+`String.fromCharCode(e.keyCode)` 方法可以获取按键名字，但是只适用于字母键和数字键，其他地方经常错乱。
+
 ### eventPhase
 返回事件传播的当前阶段。
 
