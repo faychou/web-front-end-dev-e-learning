@@ -13,6 +13,82 @@ DOM 分四个级别，一级，二级，三级，没有零级但是通常把 DOM
 ### 标准事件流
 事件流的方向为：window -> document -> html -> body -> div 目标 -> div -> body -> html -> document -> window
 
+## 事件类型
+鼠标事件：click
+
+焦点事件：focus /focusin /focusout /blur
+
+touch 事件：touchstart、touchmove、touchend、touchcancel
+
+### load
+img 的请求是不会冒泡的,但是会经过捕抓。video 是没有 load 事件的。背景图片不触发 load 事件。只有当页面上所有的图像,css,js 加载完毕时触发。
+
+如果被设置图片的 src 和之前的 src 相同，在 WebKit 中，该事件不能正常触发(需要先绑定 onload ,然后改变 src)。
+
+### mousewheel
+监听鼠标滚动事件。mousewheel 为通用的滚轮事件，而 Fixfox 的滚轮方式是：DOMMouseScroll。
+
+``` js
+// Fixfox
+window.addEventListener('DOMMouseScroll', func, false);
+
+//其他浏览器
+window.addEventListener('mousewheel', func, false);
+
+//低版本 IE，注意不能绑定到 window
+document.body.attachEvent('onmousewheel', func);
+
+//更低版本IE: 
+document.body.onmousewheel = func;
+```
+
+滚轮方向判定：
+
+* 一般浏览器：`event.originalEvent.wheelDelta` 负数代表向下滚动；
+* Fixfox：`event.originalEvent.detail` 负数代表向上滚动。
+
+``` js
+//兼容
+//为负时 为向下滚,为正时表示向上滚
+event.originalEvent.wheelDelta || event.originalEvent.detail * -1;
+```
+
+### beforeunload 和 unload
+两者触发的时机都是：
+
+* 在浏览器地址栏输入地址，然后点击跳转；
+* 点击页面的链接实现跳转；
+* 关闭或刷新当前页面;
+* 操作当前页面的 Location 对象,修改当前页面地址;
+* 调用 window.navigate 实现跳转;
+* 调用 window.open 或 document.open 方法在当前页面加载其他页面或重新打开输入流。
+
+区别：
+
+* beforeunload 在 unload 之前；
+* beforeunload 页面所有资源均未释放，且页面可视区域效果没有变化；
+* unload 页面所有资源(img, iframe等)均未被释放，页面可视区域一片空白；
+* 没有任何操作可以阻止 unload 过程的执行。
+
+``` js
+// 确认是否关闭或者跳转，部分浏览器不一定都有效
+window.addEventListener('beforeunload',function(e) { // 绑定到 unload 无效
+  e.returnValue = '确定要离开这个页面吗？';
+})
+```
+
+### touchstart
+手指触摸屏幕时触发。
+
+### touchmove
+手指滑动屏幕时触发。
+
+### touchend
+手指离开屏幕时触发。
+
+### touchcancel
+手指触摸屏幕期间内, 被手机电话、按 HOME 健离开浏览器时触发。
+
 ## DOM 事件
 ### DOM0 级事件处理程序
 ``` html
@@ -185,6 +261,24 @@ var target = event.target || event.srcElement;
 ### type
 返回当前事件的名称。
 
+### clientX
+在视口中的 x 坐标。
+
+### clientY
+在视口中的 y 坐标。
+
+### pageX
+在页面中的 x 坐标。
+
+### pageY
+在页面中的 y 坐标。
+
+### screenX
+在屏幕中的 x 坐标。
+
+### screenY
+在屏幕中的 Y 坐标。
+
 ### keyCode
 获取按下的键盘按键所对应的代码。
 
@@ -235,6 +329,15 @@ event.cancelBubble=true
 
 ### stopImmediatePropagation 
 阻止后续事件，该方法除了阻止事件冒泡外在当前事件被绑定多个处理程序的时候，后续的处理程序也会被阻止。
+
+### touches
+当前屏幕上的手指对象数组。
+
+### targetTouches
+当前绑定元素上的手指对象数组。
+
+### changeTouches
+状态发生改变的手指对象数组。
 
 ## 自定义事件
 除了系统内置的事件外，我们还可以自定义事件。
@@ -315,3 +418,68 @@ document.dispatchEvent(myEvent);
     }
 </script>
 ```
+
+## 应用
+### 触屏版和鼠标的节流
+
+### Page Visibility
+我们可能会遇到这种情况，用户在填写表单的时候，浏览器突然崩溃了或者电脑重启了，导致用户资料没有保存，而不得不再次填写的情况。对于 pc 端来说，情况比较简单，基本就是这两种情况，而如果是移动端的话，情形可能还要多：
+
+* 用户点击了一个通知，切换到另一个应用。
+* 用户唤起了任务切换栏，去了另一个应用。
+* 用户摁了 home 键去了首屏。
+* 操作系统切换应用，例如，来了个电话。
+
+而一旦应用程序被切换到后台，随时可能被干掉。所以为了提高用户体验，我们的程序应该在不中断用户的情况下自动保存相关数据，然后在必要的时候（例如：从后台状态或者意外关机中回来）恢复这些数据。
+
+由于在移动平台不能依赖 pagehide、 beforeunload、 和 unload 事件。为了提供可靠流畅的用户体验，无论是在 PC 端还是移动端，应用程序必须使用 Page Visibility API，根据 visibilityChange 状态的变化保存或恢复当前会话。
+
+``` js
+// query current page visibility state: prerender, visible, hidden
+var pageVisibility = document.visibilityState;
+
+// subscribe to visibility change events
+document.addEventListener('visibilitychange', function() {
+  // fires when user switches tabs, apps, goes to homescreen, etc. 
+    if (document.visibilityState == 'hidden') { ... }
+
+    // fires when app transitions from prerender, user returns to the app / tab.
+    if (document.visibilityState == 'visible') { ... }
+});
+```
+
+使用 Page Visibility API，将每次应用程序切换到 visible 都当做一个新的会话，恢复之前的状态，重置你的分析状态等等。然后，当应用程序切换至 hidden 时结束该会话，保存用户与应用程序状态，标记你的分析数据，以及做好所有其他必要的工作。
+
+### 拖动 div
+``` js
+var div = document.querySelector('.div'),
+  half_width = div.offsetWidth / 2,
+  half_height = div.offsetHeight / 2,
+  min_x = 0,
+  min_y = 0,
+  max_x = window.innerWidth - div.offsetWidth,
+  max_y = window.innerHeight - div.offsetHeight
+
+div.addEventListener('touchmove', function(event) {
+  event.preventDefault()
+  var x = event.touches[0].pageX - half_width,
+    y = event.touches[0].pageY - half_height
+
+  if ( x < min_x ) {
+    x = min_x
+  } else if ( x > max_x) {
+    x = max_x
+  }
+
+  if ( y < min_y ) {
+    y = min_y
+  } else if ( y > max_y) {
+    y = max_y
+  }
+  div.style.left = x  + 'px'
+  div.style.top = y + 'px'
+});
+```
+
+preventDefault 主要防止拖动时浏览器跟着滑动和微信页面向下滑动，将 pageX 和 pageY 减去 div 的一半是为了让物体置于手指中间，判断 pageX 和 pageY 最后的最大和最小值, 为了防止拖动出屏幕。
+
