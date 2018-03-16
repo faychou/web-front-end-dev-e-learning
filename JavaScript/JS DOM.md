@@ -34,7 +34,7 @@ parentElement 属性返回当前节点的父 Element 节点。如果当前节点
 ### ownerDocument
 该返回当前节点所在的顶层文档对象，即 document 对象。
 
-## node属性
+## 节点属性
 ### nodeName
 返回 node 的名字，如果是 element 那名字是大写的，其他的名字前面写上 #。
 
@@ -58,38 +58,38 @@ parentElement 属性返回当前节点的父 Element 节点。如果当前节点
 ### nodeValue
 nodeValue 属性返回或设置当前节点的值。对于 text, comment 节点来说, nodeValue 返回该节点的文本内容，对于 attribute 节点来说, 返回该属性的属性值，而对于 document 和 element 节点来说，返回 null。
 
-## node 操作
+## DOM 操作
 ### createElement()
 创建一个元素节点。
 
 ### createTextNode()
 创建一个文本节点。
 
-### Node.appendChild(childNode)
+### node.appendChild(childNode)
 将一个节点添加到指定父节点的子节点列表的末尾。
 
-### Node.insertBefore(newNode,oldNode)
+### node.insertBefore(newNode,oldNode)
 在当前节点的某个子节点之前再插入一个子节点。
 
-### Node.removeChild() 和 Node.replaceChild()
+### node.removeChild() 和 node.replaceChild()
 removeChild 方法是从当前节点删除一个子节点，不过内存里面依然存在，只不过不在页面显示了，返回的就是被移除的那个节点。所以说一个节点移除以后，依然可以使用它，比如插入到另一个节点下面。
 
 replaceChild 方法用于将一个新的节点，替换掉当前节点的一个子节点。它接受两个参数，第一个参数是用来替换的新节点，第二个参数将要被替换走的子节点。它返回被替换走的那个节点。
 
-### Node.cloneNode()
+### node.cloneNode()
 克隆一个 node，分为浅拷贝和深拷贝：
 
 浅拷贝，Node.cloneNode() 只克隆元素节点本身，而不会克隆它的子节点。包括它的文本节点。
 
 深拷贝，Node.cloneNode(true) 克隆元素的所有属性以及子节点。
 
-### Node.contains(childNode)
+### node.contains(childNode)
 判断一个节点是不是另一个节点的子节点。
 
-### Node.hasChildNodes()
+### node.hasChildNodes()
 判断该节点是否还有子节点，有子节点就返回 true。
 
-### Node.normalize()
+### node.normalize()
 就是规范化的意思。什么是规范化，在一个"规范化"后的 DOM 树中，不存在一个空的文本节点，或者两个相邻的文本节点。
 
 ``` js
@@ -105,4 +105,31 @@ wrapper.appendChild(document.createTextNode("Part 2 "));
 wrapper.normalize();
 // 现在(规范化之后), wrapper.childNodes.length === 1
 // wrapper.childNodes[0].textContent === "Part 1 Part 2"
+```
+
+## DOM 属性
+### getAttribute()
+
+### setAttribute()
+
+### style
+
+### getComputedStyle
+获取指定 DOM 的所有 css 属性。
+
+``` js
+//语法: var style = window.getComputedStyle("元素", "伪类"|null);
+
+var h3 = document.getElementById("1234");
+var style = window.getComputedStyle(h3,null);
+```
+
+#### getComputedStyle 与 style 区别?
+* getComputedStyle 只读,而 style 可读可写；
+* getComputedStyle 把所有 CSS 都列出来(包括未设置的),而 style 只列举设置了的；
+* getComputedStyle.length 表示浏览器支持的 CSS 属性个数,而 style.length 为 0。
+
+#### 兼容IE6~8
+``` js
+elementStyle = (element.currentStyle ? element.currentStyle : window.getComputedStyle(element, null)));
 ```
