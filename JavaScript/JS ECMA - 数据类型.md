@@ -56,6 +56,22 @@ typeof 只有在基本类型的检测上面才好使，在引用类型（Functio
 
 不同的对象在底层都表示为二进制，在 JavaScript 中二进制前三位都为 0 的话会被判断为 object 类型，null 的二进制表示是全 0，自然前三位也是 0，所以执行 typeof 时会返回 object 。
 
+``` js
+console.log(typeof 'k') //string
+console.log(typeof 123) // number
+console.log(typeof true) //boolean
+console.log(typeof undefined) //undefined
+console.log(typeof function a(){} ) //function
+console.log(typeof null) //object
+console.log(typeof []) //object
+console.log(typeof {}) //object
+console.log(typeof new Date()) //object
+console.log(typeof new RegExp()) //object
+```
+
+#### instanceof
+instanceof 不仅检验构造这个对象的构造器，还检验原型链上的构造器，所以所有非基本类型 & undefined & null, instanceof Object 都是 true。主要用来判断自定义对象。
+
 #### 对象检测
 检测一个对象的类型，强烈推荐使用 `Object.prototype.toString` 方法，这是唯一一个可依赖的方式。
 
