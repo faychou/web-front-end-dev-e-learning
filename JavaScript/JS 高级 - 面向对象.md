@@ -3,12 +3,12 @@
 
 面向对象编程是目前主流的编程模式，其核心思想是将真实世界中各种复杂的关系，抽象为一个个对象，然后由对象之间的分工与合作，完成对真实世界的模拟。
 
-面向对象的两大概念：
+在传统的编程语言中，面向对象都有两大概念：
 
-* 类：对象的类型模板
+* 类：对象的类型模板，通过类可以创建任意多个具有相同属性和方法的对象
 * 实例：根据类创建的对象
 
-从上面可以看到，在传统的编程语言中，面向对象都有一个类的概念，通过类可以创建任意多个具有相同属性和方法的对象。但是在 ES6 出现之前， JavaScript 是没有类的概念，而是使用构造函数（constructor）来作为对象的模板。
+在 ES6 出现之前， JavaScript 是没有类的概念，但是 javascript 也是面向对象的语言，而这种面向对象的方式是基于原型的。如果要理解基于原型实现面向对象的思想，那么掌握以下几个概念就显得尤为重要： 对象（Object）、构造函数（constructor）、原型（prototype）、原型链（prototype chain） 。
 ## 理解对象
 对象是属性的集合，而属性包含了一系列内部特性，这些特性描述了属性的特征。
 ## 创建对象
@@ -44,7 +44,7 @@ alert(newPerson2 instanceof Object);  //true
 ```
 
 ### 构造函数
-原理是像原生的构造函数 Object, Array 一样，创建自定义的构造函数，从而自定义对象的属性与方法。上面的 createPerson 并不是真正的构造函数，构造函数的语法和定义一个 function 其实是一样的：
+构造函数是用来初始化对象的，像原生的构造函数 Object, Array 一样，可以创建自定义的构造函数，从而自定义对象的属性与方法。上面的 createPerson 并不是真正的构造函数，构造函数的语法和定义一个 function 其实是一样的：
 
 ``` js
 function Person(firstname,lastname,age) {  this.firstname = firstname;
@@ -123,7 +123,7 @@ function Person(firstname,lastname,age) {  this.firstname = firstname;
 
 由此可以看出 Person 函数中有一个 prototype 属性，并且在 prototype 上定义的成员，可以在每个实例中引用，并且是共用的。
 
-## JavaScript 原型
+## 原型
 Js 所有的函数在创建的时候都会自动为其添加一个 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
 
 所以 JavaScript 是一种基于原型的面向对象语言，即每一个对象都有一个原型，对象从原型中继承属性和方法。
@@ -164,8 +164,9 @@ Object.getPrototypeOf(Object.prototype)
 对象查找他的属性的过程：首先在对象本身上面找 -> 没找到再到对象的原型上找 ->还是找不到就到原型的原型上找 —>直到 Object.prototype 找不到 -> 返回 undefined。
 
 ### constructor
-prototype 对象有一个 constructor 属性，默认指向 prototype 对象所在的构造函数。
-由于 constructor 属性是一种原型对象与构造函数的关联关系，所以修改原型对象的时候，务必要小心。
+每个 prototype 对象都有一个 constructor 属性，这个属性始终指向 prototype 对象所在的构造函数。
+
+由于 constructor 属性有原型对象与构造函数的关联关系，所以修改原型对象的时候，务必要小心。
 
 ``` js
 var Person = function (name) {
@@ -183,6 +184,21 @@ Pet.prototype.constructor = Pet;
 ```
 
 ### `__proto__`
+每个被 new 实例化的对象都会包含一个 `__proto__` 属性，它是对构造函数 prototype 的引用。
+
+``` js
+function Foo() {};
+var foo = new Foo();
+console.log(foo.__proto__ === Foo.prototype); // ture
+```
+
+由于 `Foo.prototype` 是 Object 预创建的一个对象，是 Object 创建的一个实例，所以 `Foo.prototype.__proto_` 是 `Object.prototype` 的引用。
+
+``` js
+function Foo(){};
+console.log(Foo.prototype.__proto__ === Object.prototype); // true
+```
+
 访问一个对象的原型可以使用 ES5 中的 `Object.getPrototypeOf` 方法,或者 ES6 中的 `__proto__` 属性。
 
 ``` js
@@ -203,6 +219,16 @@ console.log(a.__proto__.__proto__); // null
 * `__proto__` 是普通对象的隐式属性，在 new 的时候，会指向 prototype 所指的对象；
 * 构造函数通过 prototype 属性访问原型对象；
 * 浏览器实现了 `__proto__` 属性用于实例对象访问原型对象。
+
+### 函数（function）对象的原型
+在 javascript 中，函数是一种特殊的对象，所有的函数都是构造函数 Function 的实例。
+
+``` js
+function Foo() {};
+console.log(Foo.__proto__ === Object.prototype); //false
+console.log(Foo.__proto__ === Function.prototype); // true
+console.log(Foo.prototype.__proto__ === Object.prototype);//true
+```
 
 ### Object.create() 
 会创建一个对象并把这个对象的 Prototype 关联到指定的对象。
@@ -240,22 +266,3 @@ myObject.doCool(); // "cool!"
 
 ### 属性优先级
 对象 > 原型。
-
-## 原型
-### 原型继承
-``` js
-function Animal() {
-  this.super = 'animal';
-}
-function Cat(name) {
-  this.name = name;
-  this.food = 'fish';
-}
-Cat.prototype = new Animal();
-Cat.prototype.constructor = Cat;
-Cat.prototype.getFood = function () {
-  return this.food;
-}
-```
-
-
