@@ -292,4 +292,27 @@ CORS（Cross-Origin Resource Sharing）中文名叫 跨域资源共享。
 #### Access-Control-Expose-Headers
 相似的是，该响应应包含一个头部列表，表示将在实际的响应中出现的值，并应在客户端中有效。所有其他头部则会被限制。
 
+## fetch
+默认不带 cookie。
+
+``` js
+fetch(url, {
+  method: 'POST',
+  body: Json.stringify(comment)
+})
+.then((res)=> {
+  console.error(res);
+})
+.catch((e)=>{
+  console.error(e)
+})
+```
+
+解决浏览器兼容，引用 polyfill：
+
+``` bash
+# 安装好后 import
+npm install --save whatwg-fetch
+```
+
 ## axios
