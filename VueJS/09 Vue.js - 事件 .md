@@ -29,23 +29,6 @@ v-on 指令用于给监听 DOM 事件，来触发一些 JavaScript 代码。
 <button v-on:click="say('hi')">Say hi</button>
 ```
 
-有时也需要在内联语句处理器中访问原生 DOM 事件。可以用特殊变量 `$event` 把它传入方法：
-
-``` html
-<button v-on:click="warn('Form cannot be submitted yet.', $event)">Submit</button>
-
-<script>
-// ...
-methods: {
-  warn: function (message, event) {
-    // 现在我们可以访问原生事件对象
-    if (event) event.preventDefault()
-    alert(message)
-  }
-}
-</script>
-```
-
 v-on 指令可以缩写为 @ 符号：
 
 ``` html
@@ -113,6 +96,26 @@ Vue 允许为 v-on 添加监测常见的键值。
 
 ``` html
 <button v-on:click="warn('data', $event)">Submit</button>
+```
+
+### 事件对象
+javaScript 中事件对象用 event ，vue 中事件对象用 `$event`。
+
+有时也需要在内联语句处理器中访问原生 DOM 事件。可以用特殊变量 `$event` 把它传入方法：
+
+``` html
+<button v-on:click="warn('Form cannot be submitted yet.', $event)">Submit</button>
+
+<script>
+// ...
+methods: {
+  warn: function (message, event) {
+    // 现在我们可以访问原生事件对象
+    if (event) event.preventDefault()
+    alert(message)
+  }
+}
+</script>
 ```
 
 ### 变异方法
