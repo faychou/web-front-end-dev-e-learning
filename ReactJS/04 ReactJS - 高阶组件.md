@@ -1,7 +1,7 @@
 # 高阶组件(HOC)
-Higher-Order function（高阶函数），是函数式编程中的一个基本概念，它描述了一种函数接受函数作为输出，或者输出一个函数。比如常用的工具方法 reduce，map 等都是高阶函数。
+Higher-Order Function（高阶函数），是函数式编程中的一个基本概念，它描述了一种函数接受函数作为参数，然后输出一个函数。比如常用的工具方法 reduce，map 等都是高阶函数。
 
-而 Higher-Order components（高阶组件）其实也是类似于高阶函数，它接受一个或多个组件作为参数，返回一个全新的组件。这个新的组件会使用传给它的组件作为子组件。一般在开发过程中，当需要在多个组件类复用时，就可以创建一个高阶组件。
+而 Higher-Order Components（高阶组件）其实也是类似于高阶函数，它接受一个或多个组件作为参数，返回一个全新的组件。
 
 ``` javascript
 import React, { Component } from 'react'
@@ -17,9 +17,43 @@ export default (WrappedComponent) => {
 }
 ```
 
-我们一般希望编写的组件尽量纯净或者说其中的业务逻辑尽量单一。但是如果各种组件间又需要增加新功能，如打印日志，获取数据和校验数据等和展示无关的逻辑的时候，这些公共的代码就会被重复写很多遍。因此，我们可以抽象出一个高阶组件，可以在原有组件的基础上，对其增加新的功能和行为，如读取、添加、编辑、删除传给 WrappedComponent 的 props，也可以用其它元素包裹 WrappedComponent，用来实现封装样式、添加布局或其它操作。
+从以上代码可以看出这个新的组件会使用传给它的组件作为子组件。一般在开发过程中，当需要在多个组件类复用时，就可以创建一个高阶组件。如下，一个常见的实例：
 
-假设我有一个组件，需要从 LocalStorage 中获取数据，然后渲染出来。于是我们可以这样写组件代码：
+``` js
+const List = ({ data }) => (
+  <ul>
+    {data.map(item => <li key={item.name}>{item.name}</li>)}
+  </ul>
+)
+```
+
+现在需要给这个 List 组件加一个 loading 功能，我们可以这么做：
+
+``` js
+const List = ({ data, isLoading }) => (
+  isLoading ?
+    <div>我正在加载...</div> :
+    <ul>
+      {data.map(item => <li key={item.name}>{item.name}</li>)}
+    </ul>
+)
+```
+
+通过 isLoading 的状态来判断是否出现加载动画。这样做也能解决问题，但是不够优雅。第一，需要修改原来 List 组件的代码；第二，如果有其它组件也需要 loading 功能，又需要重复写相同的判断逻辑。而如果使用高阶组件就可以完美的解决这个问题。
+
+``` js
+const withLoading = BaseComponent => ({ isLoading, ...otherProps }) => (
+  isLoading ?
+    <div>我正在加载...</div> :
+    <BaseComponent {...otherProps} />
+)
+
+const LoadingList = withLoading(List)
+```
+
+通过以上代码我们可以总结出，编写的组件尽量纯净或者说其中的业务逻辑尽量单一。但是如果各种组件间又需要增加新功能，如打印日志，获取数据和校验数据等和展示无关的逻辑的时候，这些公共的代码就会被重复写很多遍。因此，我们可以抽象出一个高阶组件，可以在原有组件的基础上，对其增加新的功能和行为，如读取、添加、编辑、删除等，也可以用其它元素包裹组件，用来实现封装样式、添加布局或其它操作。
+
+来看另一个案例，假设我有一个组件，需要从 LocalStorage 中获取数据，然后渲染出来。于是我们可以这样写组件代码：
 
 ``` js
 import React, { Component } from 'react'
