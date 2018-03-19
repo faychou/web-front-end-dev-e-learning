@@ -23,6 +23,9 @@ e().then(v => console.log(v))
 .catch( e => console.log(e));
 ```
 
+### await
+await 关键字接收一个 Promise，等待代码执行，直到 Promise 状态变为 resolved 或者 rejected，这种特性能让我们的异步代码阅读起来更像是同步代码。
+
 async 函数返回的 Promise 对象，必须等到内部所有的 await 命令的 Promise 对象执行完，才会发生状态改变。也就是说，只有当 async 函数内部的异步操作都执行完，才会执行 then 方法的回调。
 
 ``` js
