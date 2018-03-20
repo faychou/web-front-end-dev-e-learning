@@ -1,7 +1,7 @@
 # Vue 开发环境
 	
 ## 手动创建 Vue 的开发环境
-vue-loader 是必须的，vue-template-compiler 是 vue-loader 必须的依赖。
+vue-loader 是必须的，用于解析后缀名为 `.vue` 的文件，然后转换为 JavaScript 模块。vue-template-compiler 是 vue-loader 必须的依赖。
 
 ``` bash
 npm install --save-dev vue-loader vue-template-compiler
@@ -95,6 +95,45 @@ Vue.js 提供一个官方命令行工具，可用于快速搭建大型单页应�
 * browserify-simple
 * webpack
 * webpack-simple（初始是没有vue-router的，需要另外安装）
+
+目录结构：
+
+```
+|-- build                            // 项目构建(webpack)相关代码
+|   |-- build.js                     // 生产环境构建代码
+|   |-- check-version.js             // 检查node、npm等版本
+|   |-- dev-client.js                // 热重载相关
+|   |-- dev-server.js                // 构建本地服务器
+|   |-- utils.js                     // 构建工具相关
+|   |-- vue-loader.conf.js           // vue-loader基础配置
+|   |-- webpack.base.conf.js         // webpack基础配置
+|   |-- webpack.dev.conf.js          // webpack开发环境配置
+|   |-- webpack.prod.conf.js         // webpack生产环境配置
+|-- config                           // 项目开发环境配置
+|   |-- dev.env.js                   // 开发环境变量
+|   |-- index.js                     // 项目一些配置变量
+|   |-- prod.env.js                  // 生产环境变
+|   |-- test.env.js                  // 测试环境变量
+|-- node_modules                     // 存放 npm 下载的模块
+|-- src   这是我们经常会用的一个文件夹  // 源码目录
+|   |-- assets                     // 存放静态资源文件会被webpack处理解析为模块依赖
+|   |-- components                     // vue公共组件
+|   |-- store                          // vuex的状态管理
+|   |-- router                         // 路由管理文件
+|   |-- App.vue                        // 页面入口文件
+|   |-- main.js                        // 程序入口文件，加载各种公共组件
+|-- static                           // 静态文件，比如一些图片，json数据等
+|-- test                             // 测试文件
+|-- .babelrc                         // ES6语法编译配置
+|-- .editorconfig                    // 定义代码格式
+|-- .gitignore                       // git上传需要忽略的文件格式
+|-- README.md                        // 项目说明
+|-- favicon.ico 
+  |-- index.html                       // 入口页面
+|-- package.json                     // 项目基本信息
+
+static放不会变动的文件 assets放可能会变动的文件。
+```
 
 ## 开发工具
 vue-devtools
