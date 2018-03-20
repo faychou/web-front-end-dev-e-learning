@@ -4,7 +4,11 @@
 ### 组件声明
 ``` js
 Vue.component('my-component', {
-  template: '<p class="foo bar">Hi</p>'
+  props:[],
+  template: '<p class="foo bar">Hi</p>',
+  render:function() {},
+  data:function() {},
+  components:{}
 })
 ```
 
@@ -36,6 +40,7 @@ Vue.component('my-component', {
   Vue.component('my-component', {
     template: '<div>A custom component!</div>'
   })
+  
   // 创建根实例
   new Vue({
     el: '#example'

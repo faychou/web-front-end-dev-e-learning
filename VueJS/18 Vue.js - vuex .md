@@ -127,7 +127,7 @@ export default {
 ```
 
 ### Getters
-Vuex 允许我们在 store 中定义『getters』（可以认为是 store 的计算属性），主要是对于state中数据的一种过滤。Getters 接受 state 作为其第一个参数：
+Vuex 允许我们在 store 中定义『getters』（可以认为是 store 的计算属性），主要是对于 state 中数据的一种过滤。Getters 接受 state 作为其第一个参数：
 
 ``` js
 const store = new Vuex.Store({
@@ -274,7 +274,7 @@ actions: {
 }
 ```
 
-#### 触发actions的方法：
+#### 触发 actions 的方法：
 ``` js
 store.dispatch('incrementActions')
 ```
