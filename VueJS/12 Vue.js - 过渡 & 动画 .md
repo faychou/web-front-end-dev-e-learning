@@ -112,7 +112,7 @@ new Vue({
 ```
 
 ## 过渡模式
-通过设置 mode 属性, 可以控制 离开/进入 的过渡时间序列。有两种模式：
+通过设置 mode 属性, 可以控制 离开 / 进入 的过渡时间序列。有两种模式：
 
 * in-out：新组件先过渡进入，等它的过渡完成之后当前组件过渡出去。
 * out-in：当前组件先过渡出去，等它的过渡完成之后新组件过渡进入。
@@ -304,4 +304,263 @@ computed: {
     }
   }
 }
+```
+
+## 多个组件的过渡
+多个组件的过渡简单很多，我们只需要使用动态组件：
+
+``` html
+<transition name="component-fade" mode="out-in">
+  <component v-bind:is="view"></component>
+</transition>
+```
+
+``` js
+new Vue({
+  el: '#transition-components-demo',
+  data: {
+    view: 'v-a'
+  },
+  components: {
+    'v-a': {
+      template: '<div>Component A</div>'
+    },
+    'v-b': {
+      template: '<div>Component B</div>'
+    }
+  }
+})
+```
+
+``` css
+.component-fade-enter-active, .component-fade-leave-active {
+  transition: opacity .3s ease;
+}
+.component-fade-enter, .component-fade-leave-to
+/* .component-fade-leave-active for below version 2.1.8 */ {
+  opacity: 0;
+}
+```
+
+## 列表过渡
+同时渲染整个列表，使用 `<transition-group>` 组件。
+
+### 列表的进入/离开过渡
+``` html
+<div id="list-demo" class="demo">
+  <button v-on:click="add">Add</button>
+  <button v-on:click="remove">Remove</button>
+  <transition-group name="list" tag="p">
+    <span v-for="item in items" v-bind:key="item" class="list-item">
+      {{ item }}
+    </span>
+  </transition-group>
+</div>
+```
+
+``` js
+new Vue({
+  el: '#list-demo',
+  data: {
+    items: [1,2,3,4,5,6,7,8,9],
+    nextNum: 10
+  },
+  methods: {
+    randomIndex: function () {
+      return Math.floor(Math.random() * this.items.length)
+    },
+    add: function () {
+      this.items.splice(this.randomIndex(), 0, this.nextNum++)
+    },
+    remove: function () {
+      this.items.splice(this.randomIndex(), 1)
+    },
+  }
+})
+```
+
+``` css
+.list-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+.list-enter-active, .list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to
+/* .list-leave-active for below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
+```
+
+### 列表的排序过渡
+要使用这个新功能只需了解新增的 v-move 特性，它会在元素的改变定位的过程中应用。像之前的类名一样，可以通过 name 属性来自定义前缀，也可以通过 move-class 属性手动设置。
+
+``` html
+<script src="lodash.min.js"></script>
+
+<div id="flip-list-demo" class="demo">
+  <button v-on:click="shuffle">Shuffle</button>
+  <transition-group name="flip-list" tag="ul">
+    <li v-for="item in items" v-bind:key="item">
+      {{ item }}
+    </li>
+  </transition-group>
+</div>
+```
+
+``` js
+new Vue({
+  el: '#flip-list-demo',
+  data: {
+    items: [1,2,3,4,5,6,7,8,9]
+  },
+  methods: {
+    shuffle: function () {
+      this.items = _.shuffle(this.items)
+    }
+  }
+})
+```
+
+``` css
+.flip-list-move {
+  transition: transform 1s;
+}
+```
+
+### 列表的交错过渡
+``` html
+<script src="velocity.min.js"></script>
+
+<div id="staggered-list-demo">
+  <input v-model="query">
+  <transition-group
+    name="staggered-fade"
+    tag="ul"
+    v-bind:css="false"
+    v-on:before-enter="beforeEnter"
+    v-on:enter="enter"
+    v-on:leave="leave"
+  >
+    <li
+      v-for="(item, index) in computedList"
+      v-bind:key="item.msg"
+      v-bind:data-index="index"
+    >{{ item.msg }}</li>
+  </transition-group>
+</div>
+```
+
+``` js
+new Vue({
+  el: '#staggered-list-demo',
+  data: {
+    query: '',
+    list: [
+      { msg: 'Bruce Lee' },
+      { msg: 'Jackie Chan' },
+      { msg: 'Chuck Norris' },
+      { msg: 'Jet Li' },
+      { msg: 'Kung Fury' }
+    ]
+  },
+  computed: {
+    computedList: function () {
+      var vm = this
+      return this.list.filter(function (item) {
+        return item.msg.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1
+      })
+    }
+  },
+  methods: {
+    beforeEnter: function (el) {
+      el.style.opacity = 0
+      el.style.height = 0
+    },
+    enter: function (el, done) {
+      var delay = el.dataset.index * 150
+      setTimeout(function () {
+        Velocity(
+          el,
+          { opacity: 1, height: '1.6em' },
+          { complete: done }
+        )
+      }, delay)
+    },
+    leave: function (el, done) {
+      var delay = el.dataset.index * 150
+      setTimeout(function () {
+        Velocity(
+          el,
+          { opacity: 0, height: 0 },
+          { complete: done }
+        )
+      }, delay)
+    }
+  }
+})
+```
+
+## 可复用的过渡
+要创建一个可复用过渡组件，你需要做的就是将 `<transition>` 或者 `<transition-group>` 作为根组件，然后将任何子组件放置在其中就可以了。
+
+使用 template 的简单例子：
+
+``` js
+Vue.component('my-special-transition', {
+  template: '\
+    <transition\
+      name="very-special-transition"\
+      mode="out-in"\
+      v-on:before-enter="beforeEnter"\
+      v-on:after-enter="afterEnter"\
+    >\
+      <slot></slot>\
+    </transition>\
+  ',
+  methods: {
+    beforeEnter: function (el) {
+      // ...
+    },
+    afterEnter: function (el) {
+      // ...
+    }
+  }
+})
+```
+
+函数组件更适合完成这个任务：
+
+``` js
+Vue.component('my-special-transition', {
+  functional: true,
+  render: function (createElement, context) {
+    var data = {
+      props: {
+        name: 'very-special-transition',
+        mode: 'out-in'
+      },
+      on: {
+        beforeEnter: function (el) {
+          // ...
+        },
+        afterEnter: function (el) {
+          // ...
+        }
+      }
+    }
+    return createElement('transition', data, context.children)
+  }
+})
+```
+
+## 动态过渡
+动态过渡最基本的例子是通过 name 特性来绑定动态值。
+
+``` html
+<transition v-bind:name="transitionName">
+  <!-- ... -->
+</transition>
 ```
