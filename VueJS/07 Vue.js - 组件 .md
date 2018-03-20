@@ -169,7 +169,7 @@ Vue.component('example', {
 ```
 
 ## slot（内容分发）
-假定子组件 my-component 有下面模板：
+slot 的作用就是占个位置。假定子组件 my-component 有下面模板：
 
 ``` html
 <div>
