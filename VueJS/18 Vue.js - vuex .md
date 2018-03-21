@@ -124,10 +124,27 @@ export default {
     }
   })
 }
+
+/* 不使用mapState */
+  computed: { 
+    count() { 
+	   // 直接转换为一般的计算属性的使用方式
+		return this.$store.state.count 
+    },
+	countAlias() { 
+	  // 也是转为一般的计算属性的使用方式，只不过有指定名字的会使用中括号括起来
+	  return this.$store.state['count']
+	}, 
+	countPlusLocalState() { 
+	  // 因为是函数，所以会被直接执行，并且传入了当前 store 上的 state 和 getters作为参数
+	  //（但这里没使用 getters）
+	  return this.$store.state.count + this.localCount 
+	} 
+  }
 ```
 
 ### Getters
-Vuex 允许我们在 store 中定义『getters』（可以认为是 store 的计算属性），主要是对于 state 中数据的一种过滤。Getters 接受 state 作为其第一个参数：
+Vuex 允许我们在 store 中定义 getters，就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。Getters 接受 state 作为其第一个参数：
 
 ``` js
 const store = new Vuex.Store({
@@ -149,7 +166,35 @@ Getters 会暴露为 `store.getters` 对象：
 
 ``` js
 store.getters.doneTodos // -> [{ id: 1, text: '...', done: true }]
+// 或者可以 this.$store.getters.xxxx 这样使用。
 ```
+
+``` js
+// 可以在第二个参数里面传一个 getter 作为参数
+getters: {
+  // ...
+  doneTodosCount: (state, getters) => {
+	  // 传入了之前设置的doneTodos的 getters，所以直接使用了doneTodos
+    return getters.doneTodos.length
+  }
+}
+
+store.getters.doneTodosCount // -> 1
+
+// 让 getter 返回一个函数，来实现给 getter 传参。在你对 store 里的数组进行查询时非常有用。
+getters: {
+  // ...
+  getTodoById: (state) => (id) => { // 返回一个函数
+    return state.todos.find(todo => todo.id === id)
+  }
+}
+
+// 对返回的函数传入参数来使用
+store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
+```
+
+### mapGetters 辅助函数
+mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。
 
 ### Mutations
 更改 Vuex 的 store 中的状态的唯一方法是提交 mutation，并且这个过程是同步的。Vuex 中的 mutations 非常类似于事件：每个 mutation 都有一个字符串的 事件类型 (type) 和 一个 回调函数 (handler)。这个回调函数就是我们实际进行状态更改的地方，并且它会接受 state 作为第一个参数：
