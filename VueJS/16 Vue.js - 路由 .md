@@ -136,12 +136,12 @@ export default [
 <a href="home">Home</a>
 
 <!-- 动态路径，以下结果为 /home/1 -->
-<router-link :to="'/home/'+id">home1</router-link>
+<router-link :to="'/home/'+id">{{$router.params.id}}</router-link>
 <!-- 或者 -->
 <router-link to="{name:'list',params: {id: id}}">home1</router-link>
 
 <!-- 带查询参数，下面的结果为 /register?plan=private -->
-<router-link :to="{ path: 'register', query: { plan: 'private' }}">Register</router-link>
+<router-link :to="{ path: 'register', query: { plan: 'private' }}">{{$router.query.plan}}</router-link>
 ```
 
 #### active-class
@@ -371,6 +371,15 @@ const router = new VueRouter({
   routes: [
     { path: '/a', component: A, alias: '/b' }
   ]
+})
+```
+
+## 路由匹配模式
+``` js
+new Router({
+  routers:[],
+  mode: "hash", //默认hash | history 可以达到隐藏地址栏hash值 | abstract，如果发现没有浏览器的 API 则强制进入
+  linkActiveClass : "now" //当前匹配的导航链接将被自动添加now类
 })
 ```
 

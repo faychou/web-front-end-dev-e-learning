@@ -108,13 +108,57 @@
 /* 新建一个空的 Vue 实例作为中央事件总线 */
 var bus = new Vue()
 
-// 触发组件 A 中的事件
-bus.$emit('id-selected', 1)
-
 // 在组件 B 创建的钩子中监听事件
 bus.$on('id-selected', function (id) {
   // ...
 })
+
+
+// 触发组件 A 中的事件
+bus.$emit('id-selected', 1)
+```
+
+示例：
+
+``` js
+<!-- 组件A： -->
+<com-a></com-a>
+<!-- 组件B： -->
+<com-b></com-b>
+
+<script>
+  // 中间组件
+  var bus = new Vue()
+  // 通信组件
+  var vm = new Vue({
+    el: '#app',
+    components: {
+      comB: {
+        template: '<p>组件A告诉我：{{msg}}</p>',
+        data() {
+          return {
+            msg: ''
+          }
+        },
+        created() {
+          // 给中间组件绑定自定义事件 注意:如果用到this 需要用箭头函数
+          bus.$on('tellComB', (msg) => {
+            this.msg = msg
+          })
+        }
+      },
+      comA: {
+        template: '<button @click="emitFn">告诉B</button>',
+        methods: {
+          emitFn() {
+            // 触发中间组件中的自定义事件
+            bus.$emit('tellComB', '土豆土豆我是南瓜')
+          }
+        }
+      }
+    }
+  })
+</script>
 ```
 
 ### vuex

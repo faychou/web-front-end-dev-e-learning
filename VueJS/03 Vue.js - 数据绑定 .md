@@ -12,12 +12,13 @@ Vue.js 使用了基于 HTML 的模版语法，允许开发者声明式地将 DOM
 <p v-text="`hello ${world}`"></p>
 ```
 
-在为标签的属性赋值的时候不能 Mustache 语法，我们要用 v-bind 指令。
+在为标签的属性赋值的时候不能使用 Mustache 语法，我们要用 v-bind 指令。
 
 ``` html
-// 错误的写法
+<!-- 错误的写法 -->
 <div id="{{id}}"></div>
-// 正确的写法
+
+<!-- 正确的写法 -->
 <div v-bind:id="id"></div>
 <div v-bind:id="'list-' + id"></div>
 ```
@@ -119,7 +120,7 @@ v-bind 指令可以缩写为一个冒号：
 ```
 
 ### 双向绑定
-在Vue.js中可以使用v-model指令在表单元素上创建双向数据绑定。
+在 Vue.js 中可以使用 `v-model` 指令在表单元素上创建双向数据绑定。
 
 ``` html
 <div id="app">
@@ -157,3 +158,43 @@ v-bind 指令可以缩写为一个冒号：
 // 当子组件需要更新 foo 的值时，它会显式地触发一个更新事件：
 this.$emit('update:foo', newValue)
 ```
+
+### 动态添加数据
+只有 data 中的数据才是响应式的，动态添加进来的数据默认为非响应式。可以通过以下方式实现动态添加数据的响应式：
+
+* Vue.set(object, key, value) - 适用于添加单个属性；
+* Object.assign() - 适用于添加多个属性。
+
+``` js
+var vm = new Vue({
+  data: {
+    stu: {
+      name: 'jack',
+      age: 19
+    }
+  }
+})
+
+/* Vue.set */
+Vue.set(vm.stu, 'gender', 'male')
+
+/* Object.assign 将参数中的所有对象属性和值 合并到第一个参数 并返回合并后的对象*/
+vm.stu = Object.assign({}, vm.stu, { gender: 'female', height: 180 })
+```
+
+### 异步 DOM 更新
+由于 Vue 异步执行 DOM 更新，监视所有数据改变，一次性更新 DOM。如果需要拿到更新后 dom 中的数据 则需要通过 `Vue.nextTick(callback)` 在 DOM 更新后，执行某个操作（属于 DOM 操作）。
+
+``` js
+methods: {
+  fn() {
+    this.msg = 'change'
+    this.$nextTick(function () {
+      console.log('$nextTick中打印：', this.$el.children[0].innerText);
+    })
+    console.log('直接打印：', this.$el.children[0].innerText);
+  }
+}
+```
+
+> 注意：实例调用 `vm.$nextTick(function () {})`。

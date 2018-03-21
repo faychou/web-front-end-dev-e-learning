@@ -14,7 +14,7 @@
 // 在main.js中引入
 
 import axios from 'axios'
-Vue.prototype.$http = axios
+Vue.prototype.$axios = axios
 ```
 
 步骤三：
@@ -22,7 +22,7 @@ Vue.prototype.$http = axios
 ``` js
 // 在组件中使用axios
 
-this.$http.get(URL).then(response => {
+this.$axios.get(URL).then(response => {
   // success callback
 }, response => {
   // error callback

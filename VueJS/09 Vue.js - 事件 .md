@@ -42,10 +42,10 @@ v-on 指令可以缩写为 @ 符号：
 在事件处理程序中调用 `event.preventDefault()` 或 `event.stopPropagation()` 是非常常见的需求。尽管我们可以在 methods 中轻松实现这点，但更好的方式是：methods 只有纯粹的数据逻辑，而不是去处理 DOM 事件细节。
 
 ``` html
-<!-- 阻止单击事件冒泡 -->
+<!-- 阻止事件冒泡 -->
 <a v-on:click.stop="doThis"></a>
 
-<!-- 提交事件不再重载页面 -->
+<!-- 阻止默认行为 -->
 <form v-on:submit.prevent="onSubmit"></form>
 
 <!-- 修饰符可以串联  -->
@@ -98,13 +98,13 @@ Vue 允许为 v-on 添加监测常见的键值。
 <button v-on:click="warn('data', $event)">Submit</button>
 ```
 
-### 事件对象
+## 事件对象
 javaScript 中事件对象用 event ，vue 中事件对象用 `$event`。
 
 有时也需要在内联语句处理器中访问原生 DOM 事件。可以用特殊变量 `$event` 把它传入方法：
 
 ``` html
-<button v-on:click="warn('Form cannot be submitted yet.', $event)">Submit</button>
+<button v-on:click="warn('参数', $event)">Submit</button>
 
 <script>
 // ...
@@ -118,7 +118,7 @@ methods: {
 </script>
 ```
 
-### 变异方法
+## 变异方法
 Vue 包含一组观察数组的变异方法，所以它们也将会触发视图更新。这些方法如下：
 
 * push()

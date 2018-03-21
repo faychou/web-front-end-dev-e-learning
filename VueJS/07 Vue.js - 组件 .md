@@ -265,3 +265,29 @@ Vue.component('activate-example', {
 ```
 
 > 注意：activate回调只作用于动态组件切换或静态组件初始化渲染的过程中，不作用于使用实例方法手工插入的过程中。
+
+### refs
+在 HTML 元素 中，添加 ref 属性，然后在 JS 中通过 `vm.$refs.属性` 来获取获取组件（或元素）。如果获取的是一个子组件，那么通过 ref 就能获取到子组件中的 data 和 methods 。
+
+``` html
+<div id="app">
+  <div ref="dv"></div>
+  <my res="my"></my>
+</div>
+
+<!-- js -->
+<script>
+  new Vue({
+    el : "#app",
+    mounted() {
+      this.$refs.dv //获取到元素
+      this.$refs.my //获取到组件
+    },
+    components : {
+      my : {
+        template: `<a>sss</a>`
+      }
+    }
+  })
+</script>
+```

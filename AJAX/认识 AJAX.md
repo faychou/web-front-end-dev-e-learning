@@ -316,3 +316,70 @@ npm install --save whatwg-fetch
 ```
 
 ## axios
+### Get 请求
+``` js
+const url = 'https://www.faychou.cn/api/list'
+
+// url 中带有 query 参数
+axios.get('/user?id=89')
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+
+// url 和参数分离，使用对象
+axios.get('/user', {
+  params: {
+    id: 12345
+  }
+})
+```
+
+### Post 请求
+默认情况下，axios 会将JS对象序列化为 JSON 对象。为了使用 `application/x-www-form-urlencoded` 格式发送请求，我们可以这样：
+
+``` js
+// 使用 qs 包，处理将对象序列化为字符串
+// npm i -S qs
+// var qs = require('qs')
+import qs from 'qs'
+qs.stringify({ 'bar': 123 }) ===> "bar=123"
+axios.post('/foo', qs.stringify({ 'bar': 123 }))
+
+// 或者：
+axios.post('/foo', 'bar=123&age=19')
+```
+
+### 全局配置
+``` js
+// 设置请求公共路径：
+axios.defaults.baseURL = 'https://www.faychou.cn'
+```
+
+### 拦截器
+拦截器会拦截发送的每一个请求，请求发送之前执行 request 中的函数，请求发送完成之后执行 response 中的函数：
+
+``` js
+// 请求拦截器
+axios.interceptors.request.use(function (config) {
+    // 所有请求之前都要执行的操作
+
+    return config;
+  }, function (error) {
+    // 错误处理
+
+    return Promise.reject(error);
+  });
+
+// 响应拦截器
+axios.interceptors.response.use(function (response) {
+    // 所有请求完成后都要执行的操作
+
+    return response;
+  }, function (error) {
+    // 错误处理
+    return Promise.reject(error);
+  });
+```
