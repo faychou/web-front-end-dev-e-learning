@@ -1,47 +1,45 @@
 # Vue 路由
 ## 安装
-	npm install vue-router --save
-	
-## 基本使用
-``` html
-<!-- 使用 router-link 组件来导航. -->
-<!-- 通过传入 `to` 属性指定链接. -->
-<!-- <router-link> 默认会被渲染成一个 `<a>` 标签 -->
-<router-link to="/foo">Go to Foo</router-link>
+### 直接下载
+可直接在 [https://unpkg.com/vue-router/dist/vue-router.js](https://unpkg.com/vue-router/dist/vue-router.js) 下载 vue-router.js 或者引用CDN。
 
-<!-- 路由匹配到的组件将渲染在这里 -->
-<router-view></router-view>
+``` html
+<script src="vue.js"></script>
+<script src="vue-router.js"></script>
 ```
 
-### 例子1
+### npm
+	npm install vue-router --save
+	
+## 简单入门
 ``` js
 // index.js
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from './App'
-import Page01 from './components/page01'
-import Page02 from './components/page02'
+import PageOne from './components/PageOne'
+import PageTwo from './components/PageTwo'
 // 也可使用下面的懒加载写法
-//const Page01 = (resolve) => require(['./components/page01'],resolve)
+//const PageOne = (resolve) => require(['./components/PageOne'],resolve)
 
-Vue.use(VueRouter) //全局安装路由功能
+Vue.use(VueRouter) //全局安装路由功能，如果使用全局的 script 标签，则无须如此
 
-//定义路径
+// 定义路径，每个路由应该映射一个组件
 const routes = [
-  { path: '/', component: Page01 },
-  { path: '/02', component: Page02 },
+  { path: '/', component: PageOne },
+  { path: '/two', component: PageTwo },
 ]
 
-//创建路由对象
+// 创建 router 实例，然后传 `routes` 配置
 const router = new VueRouter({
-  routes
+  routes // （缩写）相当于 routes: routes
 })
 
+// 注入路由
 new Vue({
   el: '#app',
-  template: '<App/>',
-  components: { App },
-  router
+  router,
+  render: h => h(App)
 })
 ```
 ``` html
@@ -49,30 +47,226 @@ new Vue({
 <template>
   <div id="app">
     <!-- router-link 定义跳转路径 -->
-    <router-link to="/">01</router-link>
-    <router-link to="/02">02</router-link>
+    <router-link to="/">one</router-link>
+    <router-link to="/two">two</router-link>
     <br/>
-    <!-- router-view 来渲染组件 -->
+    <!-- 路由匹配到的组件将渲染在这里 -->
     <router-view></router-view>
   </div>
 </template>
+<script>
+export default {
+  data () {
+    return {
+    }
+  }
+}
+</script>
 ```
 
 ``` html
-<!-- page01.vue -->
+<!-- PageOne.vue -->
 <template>
   <div>
-    <h1>page02</h1>
+    <h1>page-one</h1>
   </div>
 </template>
+<script>
+export default {
+  data () {
+    return {
+    }
+  }
+}
+</script>
 ```
+
 ``` html
-<!-- page02.vue -->
+<!-- PageTwo.vue -->
 <template>
   <div>
-    <h1>page02</h1>
+    <h1>page-two</h1>
   </div>
 </template>
+<script>
+export default {
+  data () {
+    return {
+    }
+  }
+}
+</script>
+```
+
+### 路由信息提取到单独文件中
+一般我们会把路由信息 routes 提取到一个单独的文件中，如 `route-config.js`：
+
+``` js
+import PageOne from './components/PageOne.vue'
+import PageTwo from './components/PageTwo.vue'
+
+export default [
+  { 
+    path: '/',
+    component: PageOne 
+  },{ 
+    path: '/two', 
+    component: PageTwo
+  }
+];
+```
+
+然后在 main.js 中引入： `import routes from './route-config.js'`。
+
+## API
+### `<router-link>`
+创建 a 标签来定义导航链接。
+
+``` html
+<!-- 字符串 -->
+<router-link to="home">Home</router-link>
+
+<!-- 使用 v-bind 的 JS 表达式 -->
+<router-link :to="'home'">Home</router-link>
+
+<!-- 同上 -->
+<router-link :to="{ path: 'home' }">Home</router-link>
+  
+<!-- 以上都会渲染成这样 -->
+<a href="home">Home</a>
+
+<!-- 动态路径，以下结果为 /home/1 -->
+<router-link :to="'/home/'+id">home1</router-link>
+<!-- 或者 -->
+<router-link to="{name:'list',params: {id: id}}">home1</router-link>
+
+<!-- 带查询参数，下面的结果为 /register?plan=private -->
+<router-link :to="{ path: 'register', query: { plan: 'private' }}">Register</router-link>
+```
+
+#### active-class
+设置 链接激活时使用的 CSS 类名，默认值: "router-link-active"。
+
+#### replace
+调用 router.replace() 而不是 router.push()，于是导航后不会留下 history 记录。默认值: false。
+
+``` html
+<router-link :to="{ path: '/abc'}" replace></router-link>
+```
+
+#### append
+设置 append 属性后，则在当前（相对）路径前添加基路径。例如，我们从 /a 导航到一个相对路径 b，如果没有配置 append，则路径为 /b，如果配了，则为 /a/b。默认值: false。
+
+``` html
+<router-link :to="{ path: 'relative/path'}" append></router-link>
+```
+
+#### tag
+有时候想要 `<router-link>` 渲染成某种标签，例如 `<li>`。 于是我们使用 tag prop 类指定何种标签，同样它还是会监听点击，触发导航。默认值: `<a>`。
+
+``` html
+<router-link to="/foo" tag="li">foo</router-link>
+
+<!-- 渲染结果 -->
+<li>foo</li>
+```
+
+#### exact
+``` html
+<!-- 这个链接只会在地址为 / 的时候被激活 -->
+<router-link to="/" exact>
+```
+
+### `<router-view>`
+展示我们匹配到的组件的区域。
+
+### `$router`
+`$route` 是一个数组，里面包含路由的所有信息。通过注入路由，我们可以在组件里用 `this.$router` 来访问它。
+
+``` js
+export default {
+  computed: {
+    username () {
+      // 我们很快就会看到 `params` 是什么
+      return this.$route.params.username
+    }
+  },
+  methods: {
+    goBack () {
+      window.history.length > 1
+        ? this.$router.go(-1)
+        : this.$router.push('/')
+    }
+  }
+}
+```
+
+### router.push(location, onComplete?, onAbort?)
+在 Vue 实例内部，你可以通过 `$router` 访问路由实例。因此你可以调用 `this.$router.push`。当你点击 `<router-link>` 时，这个方法会在内部调用，所以说，点击 `<router-link :to="...">` 等同于调用 `router.push(...)`，这个方法会向 history 栈添加一个新的记录。
+
+``` js
+// 字符串
+router.push('home')
+
+// 对象
+router.push({ path: 'home' })
+
+// 命名的路由
+router.push({ name: 'user', params: { userId: 123 }})
+
+// 带查询参数，变成 /register?plan=private
+router.push({ path: 'register', query: { plan: 'private' }})
+```
+
+可选的在 `router.push` 或 `router.replace` 中提供 onComplete 和 onAbort 回调作为第二个和第三个参数。这些回调将会在导航成功完成 (在所有的异步钩子被解析之后) 或终止 (导航到相同的路由、或在当前导航完成之前导航到另一个不同的路由) 的时候进行相应的调用。
+
+> 注意：如果目的地和当前路由相同，只有参数发生了改变 (比如从一个用户资料到另一个 `/users/1` -> `/users/2`)，你需要使用 beforeRouteUpdate 来响应这个变化 (比如抓取用户信息)。
+
+### router.replace(location, onComplete?, onAbort?)
+跟 router.push 很像，唯一的不同就是，它不会向 history 添加新记录，而是跟它的方法名一样 —— 替换掉当前的 history 记录。
+
+### router.go(n)
+这个方法的参数是一个整数，意思是在 history 记录中向前或者后退多少步，类似 `window.history.go(n)`。
+
+``` js
+// 在浏览器记录中前进一步，等同于 history.forward()
+router.go(1)
+
+// 后退一步记录，等同于 history.back()
+router.go(-1)
+
+// 前进 3 步记录
+router.go(3)
+
+// 如果 history 记录不够用，那就默默地失败呗
+router.go(-100)
+router.go(100)
+```
+## 命名路由
+有时候，通过一个名称来标识一个路由显得更方便一些，特别是在链接一个路由，或者是执行一些跳转的时候。你可以在创建 Router 实例的时候，在 routes 配置中给某个路由设置名称。
+
+``` js
+const router = new VueRouter({
+  routes: [
+    {
+      path: '/user/:userId',
+      name: 'user',
+      component: User
+    }
+  ]
+})
+```
+
+要链接到一个命名路由，可以给 router-link 的 to 属性传一个对象：
+
+``` html
+<router-link :to="{ name: 'user', params: { userId: 123 }}">User</router-link>
+```
+
+这跟代码调用 router.push() 是一回事：
+
+``` js
+router.push({ name: 'user', params: { userId: 123 }})
 ```
 
 ## 动态路由匹配
@@ -91,7 +285,7 @@ const router = new VueRouter({
 })
 ```
 
-像 `/user/fo` 和 `/user/bar` 都将映射到相同的路由。
+像 `/user/for` 和 `/user/bar` 都将映射到相同的路由。
 
 | 模式        | 匹配路径   |  `$route.params`  |
 | --------   | :-----:   | :----: |
@@ -100,14 +294,16 @@ const router = new VueRouter({
 
 `$route` 对象：
 
-* `$route.query`
-* `$route.hash`
-* `$route.path`
-* `$route.fullPath`
+* `$route.query`：URL 中查询参数；
+* `$route.hash`：哈希值；
+* `$route.path`：路径；
+* `$route.fullPath`：完整路径；
 * `$route.matched`
 * `$route.name`
 
 ### 监听路由参数的变化
+当使用路由参数时，例如从 `/user/foo` 导航到 `/user/bar`，原来的组件实例是直接复用而非销毁再创建，所以路由切换时不会调用组件的生命周期钩子。此时如果想对路由参数的变化作出响应的话，可以使用 watch 来监测 `$route` 对象：
+
 ``` js
 const User = {
   template: '...',
@@ -117,6 +313,65 @@ const User = {
     }
   }
 }
+```
+
+或者使用 2.2 中引入的 beforeRouteUpdate 守卫：
+
+``` js
+const User = {
+  template: '...',
+  beforeRouteUpdate (to, from, next) {
+    // react to route changes...
+    // don't forget to call next()
+  }
+}
+```
+
+## 重定向
+重定向』的意思是，当用户访问 `/a` 时，URL 将会被替换成 `/b`，然后匹配路由为 `/b`。
+
+``` js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', redirect: '/b' }
+  ]
+})
+```
+
+重定向的目标也可以是一个命名的路由：
+
+``` js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', redirect: { name: 'foo' }}
+  ]
+})
+```
+
+甚至是一个方法，动态返回重定向目标：
+
+``` js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', redirect: to => {
+      // 方法接收 目标路由 作为参数
+      // return 重定向的 字符串路径/路径对象
+    }}
+  ]
+})
+```
+
+> 注意：导航守卫并没有应用在跳转路由上，而仅仅应用在其目标上。在下面这个例子中，为 `/a` 路由添加一个 beforeEach 或 beforeLeave 守卫并不会有任何效果。
+
+## 别名
+`/a` 的别名是 `/b`，意味着，当用户访问 `/b` 时，URL 会保持为 `/b`，但是路由匹配则为 `/a`，就像用户访问 `/a` 一样。别名』的功能让你可以自由地将 UI 结构映射到任意的 URL，而不是受限于配置的嵌套路由结构。
+
+``` js
+const router = new VueRouter({
+  routes: [
+    { path: '/a', component: A, alias: '/b' }
+  ]
+})
 ```
 
 ## 嵌套路由
@@ -160,6 +415,59 @@ const router = new VueRouter({
   ]
 })
 </script>
+```
+
+## 命名视图
+有时候想同时（同级）展示多个视图，而不是嵌套展示，例如创建一个布局，有 sidebar（侧导航） 和 main（主内容） 两个视图，这个时候命名视图就派上用场了。你可以在界面中拥有多个单独命名的视图，而不是只有一个单独的出口。如果 router-view 没有设置名字，那么默认为 default。
+
+``` html
+<router-view class="view one"></router-view>
+<router-view class="view two" name="a"></router-view>
+<router-view class="view three" name="b"></router-view>
+```
+
+``` js
+const router = new VueRouter({
+  routes: [
+    {
+      path: '/',
+      components: {
+        default: Foo,
+        a: Bar,
+        b: Baz
+      }
+    }
+  ]
+})
+```
+
+### 嵌套命名视图
+``` html
+<!-- UserSettings.vue -->
+<div>
+  <h1>User Settings</h1>
+  <NavBar/>
+  <router-view/>
+  <router-view name="helper"/>
+</div>
+```
+
+``` js
+{
+  path: '/settings',
+  // 你也可以在顶级路由就配置命名视图
+  component: UserSettings,
+  children: [{
+    path: 'emails',
+    component: UserEmailsSubscriptions
+  }, {
+    path: 'profile',
+    components: {
+      default: UserProfile,
+      helper: UserProfilePreview
+    }
+  }]
+}
 ```
 
 ## 路由切换动效

@@ -27,7 +27,8 @@ const vm = new Vue({
 });
 
 const app = new Vue({
-  render: h => h(AppContainer)
+  // 用 render 函数渲染引入的组件 App 到 index.html 中的 #app 元素中
+  render: h => h(App)
 }).$mount('#app')
 
 
@@ -117,7 +118,7 @@ var vm = new Vue({
     a: 1
   },
   beforeCreate:function(){}, // 组件实例化之前
-  created: function () { // 在实例创建后调用这个函数
+  created: function () { // 在实例创建后调用这个函数，常在这个阶段发起请求
     // `this` 指向 vm 实例
     console.log('a is: ' + this.a)
   },
@@ -133,3 +134,5 @@ var vm = new Vue({
 })
 // -> "a is: 1"
 ```
+
+像 AJAX 请求，根据实际情况，一般在 created 里面就可以，如果涉及到需要页面加载完成之后的话就用 mounted。

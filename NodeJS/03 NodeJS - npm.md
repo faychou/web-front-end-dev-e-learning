@@ -85,7 +85,7 @@ npm update <package-name>
 npm update -g <package-name>
 ```
 
-> 注意更新 npm 直接使用 `npm update npm -g`
+> 注意：更新 npm 直接使用 `npm update npm -g` 或者 `npm i -g npm`。
 
 
 ### 卸载

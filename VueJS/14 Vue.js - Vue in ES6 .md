@@ -15,6 +15,7 @@
 </style>
 <script>
 export default {
+  name: 'app',
   data () {
     return {
       msg: 'Hello World!'
@@ -28,6 +29,8 @@ export default {
 * 每个 `.vue` 文件最多包含一个 `<script>`，默认语言：js；
 * 一个 `.vue` 文件可以包含多个 `<style>` 标签，默认语言：css；
 * 在语言块中使用该语言块对应的注释语法 (HTML、CSS、JavaScript、Jade 等)。
+
+> 注意：data 的书写方式不同。在 .vue 组件中, data 必须是一个函数，它 return 一个对象。
 
 ### 导入其他组件
 ``` html
@@ -158,11 +161,49 @@ export default {
 ```
 
 ### props
-用 props 选项来接收父组件传入的数据，渲染组件：
+用 props 选项来接收父组件传入的数据，注意父组件元素中的属性在这里必须转化为驼峰式大小写：
 
 ``` js
 export default {
   props : ['artList']
+}
+```
+
+为了明确表达出所需要的 props 类型，一般将上述的数组写法改为下列的 props 验证方式：
+
+``` js
+export default {
+  props: {
+    artList: {
+      type: String,
+      required: true,
+      default: ''
+    }
+  }
+}
+```
+
+### 计算属性
+``` js
+export default {
+  computed: {
+    listeners () {
+      return {
+        //
+      }
+    }
+  }
+}
+```
+
+### 方法
+``` js
+export default {
+  methods: {
+    addTodo () {
+      //
+	 }
+  }
 }
 ```
 
