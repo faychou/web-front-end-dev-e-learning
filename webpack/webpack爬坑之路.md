@@ -236,6 +236,9 @@ npm install url-loader file-loader --save-dev
   options: { // loader 的可选项
     limit: 8192,
     name: path.join(__dirname, 'src/images/[name].[hash:8].[ext]')
+    // [name]：指定文件输出路径和输出文件命令规则
+    // [hash:8]：表示使用7位哈希值代表文件名称
+    // [ext]：表示保持文件原有后缀名
   }
 }
 ```
@@ -502,6 +505,27 @@ import getArticle from 'api/article'
 ```
 
 ## 插件
+### 自动删除 dist 目录
+每次打包之前, 删除上一次打包的 dist 目录。
+
+安装：
+
+``` bash
+npm i -D clean-webpack-plugin
+```
+
+配置：
+
+``` js
+/* webpack.prod.js */
+const cleanWebpackPlugin = require('clean-webpack-plugin')
+
+plugins: [
+  // 创建一个删除文件夹的插件，删除dist目录
+  new cleanWebpackPlugin(['./dist'])
+]
+```
+
 ### 热替换
 热替换是指修改文件内容之后不用手动刷新页面，修改的部分会自动刷新，webpack 内部已经支持，不需要下载，直接在 plugins 中添加以下代码就行：
 
