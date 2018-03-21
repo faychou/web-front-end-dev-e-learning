@@ -5,10 +5,26 @@ AngularJS 诞生于2009年，由Misko Hevery 等人创建，后被Google所收�
 
 传统前端开发思维：* 以 JQuery 为代表；* 以 DOM 为中心；* 关注 VIEW 的变化和用户操作。
 
-新一代前端开发思维：* 以 AngularJS 为代表；* 以 Data 为中心；* 聚焦于数据的变更。### MVC & MVVM
-MVC 即 Model（模型）、View（视图）、Controller（控制）。
+新一代前端开发思维：* 以 AngularJS 为代表；* 以 Data 为中心；* 聚焦于数据的变更。### 设计模式 MV*
+#### MVC
+* M：Model（数据模型），专门用来操作数据，数据的 CRUD；
+* V：View（视图），对于前端来说，就是页面；
+* C：Controller（控制），是视图和数据模型沟通的桥梁，用于处理业务逻辑。
 
-MVVM 即 View、ViewModel、Model 三部分，View 就是视图，Model 就是数据对象，而 ViewModel 就是中间层，负责监控两侧的数据，并通知另一侧进行修改。
+MVC 的一般流程是这样的：View（界面）触发事件--》Controller（业务）处理了业务，然后触发了数据更新--》不知道谁更新了 Model 的数据--》Model（带着数据）回到了 View--》View 更新数据
+
+#### MVVM
+* M：Model（数据模型）；
+* V：View（视图）；
+* VM：ViewModel（视图模型），就是中间层，负责监控两侧的数据，并通知另一侧进行修改。
+
+#### MVP
+* M：Model
+* V：View
+* P：Presenter
+
+MVP 的思路是切断的 View 和 Model 的联系，让 View 只和 Presenter（原 Controller）交互，减少在需求变化中需要维护的对象的数量。
+
 
 ##  一、认识AngularJS
 AngularJS 通过 指令 扩展了 HTML，且通过表达式绑定数据到 HTML。
