@@ -70,8 +70,8 @@ import {p1, run} from './app.js'
 import './example.js'
 ```
 
-## 导出&导入引用关系
-### 一般的导出&导入
+## export & import 使用
+### 一般的 导出 & 导入
 ``` js
 // example1.js
 export let/var/const param1 = 'ok'
@@ -86,7 +86,7 @@ import * as example1 from './example1.js'
 example1.param1 // 'ok'
 ```
 
-### 导出&导入默认 default
+### 导出 & 导入 默认 default
 ``` js
 // example2.js
 export default val param2 = 'ok'
