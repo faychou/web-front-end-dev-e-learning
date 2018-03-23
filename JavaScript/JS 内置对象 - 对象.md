@@ -85,3 +85,60 @@ myObject.a; // 2
 //注意：即便属性是 configurable:false，我们还是可以 把 writable 的状态由 true 改为 false，但是无法由 false 改为 true。
 ```
 
+## 深拷贝和浅拷贝
+深拷贝一定都是按值传递，浅拷贝一定有按址传递。
+
+### 浅拷贝
+``` js
+var obj1 = {
+  a:1
+}
+
+function Copy(o) {
+  var c = {}; // 在堆内存中新生成一个空对象，这样来杜绝关联
+  for (var i in o) { 
+    c[i] = o[i];
+  }
+  return c;
+}
+
+obj1.b = ['1','2'];
+var obj2 = Copy(a);
+obj2.c = 3;
+alert(obj2.a);     // 1
+alert(obj2.c);    // 3
+alert(obj1.c);    // undefined
+```
+
+由于 `obj1.b` 是个引用类型，所以 copy 的时候 `obj1.b` 是按引用地址传递的，就会导致修改 `obj1.a` 的值时，`obj2.b` 的值也会变化。因为 obj1 和 obj2 会有关联，所以说这次拷贝是一次浅拷贝。
+
+### 深拷贝
+``` js
+var obj1 = {
+  a:1
+}
+
+// 通过递归进行深拷贝
+function Copy(a,b) {
+  var c = c || {};
+  for (var i in a) { 
+    if(typeof a[i] == 'object') {
+      if(a[i].constructor == Array) {
+        copy(a[i], c[i])
+      } else if(a[i].constructor == Object) {
+        copy(a[i], c[i])
+      }
+    } else {
+      c[i] = a[i]
+    }
+  }
+  return c;
+}
+
+obj1.b = ['1','1'];
+var obj2 = Copy(a);
+obj2.b = ['2','2'];
+alert(obj2.b); // 1,1
+alert(obj2.b); // 2,2
+```
+
