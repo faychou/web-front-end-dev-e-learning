@@ -6,15 +6,38 @@
 特点：模块被异步加载，模块加载不影响后面语句的运行。
 
 ### CommonJS 
-代表：nodejs
+代表：nodejs。
 
-加载模块：require()
-导出模块：module.exports = {} / exports = {}
+同步加载主要用于服务端。
 
-### ES6 中的 import / export
+### ES6 模块化
+ES6 静态加载的设计思想，使得在编译时就可以确定模块的依赖关系，以及输入、输出的变量。ES6 则在语言层面上实现了模块化，取代 CommonJS、AMD、CMD 成为服务端和浏览器端通用的模块解决方案。
 
 ### CMD 浏览器端
 代表：seajs（阿里前端大神玉伯开发）
+
+### 使用 async、defer 属性
+使用 async 和 defer 标签就可以异步加载。区别在于：
+
+* defer 等到页面渲染完成才会执行
+* async 只要脚本加载完成，立即执行
+
+``` html
+<script type="text/javascript" src="./a.js" defer></script>
+
+<script type="text/javascript" src="./b.js" async></script>
+```
+
+### 浏览器中使用模块
+在浏览器端使用脚本默认开启 defer 属性，也就是按照引入的顺序一个一个加载，这也符合静态化的思想。
+
+``` html
+<script  type='module' src='a.js'></script>
+<script  type='module'>
+  import utils from './utils.js'
+  // 其他代码
+</script>
+```
 
 ## AMD
 ### 1、定义模块
