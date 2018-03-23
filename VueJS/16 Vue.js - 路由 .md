@@ -484,24 +484,24 @@ const router = new VueRouter({
 <!--app.vue 根组件-->
 <template>
   <div id="app">
-        <transition name="fade" mode="out-in">
-        <router-view></router-view>
-        </transition>
-    </div>
+    <transition name="fade" mode="out-in">
+      <router-view></router-view>
+    </transition>
+  </div>
 </template>
 <script>
   export default {
-      name: 'app',
+    name: 'app',
     components: {}
   }
 </script>
 <style>
-    .fade-enter-active,.fade-leave-active {
-        transition: opacity .2s ease;
-    }
-    .fade-enter,.fade-leave-active {
-        opacity: 0;
-    }
+  .fade-enter-active,.fade-leave-active {
+    transition: opacity .2s ease;
+  }
+  .fade-enter,.fade-leave-active {
+    opacity: 0;
+  }
 </style>
 ```
 
@@ -656,3 +656,75 @@ axios.interceptors.response.use(
 ```
 
 对应的，如果是登出的话，清除当前 token，再跳转到首页即可。
+
+## 路由返回保持位置不变
+如果用户在列表页滚动了很长，当进入详情页后再返回列表页，之前的列表页位置得保持不变。如果要实现这个功能，需要引入 keep-alive 。
+
+* 包裹动态组件时会缓存组件实例，而不是销毁；
+
+* keep -alive 内路由切换时会调用  activated 和  deactivated 这两个钩子；
+
+* 套在 router -view 外面，受到影响的范围就是  router -view 里面的路由跳转。
+
+注意事项：
+
+* 使用后会导致 created 可能不被调用，需要把一些逻辑移到  activated；
+
+* 针对不需要保留状态的情况，可以在 deactivated 中调用  `$destroy()`。
+
+以上方法可以解决返回时不会刷新页面，从而保持原来的位置不变，但如果从列表页进入详情页后，更改了列表状态，那么列表页需要刷新这一条数据。此时还是需要用 vuex 来解决这个问题，在详情页的 deactivated 钩子更新列表中对应的该条数据，同样依赖后端对于详情和列表接口描述订单采用同样的数据格式，代码大致如下：
+
+``` js
+deactivated () {
+  this.$store.commit('AUCTION_LIST_INDEX', this.index, this.$data)
+}
+```
+
+## 路由组件按需加载
+在 Vue 项目中，一般使用 vue-cli 构建项目后，在 `npm run build` 的时候会打包成一个整个的 js 文件，如果页面一多，会导致这个文件非常大，加载缓慢，为了解决这个问题，需要将他分成多个小文件，而且还要实现异步按需加载，即用到了再加载。
+
+### 方法一：webpack
+webpack 提供的 `require.ensure()`,这样可以实现按需加载，并且你可以将多个相同类的组件打包成一个文件，只要给他们指定相同的 chunkName 即可，如示例中的 demo 将会打包成一个文件。
+
+``` js
+{
+  path: '/home',
+  name: 'Home',
+  component: r => require.ensure([], () => r(require('../components/Home')), 'demo')
+},
+{
+  path: '/about',
+  name: 'About',
+  component: r => require.ensure([], () => r(require('../components/About')), 'demo')
+}
+```
+
+### 方法二：Vue 异步组件
+这种方法可以实现按需加载，并且一个组件会打包成一个 js 文件：
+
+``` js
+{
+  path: '/Home',
+  name: 'Home',
+  component: resolve => require(['../components/Home'], resolve)
+}
+```
+
+### es6 import
+首先，可以将异步组件定义为返回一个 Promise 的工厂函数 (该函数返回的 Promise 应该 resolve 组件本身)：
+
+``` js
+const Foo = () => Promise.resolve({ /* 组件定义对象 */ })
+```
+
+第二，在 Webpack 2 中，我们可以使用动态 import 语法来定义代码分块点 (split point)：
+
+``` js
+import('./Foo.vue') // 返回 Promise
+```
+
+这样做的结果是每个组件都会打包成一个 js 文件，有时候我们想把某个路由下的所有组件都打包在同个异步块 (chunk) 中。只需要使用 命名 chunk：
+
+``` js
+const Foo = () => import(/* webpackChunkName: "group-foo" */ './Foo.vue')
+```
