@@ -212,6 +212,18 @@ module:{
 },
 ```
 
+### 使用 typescript 
+``` js
+{
+  module: {
+    rules: [{
+      test: /\.(tsx|ts)?$/,
+      use: ["ts-loader"]
+    }]
+  }
+}
+```
+
 ### 图片处理
 对图片进行 base64 转码以减小资源的体积。
 
@@ -1043,3 +1055,20 @@ if (process.env.NODE_ENV === 'production') {
   //生产模式下进行打包优化
 }
 ```
+
+## 版本升级
+### 4.0
+开发模式：
+
+``` bash
+webpack-dev-server --mode development --progress --hot --hotOnly --config ./webpack.config.js
+```
+
+生产环境：
+
+``` bash
+webpack --mode production --progress --config ./webpack.config.js
+```
+
+开启了 --mode production，会自动开启代码压缩、scope hoist 等插件，以及自动传递环境变量给 lib 包，所以已经不需要 plugins 这个配置项了。同理，开启了 --mode development 会自动开启 sourceMap 等开发插件，我们只要关心更简单的配置，这就是 4.0 零配置的重要改变。
+
