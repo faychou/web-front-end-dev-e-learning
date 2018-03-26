@@ -57,7 +57,7 @@ require.main === module（推荐）
 module.parent === null
 ```
 
-### require函数
+### require 函数
 用于在当前模块中加载和使用别的模块。require 过的文件会加载到缓存，所以多次 require 同一个文件（模块）不会重复加载
 
 ``` js
@@ -77,8 +77,8 @@ require.resolve('./a.js')
 require.cache对象 
 ```
 
-### exports对象
-是当前模块的导出对象，用于导出模块公有方法和属性。别的模块通过require函数使用当前模块时得到的就是当前模块的exports对象。
+### exports 对象
+是当前模块的导出对象，用于导出模块公有方法和属性。别的模块通过 require 函数使用当前模块时得到的就是当前模块的 exports 对象。
 
 ``` js
 exports.hello = function () {
@@ -102,11 +102,11 @@ exports.count = count;
 
 exports 和 module.exports 的区别了：
 
-1. module.exports 初始值为一个空对象 {}
+1. module.exports 初始值为一个空对象 {}；
 
-2. exports 是指向的 module.exports 的引用
+2. exports 是指向 module.exports 的引用；
 
-3. require() 返回的是 module.exports 而不是 exports
+3. require() 返回的是 module.exports 而不是 exports。
 
 ``` js
 	exports = module.exports = {...}

@@ -212,7 +212,7 @@ slot 的作用就是占个位置。假定子组件 my-component 有下面模板�
 
 ## 动态组件
 ### component
-通过使用保留的 `<component>` 元素，动态地绑定到它的 is 特性，我们让多个组件可以使用同一个挂载点，并动态切换：
+通过使用保留的 `<component>` 元素，动态地绑定到它的 is 特性，我们让多个组件可以使用同一个挂载点，并动态切换，如点击 button，随机生成 a、b、c 组件中的一个：
 
 ``` html
 <component v-bind:is="currentView">

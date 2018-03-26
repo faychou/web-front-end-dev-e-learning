@@ -1,9 +1,24 @@
 # 前端模块化
-ES6 之前，Javascript 并没有模块体系。但是实际开发中，为了更高效的开发，我们需要模块化编程开发，也就产生了几类模块化标准。
+ES6 之前，Javascript 并没有模块体系。但是实际开发中，为了更高效的开发，我们需要模块化编程开发，主要在于：
+
+* 解决项目中的全局变量污染的问题；
+* 开发效率高，有利于多人协同开发；
+* 职责单一，方便代码复用和维护；
+* 解决文件依赖问题，无需关注引用文件的顺序。
 
 ## 模块化规范
+目前实现模块化方案有以下几类标准：
+
 ### AMD
-异步加载模块，模块的加载不影响其后面语句的运行。所有依赖这个模块的语句都会添加进一个回调函数中，等到模块加载完成，回调函数就会执行。
+全名 Asynchronous Module Definition，即异步加载模块，模块的加载不影响其后面语句的运行。所有依赖这个模块的语句都会添加进一个回调函数中，等到模块加载完成，回调函数就会执行。
+
+* 用全局函数define来定义模块;
+* id为模块标识，遵从CommonJS Module Identifiers规范
+* dependencies为依赖的模块数组，在factory中需传入形参与之一一对应
+* 如果dependencies的值中有"require"、"exports"或"module"，则与commonjs中的实现保持一致
+* 如果dependencies省略不写，则默认为["require", "exports", "module"]，factory中也会默认传入require,exports,module
+* 如果factory为函数，模块对外暴漏API的方法有三种：return任意类型的数据、exports.xxx=xxx、module.exports=xxx
+* 如果factory为对象，则该对象即为模块的返回值
 
 代表：requirejs。
 
@@ -12,20 +27,20 @@ ES6 之前，Javascript 并没有模块体系。但是实际开发中，为了�
 特点：模块被异步加载，模块加载不影响后面语句的运行。
 
 ### CMD
-CMD 和 AMD 解决的问题一样，不过是模块定义方式、模块加载的时机不同。
+CMD 全称是 Common Module Definition，即通用模块定义。CMD 和 AMD 解决的问题一样，不过是模块定义方式、模块加载的时机不同。
 
 代表：seajs（阿里前端大神玉伯开发）
 
 适用平台：浏览器端。
 
-CMD & AMD 间的区别：
-
-* AMD 依赖前置，在定义模块时就声明其所要依赖的模块；
-* CMD 是按需加载依赖，在用到那个模块再去 require；
-* AMD 在使用前就准备好，CMD 是用到了再去准备模块。
-
 ### CommonJS
-一个文件就是一个模块，每个模块都是单独的作用域，除非定义为 global 对象的属性，属于同步加载方案。
+根据 CommonJS 规范，一个文件就是一个模块，每个模块都是单独的一个作用域，，也就是在一个文件里面定义的变量、函数、类，都是私有的，对其他文件是不可见的，除非定义为 global 对象的属性，属于同步加载方案。
+
+* 模块的标识应遵循的规则（书写规范）。
+* 定义全局函数require，通过传入模块标识来引入其他模块，执行的结果即为别的模块暴露出来的API。
+* 如果被require函数引入的模块中也包含依赖，那么依次加载这些依赖。
+* 如果引入模块失败，那么require函数应该报一个异常。
+* 模块通过变量exports来向外暴露API，exports只能是一个对象，暴露的API须作为此对象的属性。
 
 代表：nodejs。
 
@@ -184,14 +199,24 @@ require(['jquery', 'template'])
 
 ``` html
 <!-- 
-  设置data-main属性
-  1 data-main属性指定的文件也会同时被加载
+  设置 data-main 属性
+  1 data-main 属性指定的文件也会同时被加载
   2 用于指定查找其他模块的基础路径
 -->
-<script src="js/require.js" data-main="js/main"></script>
+<script src="js/require.js" data-main="js/main" defer async="true"></script>
 ```
 
+为了避免浏览器未响应，我们在后面可以加上 async，告诉浏览器这个文件需要异步加载，IE 不支持该属性，所以需要把 defer 也加上。
+
 ## seajs
+Sea.js 遵循 CMD 规范，可以像 Node.js 一般书写模块代码。在 CMD 规范中，一个文件就是一个模块，语法格式：
+
+``` js
+define(factory);
+```
+
+当 factory 为函数时，表示模块的构造方法，执行该方法，可以得到该模块对外提供的 factory 接口，factory 方法在执行时，默认会传入三个参数：require、exports 和 module：
+
 ``` js
 // 定义模块  myModule.js
 define(function(require, exports, module) {
@@ -204,5 +229,32 @@ define(function(require, exports, module) {
 seajs.use(['myModule.js'], function(my) {
   var star= my.data;
   console.log(star);  //1
+});
+```
+
+### CMD & AMD 间的区别：
+
+* AMD 依赖前置，在定义模块时就声明其所要依赖的所有模块；
+* CMD 是按需加载依赖，在用到那个模块再去 require；
+* AMD 在使用前就准备好，CMD 是用到了再去准备模块。
+
+``` js
+// AMD规范
+define(['./a', './b'], function(a, b) {  // 依赖必须一开始就写好  
+   a.doSomething()    
+   // ...    
+   b.doSomething()    
+   ...
+});
+
+// CMD规范
+define(function(require, exports, module) {
+   var a = require('./a')   
+   a.doSomething()   
+   // ...
+   var b = require('./b') 
+   // 依赖就近写   
+   b.doSomething()
+   // ... 
 });
 ```
