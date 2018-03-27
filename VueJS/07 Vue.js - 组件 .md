@@ -212,7 +212,7 @@ slot 的作用就是占个位置。假定子组件 my-component 有下面模板�
 
 ## 动态组件
 ### component
-通过使用保留的 `<component>` 元素，动态地绑定到它的 is 特性，我们让多个组件可以使用同一个挂载点，并动态切换，如点击 button，随机生成 a、b、c 组件中的一个：
+通过使用 vue 内置的 `<component>` 组件，动态地绑定到它的 is 特性，我们让多个组件可以使用同一个挂载点，并动态切换，如点击 button，随机生成 a、b、c 组件中的一个：
 
 ``` html
 <component v-bind:is="currentView">
@@ -232,6 +232,57 @@ var vm = new Vue({
   }
 })
 </script>
+```
+
+还有一个常见的场景就是在注册页面选择邮箱注册还是手机注册，我们知道除了中间的表单内容不一致之外，其他的界面内容是一样的。
+
+``` html
+<div>
+  <h3>新用户注册</h3>
+  <div class="register-type">
+    <span :class="{active: registerType === 'mobileForm'}" @click="registerType = 'mobileForm'">手机注册</span>
+    <span :class="{active: registerType === 'emailForm'}" @click="registerType = 'emailForm'">邮箱注册</span>
+  </div>
+
+  <component :is="registerType" ref="form"></component>
+
+  <input type="button" value="注册" />
+  <span>已有账号直接登入</span>
+</div>
+```
+
+``` js
+const mobileForm = {
+  template:`
+    <div>
+      <input type="text" placeholder="请输入手机号" />
+      <input type="password" placeholder="请设置密码" />
+      <input type="password" placeholder="请确认密码" />
+    </div>
+  `
+}
+
+const emailForm = {
+  template:`
+    <div>
+      <input type="text" placeholder="请输入邮箱地址" />
+      <input type="password" placeholder="请设置密码" />
+      <input type="password" placeholder="请确认密码" />
+    </div>
+  `
+}
+
+export default {
+  data() {
+    return {
+      registerType: 'mobileForm'
+    }
+  },
+  components:{
+    mobileForm,
+    emailForm
+  }
+}
 ```
 
 ### keep-alive
