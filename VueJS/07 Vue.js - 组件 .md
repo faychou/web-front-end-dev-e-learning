@@ -120,7 +120,7 @@ Vue.component('child', {
 </script>
 ```
 
-> 注意:当使用的不是字符串模版,驼峰式命名的 prop 需要转换为相对应的 kebab-case (短横线隔开式) 命名。
+> 注意:当使用的不是字符串模版,驼峰式命名的 props 需要转换为相对应的 kebab-case (短横线隔开式) 命名。
 
 动态地绑定父组件的数据到子模板的 props  需要使用 v-bind 。
 
