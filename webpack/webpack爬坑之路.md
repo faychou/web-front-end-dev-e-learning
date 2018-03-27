@@ -192,9 +192,26 @@ module.exports = {
     require('autoprefixer')
   ]
 };
+
+//或者
+//建立.postcssrc.js文件
+module.exports = {
+  "plugins": {
+    // to edit target browsers: use "browserslist" field in package.json
+    "autoprefixer": {
+      "browsers": [
+        "ie >= 9",
+        "ff >= 30",
+        "chrome >= 34",
+        "safari >= 7",
+        "opera >= 23"
+      ]
+    }
+  }
+}
 ```
 
-postcss 解决兼容性问题主要依靠的是它的插件 autoprefixer ，这里可能要去下载 `autoprefixer` 包。
+postcss 解决兼容性问题主要依靠的是它的插件 autoprefixer ，这里要去下载 `autoprefixer` 包。
 
 ### babel
 ``` js
@@ -255,7 +272,9 @@ npm install url-loader file-loader --save-dev
 }
 ```
 
-使用 url-loader 对引入的图片进行编码,将小于 limit 设置的阈值 8192 字节(8kb)的图片转为 DataURL(base64) 格式直接写入 src 里面，可以降低网络请求次数。大于 limit 字节的会自动调用 file-loader 进行处理，name 对应文件本来名称，以及 8 位 md5 编码， ext 对应扩展名。
+file-loader 是解析图片地址，把图片从源文件拷贝到目标文件并且修改源文件名字。
+
+使用 url-loader 对引入的图片进行编码,将小于 limit 设置的阈值 8192 字节(8kb)的图片转为 DataURL(base64) 格式直接写入 src 里面，可以降低网络请求次数。大于 limit 字节的会自动调用 file-loader 进行图片路径的处理，name 对应文件本来名称，以及 8 位 md5 编码， ext 对应扩展名。
 
 在网速不好的时候先于内容加载和减少 http 的请求次数来减少网站服务器的负担。
 
@@ -472,6 +491,8 @@ noInfo: true
 ```
 
 ## devtool
+使用 devtool 可以调试打包的代码，自动生成 source maps 文件，map 文件是一种对应编译文件和源文件的方法。
+
 ``` js
 module.exports = {
   //...
@@ -698,7 +719,6 @@ var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
   //...
-  
   module:{
     rules: [{
       test: /\.css$/,
@@ -714,7 +734,6 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin('./css/[name].min.css') // 生成到css文件夹下
   ],
-  new ExtractTextPlugin("[name].css?[hash]") //基础配置只需要传入打包名称就行了
 }
 ```
 
@@ -988,7 +1007,7 @@ package.json 中 scripts 属性是一个对象，它的每一个键名都可以�
 
 这样就把 NODE_ENV 属性添加到了 `process.env` 对象上，值为 development，然后就只能在 webpack.dev.config.js 脚本中访问到 `process.env.NODE_ENV` ，而无法在其它脚本中访问。
 
-#### 在webpack中的使用
+#### 在 webpack 中的使用
 webpack 只打包入口 js 文件，这个入口 js 文件及其引用的 js 文件无法访问为 webpack.dev.config.js 脚本提供的 `process.env.NODE_ENV`，但是可以通过 webpack 的插件来让入口 js 文件及其引用的 js 文件都能访问到 `process.env.NODE_ENV`：
 
 ``` js
@@ -1058,6 +1077,8 @@ if (process.env.NODE_ENV === 'production') {
 
 ## 版本升级
 ### 4.0
+与 3.x 最大的差别在于新增了 `--mode` ，可以实现零配置区分开发环境与生产环境。
+
 开发模式：
 
 ``` bash
@@ -1070,5 +1091,5 @@ webpack-dev-server --mode development --progress --hot --hotOnly --config ./webp
 webpack --mode production --progress --config ./webpack.config.js
 ```
 
-开启了 --mode production，会自动开启代码压缩、scope hoist 等插件，以及自动传递环境变量给 lib 包，所以已经不需要 plugins 这个配置项了。同理，开启了 --mode development 会自动开启 sourceMap 等开发插件，我们只要关心更简单的配置，这就是 4.0 零配置的重要改变。
+开启了 --mode production，会自动开启 js、css 代码压缩、scope hoist 等插件，以及自动传递环境变量给 lib 包，所以已经不需要 plugins 这个配置项了。同理，开启了 --mode development 会自动开启 sourceMap 等开发插件，我们只要关心更简单的配置，这就是 4.0 零配置的重要改变。
 
