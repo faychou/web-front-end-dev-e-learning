@@ -1,6 +1,27 @@
 # HTML-head清单
 一些关于 head 标签的设置清单。
 
+### 添加到主屏后的标题（IOS）
+
+``` html
+<meta name="apple-mobile-web-app-title" content="标题"> 
+```
+
+### 添加到主屏后的APP图标
+
+``` html
+<link href="short_cut_114x114.png" rel="apple-touch-icon-precomposed">
+```
+
+### 启用 WebApp 全屏模式（IOS）
+
+当网站添加到主屏幕后再点击进行启动时，可隐藏地址栏（从浏览器跳转或输入链接进入并没有此效果）
+
+``` html
+<meta name="apple-mobile-web-app-capable" content="yes" /> 
+<meta name="apple-touch-fullscreen" content="yes" /> 
+```
+
 ### 语言
 在 html 标签中通过 lang 属性进行明确的语言声明，将会有助于翻译。
 
@@ -44,7 +65,13 @@
 <meta name="force-rendering" content="webkit"> <!-- 其他 -->
 ```
 
-### 禁止自动转码
+### 禁止百度转码
+通过百度手机打开网页时，百度可能会对你的网页进行转码，往你页面贴上它的广告，非常之恶心。不过我们可以通过这个 meta 标签来禁止它：
+
+``` html
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+```
+
 对于百度搜索强制转码的流氓做法，通过 no-transform 禁止其自动转码。
 
 ``` html

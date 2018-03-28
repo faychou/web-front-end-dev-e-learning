@@ -77,6 +77,34 @@ css3 中用于控制一段文字的行数显示，只适用于WebKit浏览器及
 [demo](http://jsbin.com/juxihisisu/edit?html,css,js,output)
 
 ## 表单
+### 解决截断非直接输入
+``` js
+var inputLock = false;
+
+// 限制输入特殊字符
+function do(inputElement) {
+    var regex = /[^1-9a-zA-Z]/g;
+    inputElement.value = inputElement.value.replace(regex, '');
+}
+
+inputElement.addEventListener('compositionstart', function() {
+  inputLock = true;
+});
+
+
+inputElement.addEventListener('compositionend', function(event) {
+  inputLock = false;
+  do(event.target);
+})
+
+// 在 Web 开发中，经常要对表单元素的输入进行限制，比如说不允许输入特殊字符，标点。通常我们会监听 input 事件
+inputElement.addEventListener('input', function(event) {
+  if (!inputLock) {
+    do(event.target);
+    event.returnValue = false;
+  }
+});
+```
 
 ## 滚动
 ### 滚动缓冲
