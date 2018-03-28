@@ -130,7 +130,7 @@ export default new VueRouter({
 
 ## 路由组件
 ### `<router-link>`
-创建 a 标签来定义导航链接。
+使用 router-link 组件来导航，它会被渲染成 a 标签，通过传入 `to` 属性指定链接地址。
 
 ``` html
 <!-- 字符串 -->
@@ -155,10 +155,10 @@ export default new VueRouter({
 ```
 
 #### active-class
-设置 链接激活时使用的 CSS 类名，默认值: "router-link-active"。
+设置链接激活时使用的 CSS 类名，默认值: "router-link-active"。
 
 #### replace
-调用 router.replace() 而不是 router.push()，于是导航后不会留下 history 记录。默认值: false。
+该属性会调用 `$router.replace()`，于是导航后不会留下 history 记录，默认值: false。
 
 ``` html
 <router-link :to="{ path: '/abc'}" replace></router-link>
@@ -172,7 +172,7 @@ export default new VueRouter({
 ```
 
 #### tag
-有时候想要 `<router-link>` 渲染成某种标签，例如 `<li>`。 于是我们使用 tag prop 类指定何种标签，同样它还是会监听点击，触发导航。默认值: `<a>`。
+有时候想要 `<router-link>` 渲染成其他标签，例如 `<li>`。 就可以使用 tag 属性指定标签，同样它还是会监听点击事件，触发导航。默认值: `<a>`。
 
 ``` html
 <router-link to="/foo" tag="li">foo</router-link>
@@ -188,7 +188,7 @@ export default new VueRouter({
 ```
 
 ### `<router-view>`
-展示我们匹配到的组件的区域。
+路由匹配到的组件将在这里渲染。
 
 ## API
 ### `$router`
