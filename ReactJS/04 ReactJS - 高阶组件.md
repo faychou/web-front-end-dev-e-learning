@@ -98,6 +98,8 @@ class MyComponent2 extends Component {
 const MyComponentWithPersistentData = withPersistentData(MyComponent2)
 ```
 
+高阶组件也有缺点，首先是被包裹组件的静态方法会消失，因为我们将组件当做参数传入函数中，返回的已经不是原来的组件，而是一个新的组件。
+
 ## 案例
 ### 组合方式
 如果用户已经登录则显示主页面，否则显示登录界面；又或者在渲染列表时，传入 List 和 Loading 组件，为新组件添加加载中的行为。
