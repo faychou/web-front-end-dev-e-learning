@@ -253,6 +253,18 @@ this.$router.go(3)
 this.$router.go(-100)
 this.$router.go(100)
 ```
+
+### `$router` 对象：
+可以获取当前路由的相关信息：
+
+* `$route.query`：URL 中查询参数；
+* `$route.hash`：哈希值；
+* `$route.path`：路径；
+* `$route.fullPath`：完整路径；
+* `$route.matched`
+* `$route.name`
+* `$route.meta`：路由元信息
+
 ## 命名路由
 有时候，通过一个名称来标识一个路由显得更方便一些，特别是在链接一个路由，或者是执行一些跳转的时候。你可以在创建 Router 实例的时候，在 routes 配置中给某个路由设置名称。
 
@@ -302,16 +314,6 @@ const router = new VueRouter({
 | --------   | :-----:   | :----: |
 | `/user/:username`        | `/user/evan`      |   `{ username: 'evan' }`    |
 | `/user/:username/post/:post_id`     | `/user/evan/post/123` |   `{ username: 'evan', post_id: 123 }`  |
-
-`$router` 对象：
-
-* `$route.query`：URL 中查询参数；
-* `$route.hash`：哈希值；
-* `$route.path`：路径；
-* `$route.fullPath`：完整路径；
-* `$route.matched`
-* `$route.name`
-* `$route.meta`：路由元信息
 
 ### 监听路由参数的变化
 当使用路由参数时，例如从 `/user/foo` 导航到 `/user/bar`，原来的组件实例是直接复用而非销毁再创建，所以路由切换时不会调用组件的生命周期钩子。此时如果想对路由参数的变化作出响应的话，可以使用 watch 来监测 `$route` 对象：
@@ -395,6 +397,56 @@ new Router({
 })
 ```
 
+如果设置为 history ，则需要后台配置支持。因为我们的应用是个单页应用，如果后台没有正确的配置，当用户在浏览器直接访问 https://faychou.cn/home 可能就会返回 404。所以需要后台设置对于所有路径都会返回 index.html 文件然后前端在 Vue 应用里面覆盖所有的路由情况，对于不存在的路由返回 404 页面。
+
+``` js
+routes: [
+  { path: '*', component: NotFoundComponent }
+]
+```
+
+``` js
+/* 后端配置例子 */
+// Apache
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>
+//除了 mod_rewrite，也可以使用 FallbackResource。
+
+// nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+
+// 原生 Node.js
+const http = require('http')
+const fs = require('fs')
+const httpPort = 80
+
+http.createServer((req, res) => {
+  fs.readFile('index.htm', 'utf-8', (err, content) => {
+    if (err) {
+      console.log('We cannot open "index.htm" file.')
+    }
+
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8'
+    })
+
+    res.end(content)
+  })
+}).listen(httpPort, () => {
+  console.log('Server listening on: http://localhost:%s', httpPort)
+})
+
+// Express，请考虑使用 connect-history-api-fallback 中间件。
+```
+
 ## 嵌套路由
 ``` html
 <div id="app">
@@ -420,6 +472,12 @@ const router = new VueRouter({
       component: User,
       children: [
         {
+          //当 /user/:id 匹配成功，默认渲染子路由
+          //UserHome 会被渲染在 User 的 <router-view> 中
+          path: '', 
+          component: UserHome 
+        },
+        {
           // 当 /user/:id/profile 匹配成功，
           // UserProfile 会被渲染在 User 的 <router-view> 中
           path: 'profile',
@@ -437,6 +495,8 @@ const router = new VueRouter({
 })
 </script>
 ```
+
+> 注意,以 / 开头的嵌套路径会被当作根路径。
 
 ## 命名视图
 有时候想同时（同级）展示多个视图，而不是嵌套展示，例如创建一个布局，有 sidebar（侧导航） 和 main（主内容） 两个视图，这个时候命名视图就派上用场了。你可以在界面中拥有多个单独命名的视图，而不是只有一个单独的出口。如果 router-view 没有设置名字，那么默认为 default。
@@ -515,6 +575,32 @@ const router = new VueRouter({
     opacity: 0;
   }
 </style>
+```
+
+## 导航守卫(beforeRouteUpdate)
+参数或查询的改变并不会触发进入/离开的导航守卫。你可以通过观察 `$route` 对象来应对这些变化，或使用 beforeRouteUpdate 的组件内守卫。
+
+## 全局守卫(router.beforeEach)
+``` js
+const router = new VueRouter({ ... })
+
+router.beforeEach((to, from, next) => {
+  // ...
+})
+
+//当一个导航触发时，全局前置守卫按照创建顺序调用。守卫是异步解析执行，此时导航在所有守卫 resolve 完之前一直处于 等待中。
+
+/* 
+每个守卫方法接收三个参数：
+to: Route: 即将要进入的目标 路由对象
+from: Route: 当前导航正要离开的路由
+next: Function: 一定要调用该方法来 resolve 这个钩子。执行效果依赖 next 方法的调用参数。
+  next(): 进行管道中的下一个钩子。如果全部钩子执行完了，则导航的状态就是  confirmed （确认的）。
+  next(false): 中断当前的导航。如果浏览器的 URL 改变了（可能是用户手动或者浏览器后退按钮），那么 URL 地址会重置到 from 路由对应的地址。
+  next('/') 或者 next({ path: '/' }): 跳转到一个不同的地址。当前的导航被中断，然后进行一个新的导航。你可以向 next 传递任意位置对象，且允许设置诸如 replace: true、name: 'home' 之类的选项以及任何用在 router-link 的 to prop 或 router.push 中的选项。
+  next(error): (2.4.0+) 如果传入 next 的参数是一个 Error 实例，则导航会被终止且该错误会被传递给 router.onError() 注册过的回调。
+  确保要调用 next 方法，否则钩子就不会被 resolved。
+*/
 ```
 
 ## 路由拦截
