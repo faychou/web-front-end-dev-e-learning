@@ -36,3 +36,33 @@ var app = new Vue({
 ```
 
 watch 用于观察和响应 Vue 实例上的数据变动,与计算属性相比，大部份情况下使用计算属性可能会更好一些，但当你想要在数据变化响应时，执行异步操作或开销较大的操作，这时使用 watch 将是更好的选择。
+
+详细案例：
+
+``` js
+data() {
+  return {
+    loading: false,
+    error: null,
+    post: null
+  }
+}, 
+watch: {
+  '$route': {
+    handler: 'resetData',
+    // immediate:true 表示创建组件时立马执行一次
+    immediate: true
+  }
+},
+methods: {
+  resetData() {
+    this.loading = false
+    this.error = null
+    this.post = null
+    this.getPost(this.$route.params.id)
+  },
+  getPost(id){
+
+  }
+}
+```
