@@ -25,6 +25,13 @@ const three = ['g', 'h', 'i']
 const result = [...one, ...two, ...three]
 ```
 
+数组的分割：
+
+``` js
+var [a, ...b] = [0, 1, 2];
+console.log(b) // [1, 2]
+```
+
 对对象属性的展开符的使用，而不必再使用 `Object.assign` 进行对象的扩展：
 
 ``` js
@@ -56,7 +63,7 @@ const obj = { ...oldObj }
 const arr = [ ...oldArr ]
 ```
 
-### 解构
+## 解构
 利用数组解构来实现值的互换。
 
 ``` js
