@@ -1,5 +1,5 @@
 # PWA
-PWA 全称 Progressive Web Apps，中文名叫渐进式网络应用。是一个令人兴奋的前端技术的革新。PWA 综合了一系列技术使你的 web app 表现得就像是 native mobile app，让你能够构建一个完全离线的网站，为用户提供几乎是瞬间加载的体验。
+PWA 全称 Progressive Web Apps，中文名叫渐进式网络应用。是 Google 推出的一个令人兴奋的前端技术。PWA 综合了一系列技术使你的 web app 表现得就像是 native mobile app，让你能够构建一个完全离线的网站，为用户提供几乎是瞬间加载的体验。
 
 一个 PWA 应用首先是一个网页, 可以通过 Web 技术编写出一个网页应用. 随后添加上 App Manifest 和 Service Worker 来实现 PWA 的安装和离线等功能。
 
@@ -14,6 +14,13 @@ PWA 全称 Progressive Web Apps，中文名叫渐进式网络应用。是一个�
 * 可安装
 * 可链接
 
+由于 PWA 是一个全新的内容，所以在学习 PWA 之前，你需要保证你已经熟练使用以下的内容：
+
+* ES6 基础；
+* Promise ，当然这也是 ES6 里的知识，单独拿出来说明这很重要；
+* fetch，全新的可替代 AJAX 的 API；
+* WebWorker，JavaScript 解决单线程的方案；
+* Cache API。
 
 ## manifest.json
 这是 Web 应用清单文件，该文件包含网站相关的信息，包括图标，背景屏幕，颜色和默认方向等。能够使浏览器将 Web 应用安装到设备的主屏幕，以便为用户提供更快捷的访问和更丰富的体验。其次，还可以自定义浏览器的启动画面，并允许你自定义浏览器的地址栏和模板颜色等。
@@ -66,21 +73,27 @@ Web 应用显示模式。
 字段决定了当 Web 应用被添加到设备主屏幕时所显示的图标。
 
 ## Service Worker
-Service Worker 在网页已经关闭的情况下还可以运行, 用来实现页面的缓存和离线, 后台通知等等功能，是 PWA 的关键组成部分。
+Service Worker 能够在网页已经关闭的情况下运行, 用来实现页面的缓存和离线, 后台通知等功能，是 PWA 的最关键组成部分。
 
 Service Worker 是用 JavaScript 编写的，但是又与标准 JavaScript 文件略有不同:
 
-* 运行在它自己的全局脚本上下文中
-* 不绑定到具体的网页
-* 无法修改网页中的元素，因为它无法访问 DOM
-* 只能使用 HTTPS
+* 运行在它自己的全局脚本上下文中；
+
+* 不绑定到具体的网页；
+
+* 无法修改网页中的元素，因为它无法访问 DOM；
+
+* 只能使用 HTTPS。
 
 Service Worker 能够拦截进出的 HTTP 请求，从而完全控制你的网站。Service Worker 运行在 worker 上下文中，这意味着它无法访问 DOM，它与应用的主要 JavaScript 运行在不同的线程上，所以它不会被阻塞。它们被设计成是完全异步的，因此你无法使用诸如同步 XHR 和 localStorage 之类的功能。所以我们只需记住 Service Worker 可以让你全权控制网站中所有进出的网络请求。
 
-* self: 表示 Service Worker 作用域, 也是全局变量
-* caches: 表示缓存
-* skipWaiting: 表示强制当前处在 waiting 状态的脚本进入 activate 状态
-* clients: 表示 Service Worker 接管的页面
+* self: 表示 Service Worker 作用域, 也是全局变量；
+
+* caches: 表示缓存；
+
+* skipWaiting: 表示强制当前处在 waiting 状态的脚本进入 activate 状态；
+
+* clients: 表示 Service Worker 接管的页面。
 
 ### 安全
 为了让 Service Worker 能在网站上运行，需要通过 HTTPS 来提供服务。
@@ -96,7 +109,7 @@ Service Worker 能够拦截进出的 HTTP 请求，从而完全控制你的网�
 一旦安装这步完成，Service Worker 便会激活并控制在其范围内的一切。如果生命周期中的所有事件都成功了，Service Worker 便已准备就绪，随时可以使用了！
 
 ### 添加方法
-为了让应用可以离线工作，要做的第一件事情就是注册一个service worker，这是一段在后台运行的脚本程序，并不要用户去打开它，也不需要任何的操作。
+为了让应用可以离线工作，要做的第一件事情就是注册一个 service worker，这是一段在后台运行的脚本程序，并不要用户去打开它，也不需要任何的操作。
 
 第一步，在跟目录下创建一个空文件叫做 service-worker.js。这个文件必须放在根目录。因为 service worker 的作用域范围是跟它所在的位置来决定的。
 
@@ -106,9 +119,9 @@ Service Worker 能够拦截进出的 HTTP 请求，从而完全控制你的网�
 if('serviceWorker' in navigator) { // 检查当前浏览器是否支持 Service Workers
 navigator.serviceWorker  
   .register('/service-worker.js')  // 如果支持就注册一个 'service-worker.js' 的 Service Worker 文件
-  .then(function(registration) { 
+  .then((registration) => { 
     console.log('ServiceWorker Registered successful:',registration.scope); 
-  }).catch(function(err) { // 注册失败
+  }).catch((err) => { // 注册失败
     console.log('ServiceWorker Registered failed: ', err);
   });  
 }
@@ -117,13 +130,13 @@ navigator.serviceWorker
 if(navigator.serviceWorker != null) {
   navigator.serviceWorker
   .register('./service-worker.js')
-  .then(function(registration){
+  .then((registration) => {
     console.log("ServiceWorker Registered:",registration.scope);
   });
 }
 ```
 
-使用 navigator.serviceWorker.register('/service-worker.js') 函数注册，该函数返回 promise，然后通知浏览器下载 Service Worker 文件，如果注册成功，它会开始 Service Worker 生命周期的剩余阶段。
+使用 `navigator.serviceWorker.register('/service-worker.js')` 函数注册，该函数返回 promise，然后通知浏览器下载 Service Worker 文件，如果注册成功，它会开始 Service Worker 生命周期的剩余阶段。
 
 ### 处理静态缓存
 当 service worker 被注册以后，用户首次访问页面的时候，一个 install 事件函数就会被触发。在这个事件的回调函数中，我们能够缓存所有应用需要用到的资源。
@@ -143,18 +156,17 @@ var cacheList = [
 ];
 
 // 在注册安装完 Service Worker 时, 抓取资源写入缓存
-self.addEventListener('install',function(e) { // 进入 Service Worker 的安装事件
+// self 在 Worker 里面相当于 Global
+self.addEventListener('install',(e) => { // 进入 Service Worker 的安装事件
   e.waitUntil(
-    //打开cache对象
+    // 打开 cache 对象，这是一个全局变量
     caches.open(cacheStorageKey)
-    .then(function(cache) {
+    .then((cache) => {
       
-      //添加到缓存中
+      // 添加到缓存中
       return cache.addAll(cacheList);
     })
-    .then(function() {
-      return self.skipWaiting()
-    })
+    .then(() => self.skipWaiting())
   )
 })
 ```
@@ -167,11 +179,11 @@ self.addEventListener('install',function(e) { // 进入 Service Worker 的安装
 网页抓取资源的过程中, Service Worker 可以收到从 PWA 中发起的请求，并且响应, 可以编写代码决定如何响应资源的请求:
 
 ``` js
-self.addEventListener('fetch',function(e) { // 添加 fetch 事件的事件监听器
+self.addEventListener('fetch',(e) => { // 添加 fetch 事件的事件监听器
   console.log('[ServiceWorker] Fetch', e.request.url);
   e.respondWith(
     caches.match(e.request) //检查传入的请求 URL 是否匹配当前缓存中存在的任何内容
-    .then(function(response) {
+    .then((response) => {
       // return response || fetch(e.request);
       if(response) {
         return response;
@@ -190,12 +202,12 @@ self.addEventListener('fetch',function(e) { // 添加 fetch 事件的事件监�
 缓存的资源随着版本的更新会过期, 所以会根据缓存的字符串名称清除旧缓存, 采用遍历所有的缓存名称逐一判断决定是否清除:
 
 ``` js
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', (e) => {
   console.log('[ServiceWorker] Activate');
   e.waitUntil(
     caches.keys()
-    .then(function(cacheNames) {
-      return Promise.all(cacheNames.map(function(name) {
+    .then((cacheNames) => {
+      return Promise.all(cacheNames.map((name) => {
         if (name !== cacheStorgeKey) {
           console.log('[ServiceWorker] Removing old cache', name);
           return caches.delete(name);
@@ -214,22 +226,22 @@ Service Workers 能够拦截 HTTP 请求，先请求资源，然后立即缓存�
 
 ``` js
 var cacheName = 'helloWorld';
-self.addEventListener('fetch', function (event) { 
+self.addEventListener('fetch', (event) => { 
   event.respondWith(
     caches.match(event.request) 
-    .then(function (response) {
+    .then((response) => {
       if (response) {  
         return response;
       }
       var requestToCache = event.request.clone(); // 克隆了请求。请求是一个流，只能消耗一次
       return fetch(requestToCache).then( // 尝试按预期一样发起原始的 HTTP 请求
-        function (response) {
+        (response) => {
           if (!response || response.status !== 200) { 
             return response; // 请求失败或者服务器响应了错误代码，则返回错误信息
           }
           var responseToCache = response.clone(); // 再次克隆响应，因为需要将其添加到缓存中，而且它还将用于最终返回响应
           caches.open(cacheName) // 打开名称为 “helloWorld” 的缓存
-            .then(function (cache) {
+            .then((cache) => {
               cache.put(requestToCache, responseToCache); // 将响应添加到缓存中
             });
           return response;
