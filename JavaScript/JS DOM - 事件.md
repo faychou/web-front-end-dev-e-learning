@@ -262,16 +262,16 @@ var target = event.target || event.srcElement;
 返回当前事件的名称。
 
 ### clientX
-在视口中的 x 坐标。
+目标元素在视口中的 x 坐标。
 
 ### clientY
-在视口中的 y 坐标。
+目标元素在视口中的 y 坐标。
 
 ### pageX
-在页面中的 x 坐标。
+目标元素在页面（document）中的 x 坐标。
 
 ### pageY
-在页面中的 y 坐标。
+目标元素在页面（document）中的 y 坐标。
 
 ### screenX
 在屏幕中的 x 坐标。
