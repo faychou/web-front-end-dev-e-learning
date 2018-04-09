@@ -1,4 +1,14 @@
 # Git
+## 概念
+### 工作区
+就是在你电脑上创建的项目目录。
+
+### 本地仓库(版本库)
+工作区有一个隐藏目录 .git，这就是 Git 的版本库，又名仓库，英文名 repository，你可以简单理解成一个目录，这个目录里面的所有文件都可以被 Git 管理起来，每个文件的修改、删除，Git 都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。
+
+### 暂存区
+英文叫 stage, 或 index。一般存放在 ".git 目录下" 下的 index 文件（.git/index）中，所以我们把暂存区有时也叫作索引（index）。
+
 ## 安装
 ### 在 Linux 上安装
 ``` bash
@@ -8,14 +18,14 @@ sudo apt-get install git -y
 ```
 
 ### 在 Mac 上安装
-方法一：Xcode Command Line Tools
+* 方法一：Xcode Command Line Tools
 
-方法二：homebrew
+* 方法二：homebrew
 
-方法三：官网下载程序
+* 方法三：官网下载程序
 
 ### 在 Windows 上安装
-直接官网下载
+直接官网下载。
 
 ## Git 配置
 Git 自带一个 git config 的工具来帮助设置控制 Git 外观和行为的配置变量。 这些变量存储在三个不同的位置：
@@ -101,7 +111,12 @@ git status
 
 `git status` 命令的输出十分详细，但其用语有些繁琐。 如果你使用 `git status -s` 命令或 `git status --short` 命令，你将得到一种更为紧凑的格式输出。
 
-要查看尚未暂存的文件更新了哪些部分，不加参数直接输入 `git diff` 。
+### 查看更改
+要查看尚未暂存的文件更新了哪些部分：
+
+``` bash
+git diff
+```
 
 `git diff --staged` 或 `git diff --cached` 可查看已暂存文件和上次提交的区别
 
@@ -137,13 +152,54 @@ git log
 
 而 `git reflog` 的功能是查看本地操作记录，可以看到本地的commit, merge, rebase等操作记录，并带有版本号。
 
-## 回退
-git reset HEAD {filename}: 取消暂存文件，恢复到已修改未暂存状态。
+## 版本回退
+``` bash
+# 重置暂存区与工作区，与上一次commit保持一致
+git reset --hard
 
-git reset HEAD~{n}: 表示回退到n个提交之前。它也可以用来合并提交，下面的写法与 git commit --amend 结果是一样的。
+# 取消暂存文件，恢复到已修改未暂存状态
+git reset HEAD {filename}
 
-git reset {version}: 后面带版本号，直接回退到指定版本。
+# 表示回退到 n 个提交之前
+git reset HEAD~{n}
 
+# 直接回退到指定版本，后面带版本号
+git reset {version}
+```
+
+如果发现刚刚的提交是正确的,又想回到之前版本，再输入下面这个命令，相当于你那个回退没有做：
+
+``` bash
+# 重置当前分支的 HEAD 为指定 commit，同时重置暂存区和工作区，与指定 commit 一致
+git reset --hard [commitid]     
+# commitid 使用 git log --stat 查看
+```
+
+### 记录每一次命令
+``` bash
+git reflog 
+```
+
+## 分支(branch)
+``` bash
+# 查看分支,列出所有分支，当前分支前面会标一个*号：
+git branch
+
+# 创建分支：
+git branch <name>
+
+# 切换分支：
+git checkout <name>
+
+# 创建+切换分支：
+git checkout -b <name>
+
+# 合并某分支到当前分支：
+git merge <name>
+
+# 删除分支：
+git branch -d <name>
+```
 
 # GitHub
 ## 注册
