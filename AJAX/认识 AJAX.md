@@ -315,7 +315,7 @@ fetch(url, {
 npm install --save whatwg-fetch
 ```
 
-## axios
+## axios 库
 ### Get 请求
 ``` js
 const url = 'https://www.faychou.cn/api/list'
@@ -382,4 +382,43 @@ axios.interceptors.response.use(function (response) {
     // 错误处理
     return Promise.reject(error);
   });
+```
+
+### 请求超时
+请求过程中，如果服务器或者网络不稳定掉包了, 要解决这个问题，我们需要设置一个请求超时，当超时后重新请求。
+
+``` js
+//在main.js设置全局的请求次数，请求的间隙
+axios.defaults.retry = 4;
+axios.defaults.retryDelay = 1000;
+
+axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
+    var config = err.config;
+    // If config does not exist or the retry option is not set, reject
+    if(!config || !config.retry) return Promise.reject(err);
+    
+    // Set the variable for keeping track of the retry count
+    config.__retryCount = config.__retryCount || 0;
+    
+    // Check if we've maxed out the total number of retries
+    if(config.__retryCount >= config.retry) {
+        // Reject with the error
+        return Promise.reject(err);
+    }
+    
+    // Increase the retry count
+    config.__retryCount += 1;
+    
+    // Create new promise to handle exponential backoff
+    var backoff = new Promise(function(resolve) {
+        setTimeout(function() {
+            resolve();
+        }, config.retryDelay || 1);
+    });
+    
+    // Return the promise in which recalls axios to retry the request
+    return backoff.then(function() {
+        return axios(config);
+    });
+});
 ```
