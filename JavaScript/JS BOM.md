@@ -7,7 +7,7 @@ window.url 对象包含整个页面的地址，可以简写为 url。
 ### hash
 url 中的哈希值，也就是路径中的 `#` 之后的内容。
 
-#### onhashchange
+#### hashchange 事件
 window 对象中的一个事件，以下情况都会触发该事件：
 
 * 直接更改浏览器地址，在最后面增加或改变 `#hash`；
