@@ -42,6 +42,21 @@ let newWarriors = {
 }
 ```
 
+使用 `...` 代替 arguments 类数组：
+
+``` js
+// low
+function concatenateAll() {
+  const args = Array.prototype.slice.call(arguments);
+  return args.join('');
+}
+
+// good
+function concatenateAll(...args) {
+  return args.join('');
+}
+```
+
 案例1、使用`Math.max`方法对数组求最大值时，我们可以利用 apply 接受一个数组作为函数参数的特性：
 
 ``` js
@@ -56,7 +71,7 @@ const maxValue = (arr) => Math.max(...arr)
 maxValue([33, 22, 9]) // 33
 ```
 
-很容易的实现数组和对象的 拷贝：
+很容易的实现数组和对象的拷贝：
 
 ``` js
 const obj = { ...oldObj }
@@ -75,14 +90,41 @@ console.log(b) // -> world
 
 自动解析到对应接收该值的变量中：
 
+``` js
+const arr = [1, 2, 3, 4];
+
+const [first, second] = arr;
+console.log(first, second);   // 1,2 
+```
+
+函数的参数如果是对象的成员，优先使用解构赋值：
 
 ``` js
-function getVal() {
-  return [1, 2];
+// low
+function getFullName(user) {
+  const firstName = user.firstName;
+  const lastName = user.lastName;
 }
 
-var [x,y] = getVal(); //函数返回值的解构
-console.log('x:'+x+', y:'+y);   //输出：x:1, y:2 
+// good
+function getFullName({ firstName, lastName }) {
+}
+```
+
+如果函数返回多个值，优先使用对象的解构赋值，而不是数组的解构赋值。这样便于以后添加返回值，以及更改返回值的顺序。
+
+``` js
+// low
+function processInput(input) {
+  return [left, right, top, bottom];
+}
+
+// good
+function processInput(input) {
+  return { left, right, top, bottom };
+}
+
+const { left, right } = processInput(input);
 ```
 
 ## 数组扩展
@@ -91,6 +133,14 @@ console.log('x:'+x+', y:'+y);   //输出：x:1, y:2
 // 计算数组的总和
 const sum = (arr) => arr.reduce((a, b) => (a + b), 0)
 sum([1, 2, 3, 4]) // 10
+```
+
+### 类数组转化
+用 Array.from 方法，将类似数组的对象转为数组：
+
+``` js
+const foo = document.querySelectorAll('.foo');
+const nodes = Array.from(foo);
 ```
 
 ## 对象扩展
@@ -118,12 +168,12 @@ getStuffAwesome({ id: 150, force: true, verbose: true })
 
 ``` js
 function sayHello(name) {
-  var name=name||'tom';   // 传统的指定默认参数的方式
+  var name = name || 'tom';   // 传统的指定默认参数的方式
   console.log('Hello '+name);
 }
 
 // ES6 的默认参数
-function sayHello2(name='tom'){  // 如果没有传这个参数，才会有默认值，
+function sayHello2(name = 'tom') {  // 如果没有传这个参数，才会有默认值，
   console.log(`Hello ${name}`);
 }
 ```
