@@ -32,3 +32,29 @@ for(var i = 0 ; i < lis.length; i++) {
 ```
 
 通过一个直接执行的函数把参数传给匿名函数。
+
+## 柯里化
+参数够了就执行，参数不够就返回一个函数，之前的参数存起来，直到够了为止。
+
+``` js
+function curry(func) {
+  var l = func.length;
+  return function curried() {
+    var args = [].slice.call(arguments);
+    if(args.length < l) {
+      return function() {
+        var argsInner = [].slice.call(arguments)
+        return curried.apply(this, args.concat(argsInner))
+      }
+    } else {
+      return func.apply(this, args)
+    }
+  }
+}
+
+var f = function(a,b,c) {
+  return console.log([a,b,c])
+}
+var curried = curry(f);
+curried(1)(2)(3)
+```

@@ -1,8 +1,18 @@
 # 节流与防抖
+函数节流和函数防抖都是对大量频繁调用代码的一种优化。
+
 ## 节流
-指定时间内函数只被触发一次。
+不管怎么触发，都是按照指定的时间间隔来执行。简单地说，就是限制函数在一定时间内调用的次数。
 
 ``` js
+// 实现方案
+let throttleIndentify = 0;
+$dragable.addEventListener('mousemove', () => {
+  if(throttleIndentify) return;
+  throttleIndentify = setTimeout(() => throttleIdentify = 0, 500);
+  console.log('trigger');
+})
+
 // 简易版本
 var my_throttled_timeout = null,
   prev_time = null,
@@ -27,7 +37,7 @@ window.addEventListener('mousemove', function(){
 ```
 
 ``` js
-// underscore 的 throttle源码
+// underscore 的 throttle 源码
 _.throttle = function(func, wait, options) {
     var timeout, context, args, result;
     var previous = 0;
@@ -72,16 +82,20 @@ _.throttle = function(func, wait, options) {
 ```
 
 ## 防抖
-在某个连续触发的函数时, n 秒内没有再被触发, 则执行一次。
-
-应用场景: 拖动 window 的 size, 不断触发 resize, 当停止拖动时, 才做处理。
+不管你触发了多少次，都等到你最后触发后过一段你指定的时间才触发。应用场景: 拖动 window 的 size, 不断触发 resize, 当停止拖动时, 才做处理。
 
 ``` js
-
+let debounceIdentify = 0;
+window.addEventListener('resize', () => {
+  debounceIdentify && clearTimeout(debounceIdentity)
+  debounceIdentity = setTimeout(() => {
+    console.log('trigger')
+  }, 300)
+});
 ```
 
 ``` js
-// underscore的debounce
+// underscore 的 debounce
 _.debounce = function(func, wait, immediate) {
     var timeout, result;
 
@@ -110,4 +124,35 @@ _.debounce = function(func, wait, immediate) {
 
     return debounced;
   };
+```
+
+### 应用：输入框
+搜索引擎会对你输入的文字进行预判，并在下方推荐相关的结果。所以我们就在监听用户输入的事件那里做函数防抖处理，在 n 秒后发送输入框的联想的 ajax 请求，获取返回数据，展示在页面中。
+
+``` js
+function debounce(func, wait, leading, trailing) {
+  var timer, lastCall = 0, flag = true
+  return function() {
+    var context = this
+    var args = arguments
+    var now = + new Date()
+    if (now - lastCall < wait) {
+      flag = false
+      lastCall = now
+    } else {
+      flag = true
+    }
+    if (leading && flag) {
+      lastCall = now
+      return func.apply(context, args)
+    }
+    if (trailing) {
+      clearTimeout(timer)
+      timer = setTimeout(function() {
+        flag = true
+        func.apply(context, args)
+      }, wait)
+    }
+  }
+}
 ```

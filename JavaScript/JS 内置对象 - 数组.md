@@ -211,6 +211,25 @@ function arrayIntersection(a, b) {
 console.log(arrayIntersection([1,2,3],[2,3,4,5,6]));//[2,3]
 ```
 
+### 数组扁平化
+``` js
+function flattenDepth(array, depth=1) {
+  let result = [];
+  array.forEach (item => {
+    let d = depth;
+    if(Array.isArray(item) && d > 0){
+      result.push(...(flattenDepth(item, --d)))
+    } else {
+      result.push(item);
+    }
+  })
+  return result;
+}
+console.log(flattenDepth([1,[2,[3,[4]],5]]))
+console.log(flattenDepth([1,[2,[3,[4]],5]],2))
+console.log(flattenDepth([1,[2,[3,[4]],5]],3))
+```
+
 ### 把 arguments 转换为 Array
 ``` js
 var args = Array.prototype.slice.call(arguments, 0);
