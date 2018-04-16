@@ -26,18 +26,32 @@ W3C标准盒模型宽高的计算模式在对于非px为单位的宽高时，会
 浏览器选择哪个盒模型，主要是看浏览器处于标准模式还是怪异模式，在 `<DOCTYPE DTD="">` 标签里有DTD声明，如果有DTD声明，浏览器处于标准模式，没有DTD声明，浏览器处于怪异模式，处于怪异模式的浏览器按照自身的解析方式去解析，IE6会选择IE盒模型，其他现代浏览器都会采用W3C标准盒模型。IE6以下版本的浏览器没有遵循W3C标准，无论页面有没有DTD声明，它都是按照IE盒模型解析代码。
 
 ## margin属性
-margin:% | px，margin的值如果为%，其是根据父元素的宽度来计算的，包括margin-top和margin-bottom，其值也是相对于父元素的宽度。并且内联元素的margin-top/bottom是不允许设置的。
+margin:% | px，margin 的值如果为 %，其是根据父元素的宽度来计算的，包括 margin-top 和 margin-bottom，其值也是相对于父元素的宽度。并且内联元素的 margin-top/bottom 是不允许设置的。
 
-### margin的合并
-margin在水平方向上不会合并
-margin在垂直方向会合并，其值为两者最大值
-元素设置有margin-top、margin-bottom且为空内容，其margin上下也会重叠，其值为两者最大值
-父元素如果没有padding、border等属性时，其子元素的margin上下方向会和父元素的margin进行重叠
-margin设置负值
-位于普通文档流中元素，负值相当于将元素向负值方向移动覆盖，但是只会覆盖颜色，不会覆盖文字。
-对于position:relative元素，负值会完全覆盖前一个元素，会影响后面元素一起移动
-对于position:absolute元素，元素脱离了普通文档流，对其他元素没有影响
-对于float元素，可以通过负值进行覆盖，最常见的应用是三列布局。
+位于普通文档流中元素，margin 负值相当于将元素向负值方向移动覆盖，但是只会覆盖颜色，不会覆盖文字。
+
+### 外边距重叠
+在同一 BFC 内，两个或多个毗邻（没有空隙 或者 中间没有 border 或 padding）的普通流中的块元素垂直方向上的 margin 会折叠。包括相邻元素、嵌套元素。
+
+其结果是 margin 在垂直方向会合并，其值为两者最大值。
+
+#### 如何解决
+只要让它们不在同一个 BFC 内就行。
+
+* 脱离普通文档流：设置 float，absolute。
+
+* 不是块级元素：display: inline-block。
+
+* 创建了块级格式化上下文的元素，如：float（除了 none）、overflow（除了 visible）、display（table-cell/table-caption/inline-block）、position（除了 static/relative） 
+
+针对相邻元素：只要给它们加上 BFC 的外壳，就能使它们的 margin 
+不重叠；
+
+针对嵌套元素：只要让父级元素触发 BFC，就能使父级 margin 和当前元素的 margin 不重叠。
+
+这些方法都很麻烦，所以最好开始写的时候就用同一个方向的 margin。
+
+> 注意：外边距重叠是指垂直方向上，margin 在水平方向上是不会合并的。
 
 ## padding属性
 值如果为%，也是根据父元素宽度来计算的
