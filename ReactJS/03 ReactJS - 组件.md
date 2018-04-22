@@ -1,6 +1,6 @@
 # 组件
 
-### 组件声明
+## 组件声明
 ``` js
 //创建一个组件
 var MyComponent = React.createClass({
@@ -75,7 +75,7 @@ this.setState(function(prevState, props) {
 });
 ```
 
-### 函数组件
+## 函数组件
 函数组件是指没有状态、没有方法的纯组件，也称为无状态组件，是最基础的组件形式，由于没有状态的影响所以就是纯静态展示的作用。如按钮、标签、输入框等。我们应该最大限度地编写和使用这一类组件。编写这类组件的方法通常是使用 ES6 的箭头函数，将 props 作为函数的参数。
 
 ``` js
@@ -97,14 +97,14 @@ function ExpandableForm({ onExpand, expanded = false, children, onSubmit }) {
 }
 ```
 
-### 组件生命周期
-#### componentWillMount
+## 组件生命周期
+### componentWillMount
 该方法在整个组件生命周期只会被调用一次，所以可以利用该方法做一些组件内部的初始化工作。
-#### componentDidMount
+### componentDidMount
 这个阶段表示组件对应的 DOM 已经存在，我们可以在这个时候做一些依赖 DOM 的操作或者其他的一些如请求数据，和第三方库整合的操作。如果嵌套了子组件，子组件会比父组件优先渲染，所以这个时候可以获取子组件对应的 DOM。
-#### componentWillReceiveProps(newProps)
+### componentWillReceiveProps(newProps)
 当组件获取新属性的时候，可以根据新的属性来修改组件状态，注意首次渲染组件时不会调用。
-#### shouldComponentUpdate(nextProps, nextState)
+### shouldComponentUpdate(nextProps, nextState)
 接收到新属性或者新状态的时候在 render 前会被调用，该方法让我们决定是否重渲染组件，默认返回 true，也就是每次更新都会重新渲染。如果返回 false，那么不会重渲染组件，借此可以优化应用性能。
 
 ``` js
@@ -112,12 +112,12 @@ shouldComponentUpdate() {
   return false;
 }
 ```
-#### componentWillUpdate(nextProps, nextState)
+### componentWillUpdate(nextProps, nextState)
 当组件确定要更新，在 render 之前调用，(?方法中不能使用 setState ，setState 的操作应该在 componentWillReceiveProps 方法中调用)。
-#### componentDidUpdate(prevProps,prevState)
+### componentDidUpdate(prevProps,prevState)
 更新被应用到 DOM 之后，可以执行组件更新过后的操作。
 
-#### componentWillUnmount
+### componentWillUnmount
 组件将要卸载时调用，一些事件监听和定时器需要解除。
 
-### 组件通信
+## 组件通信
