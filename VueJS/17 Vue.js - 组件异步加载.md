@@ -75,3 +75,11 @@ export default {
 }
 </script>
 ```
+
+# 动态 require 组件
+借助 webpack，使用 require.context() 方法来创建自己的模块上下文，从而实现自动动态 require 组件。这个方法需要3个参数：
+ 
+ * 要搜索的文件夹目录；
+ * 是否还应该搜索它的子目录；
+ * 以及一个匹配文件的正则表达式。
+ 

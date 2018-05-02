@@ -327,6 +327,30 @@ const User = {
     }
   }
 }
+
+//或者
+data() {
+  return {
+    loading: false,
+    error: null,
+    post: null
+  }
+},
+watch: {
+  '$route': {        // 使用watch来监控是否是同一个路由
+    handler: 'resetData',
+    immediate: true
+  }
+},
+methods: {
+  resetData() {
+    this.loading = false
+    this.error = null
+    this.post = null
+    this.getPost(this.$route.params.id)
+  },
+  getPost(id){ }
+}
 ```
 
 或者使用 2.2 中引入的 beforeRouteUpdate 守卫：
