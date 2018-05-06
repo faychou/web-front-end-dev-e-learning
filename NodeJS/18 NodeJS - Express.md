@@ -832,7 +832,7 @@ app.get('/users/:userId', (req, res, next) => {
 ```
 
 ## passport
-实现登陆认证。
+综合的用户验证解决方案，可以实现 qq，微信登录。
 
 ``` bash
 # 安装

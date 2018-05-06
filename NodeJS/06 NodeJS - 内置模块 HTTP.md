@@ -9,7 +9,10 @@ Node.js 标准库提供了http模块，其中封装了一个高效的 HTTP 服�
 3、创建一个名为 app.js 的文件，代码为：
 
 ``` js
+// 引入 HTTP 模块
 var http = require('http'); 
+
+// 创建 HTTP 服务端 server
 http.createServer(function(request, response) {
   response.writeHead(200, {'Content-Type': 'text/html'});
   response.write('<h1>Node.js</h1>');
@@ -144,3 +147,16 @@ npm install -g supervisor
 # 使用 supervisor 命令启动 app.js 
 supervisor app.js
 ```
+
+## https
+http 协议是明文的，所以：
+
+* 内容可能被窃听；
+* 不验证身份，有可能遭遇伪装；
+* 无法证明消息的完整性，消息有可能被篡改。
+
+https 是更安全的 http 协议：
+
+* 客户端和服务器端的双向认证；
+* 完整性检查；
+* 内容加密。

@@ -3,7 +3,11 @@
 现在常见的模块规范分为三类：AMD、CMD 和 CommonJS。这三个规范都是为 javascript 模块化加载而生的，都是在用到或者预计要用到某些模块时候加载该模块，使得大量的系统巨大的庞杂的代码得以很好的组织和管理。模块化使得我们在使用和管理代码的时候不那么混乱，而且也方便了多人的合作。
 
 ### CommonJS
-Commonjs 是一个更偏向于服务器端的 javascript 规范。当然你也可以把它用在浏览器里边。Node.js 采用了这个规范。 根据 CommonJS 规范，一个单独的文件就是一个模块。加载模块使用 require 方法，该方法读 取一个文件并执行，最后返回文件内部的 exports 对象。
+Commonjs 是一个更偏向于服务器端的 javascript 规范。当然你也可以把它用在浏览器里边。Node.js 采用了这个规范。 根据 CommonJS 规范：
+
+* 一个单独的文件就是一个模块，有自己的作用域。
+* 加载模块使用 require 方法，该方法读取一个文件并执行，最后返回文件内部的 exports 对象。
+* 对象，方法和变量可以从一个文件中通过 exports 导出，用在其它文件/模块中。
 
 ### AMD
 Commonjs 解决了模块化的问题，并且可以用在浏览器中，但是 Commonjs 是同步加载模块，当要用到该模块了，现加载现用，这种同步机制到了浏览器里边就有问题了，浏览器同步加载模块会导致性能、可用性、调试和跨域访问等问题。
@@ -84,10 +88,6 @@ require.cache对象
 exports.hello = function () {
   console.log('Hello World!');
 };
-
-module.exports = function () {
-  console.log('Hello World!');
-};
 ```
 
 ``` js
@@ -100,11 +100,20 @@ function count() {
 exports.count = count;
 ```
 
+#### module.exports
+module 指当前模块对象，exports 是当前 module 对象的一个属性，本质上也是一个对象。
+
+``` js
+module.exports = function () {
+  console.log('Hello World!');
+};
+```
+
 exports 和 module.exports 的区别了：
 
 1. module.exports 初始值为一个空对象 {}；
 
-2. exports 是指向 module.exports 的引用；
+2. exports 是指向 module.exports 的引用，相当于一个变量；
 
 3. require() 返回的是 module.exports 而不是 exports。
 

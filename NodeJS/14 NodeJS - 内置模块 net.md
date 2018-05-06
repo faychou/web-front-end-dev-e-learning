@@ -1,8 +1,11 @@
 # 内置模块 net
-在 NodeJS 中用内置的 net 模块可以实现 TCP 连接。
+在 NodeJS 中用内置的 net 模块可以实现基于 TCP 的客户端与服务器端通信。
 
 ``` js
+// 引入 net 模块
 let net = require('net');
+
+// 使用 net.createServer 方法创建服务端对象
 let server = net.createServer(connection => {
 	// ...
 }).lieten(8080);
@@ -56,7 +59,7 @@ server.on('error',function(err) {
 const net = require('net'),
   fs = require('fs'),
   filename = process.argv[2];
-      
+
 server = net.createServer((connection)=> {
   console.log('Subscriber connected');
   connection.write(`watching ${filename} for changes`);

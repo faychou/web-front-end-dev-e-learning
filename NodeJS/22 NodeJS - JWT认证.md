@@ -1,10 +1,4 @@
 # JWT
-JWT（json web token）是为了在网络应用环境间传递声明而执行的一种基于 JSON 的开放标准。一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，以便于从资源服务器获取资源，比如用在用户登录上。
-
-在传统的用户登录认证中，因为 http 是无状态的，所以都是采用 session 方式。用户登录成功，服务端会保证一个 session，当然会给客户端一个 sessionId，客户端会把 sessionId 保存在 cookie 中，每次请求都会携带这个 sessionId。
-
-而 JWT 只需要服务端生成 token，客户端保存这个 token，每次请求携带这个 token，服务端认证解析就可。
-
 ## 前话 - 前端密码加密是否有意义？
 首先我们明确知道走 HTTPS 是目前唯一负责的方式。但在 HTTP 环境下，无论如何都可能会被劫持流量，不管前端做不做加密都会被轻易成功登录。这个时候保护密码明文是否有意义？
 
@@ -35,6 +29,12 @@ Token 是在服务端产生的。如果前端使用用户名/密码向服务端�
 还有另一种方案，使用 Refresh Token，它可以避免频繁的读写操作。这种方案中，服务端不需要刷新 Token 的过期时间，一旦 Token 过期，就反馈给前端，前端使用 Refresh Token 申请一个全新 Token 继续使用。这种方案中，服务端只需要在客户端请求更新 Token 的时候对 Refresh Token 的有效性进行一次检查，大大减少了更新有效期的操作，也就避免了频繁读写。当然 Refresh Token 也是有有效期的，但是这个有效期就可以长一点了，比如，以天为单位的时间。
 
 ## JWT的构成
+JWT（json web token）是为了在网络应用环境间传递声明而执行的一种基于 JSON 的开放标准。一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，以便于从资源服务器获取资源，比如用在用户登录上。
+
+在传统的用户登录认证中，因为 http 是无状态的，所以都是采用 session 方式。用户登录成功，服务端会保证一个 session，当然会给客户端一个 sessionId，客户端会把 sessionId 保存在 cookie 中，每次请求都会携带这个 sessionId。
+
+而 JWT 只需要服务端生成 token，客户端保存这个 token，每次请求携带这个 token，服务端认证解析就可。
+
 ### JWT生成编码后的样子：
 
 ```
@@ -124,7 +124,7 @@ UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 * 客户端每次向服务端请求资源的时候需要带着服务端签发的 Token
 * 服务端收到请求，然后去验证客户端请求里面带着的 Token，如果验证成功，就向客户端返回请求的数据
 
-## express中使用
+### express 中使用
 ``` bash
 npm install express --save
 npm install express-jwt --save
