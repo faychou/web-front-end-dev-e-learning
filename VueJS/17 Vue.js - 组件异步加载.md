@@ -3,12 +3,6 @@
 
 ### 方式一：
 ``` js
-Vue.component(
-  'async-demo',
-  // 该 import 函数返回一个 Promise 对象。
-  () => import('./async-demo')
-)
-
 //异步子组件
 Vue.component('parent-demo', {
   // 父组件的其他选项
@@ -16,6 +10,11 @@ Vue.component('parent-demo', {
     'async-demo': () => import('./async-demo')
   }
 })
+
+// 或者
+import Foo from './Foo.vue'
+// 改为：
+const Foo = () => import('./Foo.vue')
 ```
 
 ### 方式二：
