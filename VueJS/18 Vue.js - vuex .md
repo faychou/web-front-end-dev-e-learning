@@ -1,5 +1,5 @@
 # vuex（状态管理）
-Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。它采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化。
+Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化。
 
 ## 安装
 	npm install vuex --save
@@ -35,17 +35,19 @@ const store = new Vuex.Store({
 export default store
 ```
 
-### Store
-"store" 基本上就是一个容器，它包含着你的应用中大部分的状态(state)。
+### 一、Store
+Store 基本上就是一个容器，包含着应用中大部分的状态，其中至少要注入两项，state 和 mutation。
 
 ``` js
 // 如果在模块化构建系统中，请确保在开头调用了 Vue.use(Vuex)
 
 // 创建 store
 const store = new Vuex.Store({
+  // 初始状态
   state: {
     count: 0
   },
+  // 改变状态的规则
   mutations: {
     increment (state) {
       state.count++
@@ -55,15 +57,15 @@ const store = new Vuex.Store({
 ```
 
 ``` js
-// 触发状态变更，这是改变 store 中状态的唯一途径
+// 触发状态变更，这是改变 state 的唯一途径
 store.commit('increment')
 
 // 通过 store.state 来获取状态对象
 console.log(store.state.count) // -> 1
 ```
 
-### state
-state 定义了应用状态的数据结构，同样可以在这里设置默认的初始状态。
+### 二、state
+state 其实就是根据项目的需求，自己定义的一个应用状态的数据结构，同样可以在这里设置默认的初始状态。
 
 ``` js
 state: {
@@ -143,7 +145,9 @@ export default {
   }
 ```
 
-### Getters
+### 三、Getters
+Getters 相当于从数据库里获取数据的 API，由于是取数据，所以 getters 是一个“纯函数”，也就是不会对原数据造成影响的函数。
+
 Vuex 允许我们在 store 中定义 getters，就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。Getters 接受 state 作为其第一个参数：
 
 ``` js
@@ -193,11 +197,13 @@ getters: {
 store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
 ```
 
-### mapGetters 辅助函数
+#### mapGetters 辅助函数
 mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。
 
-### Mutations
-更改 Vuex 的 store 中的状态的唯一方法是提交 mutation，并且这个过程是同步的。Vuex 中的 mutations 非常类似于事件：每个 mutation 都有一个字符串的 事件类型 (type) 和 一个 回调函数 (handler)。这个回调函数就是我们实际进行状态更改的地方，并且它会接受 state 作为第一个参数：
+### 四、Mutations
+这是更改 state 的唯一方法，并且这个过程是同步的。说白了 Mutations 就类似于把数据存入数据库的 API。
+
+Vuex 中的 mutations 非常类似于事件：每个 mutation 都有一个字符串的 事件类型 (type) 和 一个 回调函数 (handler)。这个回调函数就是我们实际进行状态更改的地方，并且它会接受 state 作为第一个参数：
 
 ``` js
 const store = new Vuex.Store({
@@ -268,7 +274,7 @@ export default {
 }
 ```
 
-### Actions
+### 五、Actions
 Action 类似于 mutation，不同在于：
 
 * Action 是触发 mutation 修改数据，而不是直接变更状态。
@@ -356,7 +362,7 @@ export default {
 }
 ```
 
-### Modules
+### 六、Modules
 由于使用单一状态树，应用的所有状态会集中到一个比较大的对象。当应用变得非常复杂时，store 对象就有可能变得相当臃肿。
 
 为了解决以上问题，Vuex 允许我们将 store 分割成模块（module）。每个模块拥有自己的 state、mutation、action、getter、甚至是嵌套子模块——从上至下进行同样方式的分割：
