@@ -180,3 +180,10 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps)(Counter);
 ```
+
+# react-router-redux
+利用 react-router-redux 提供的 syncHistoryWithStore 可以结合 store 同步导航事件。
+
+``` js
+import { syncHistoryWithStore } from 'react-router-redux'
+```
