@@ -30,12 +30,12 @@ const state = store.getState()
 ```
 
 ### action
-是一个描述事件的简单对象，它是改变 store 中 state 的唯一方法。其中的 type 属性是必须的，表示将要执行的动作，其他属性可以自由设置。
+是一个描述事件的简单对象，告诉我们发生了什么。其中的 type 属性是必须的，表示将要执行的动作，其他属性可以自由设置。
 
 ``` javascript
 const action = {
-    type: 'ADD_TODO',
-    payload: 'Learn Redux'
+  type: 'ADD_TODO', //发生事件的类型
+  payload: 'Learn Redux' // 该类型携带的数据
 }
 ```
 
@@ -51,7 +51,7 @@ function addTodo(text) {
 ```
 
 ### store.dispatch()
-dispatch 方法是触发 state 改变的唯一途径，它将 action 发送到 reducer 函数中，进行状态的更新。
+action 描述了发生了什么事情，但是这个事情并不会主动发生，而是需要通过 dispatch 方法来触发，它将 action 发送到 reducer 函数中，进行状态的更新。
 
 ``` javascript
 import { createStore } from 'redux'
@@ -236,25 +236,23 @@ export function handleError(err) {
 }
 
 export function requstAync() {
-  return function(dispatch){
+  return function(dispatch) {
     // 请求发起时 dispatch action
     dispatch(requestPost())
-    // 这里的fetchPost 是一个Promise
+    
+    // 这里的 fetchPost 是一个 Promise
     return fetchPost()
     .then(response => response.json())
-    .then(json =>
-     // 请求成功时 dispatch action
-      dispatch(receivePost())
+    .then(json => dispatch(receivePost()) // 请求成功时 dispatch action
     )
-    .catch(err =>
-     // 请求错误时 dispatch action
-      dispatch(handleError(err))
+    .catch(err => dispatch(handleError(err)) // 请求错误时 dispatch action
     )
   }
 }
 ```
 
-### combineReducers
+### compose
+
 
 ### redux-thunk
 redux-thunk 支持 dispatch function，并且可以异步调用它。
