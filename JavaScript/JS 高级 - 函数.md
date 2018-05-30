@@ -33,6 +33,42 @@ for(var i = 0 ; i < lis.length; i++) {
 
 通过一个直接执行的函数把参数传给匿名函数。
 
+## 惰性载入函数
+惰性载入函数是指在执行函数前需要做出判断，但是每次执行还要进行 if 判断，这就造成了不必要的浪费。所以解决方法是只判断一次，后续所有函数直接执行不再判断。实现方式有以下两种：
+
+### 在声明函数时就指定适当的函数
+``` js
+var foo = (function foo() {
+  if(a != b) {
+    return function() {
+      console.log('aaa');
+    }
+  } else {
+    return function() {
+      console.log('bbb');
+    }
+  }
+})();
+```
+
+### 在函数被调用时再处理函数
+``` js
+function foo() {
+  if(a != b) {
+    foo = function() {
+      console.log('aaa');
+    };
+  } else {
+    foo = function() {
+      console.log('bbb');
+    }
+  };
+  return foo();
+}
+```
+
+比如说，在写 js 的事件监听时，每次都要判断当前浏览器，然后再根据不同的浏览器选择不同的添加事件方式，这就浪费了性能。因为当打开浏览器后，浏览器就已经确定了。
+
 ## 柯里化
 参数够了就执行，参数不够就返回一个函数，之前的参数存起来，直到够了为止。
 

@@ -90,13 +90,33 @@ alert(person1 instanceof Person2);  //false
 > 注意：构造函数内部有 return 语句的时候，如果 return 后面跟着一个对象，new 命令返回 return 指定的对象；否则不管 return 语句直接返回 this。
 
 ``` js
-var Per = function (name) {
+var Person = function (name) {
   this.name = name;
   return {age:18}
 }
-var p1 = new Per('tom');
+var p1 = new Person('tom');
 p1.name // undefined
 p1.age // 18
+```
+
+#### 作用域安全的构造函数
+作用域安全的构造函数在进行更改前，首先确认 this 对象是正确类型的实例，如果不是，就创建新的对象并且返回。
+
+``` js
+function Person(name, age) {
+  if(this instanceof Person) { // 检查 this 对象是不是 Person 的实例
+    this.name = name;
+    this.age = age;     
+  } else {
+    return new Person(name, age);
+  }
+}
+
+let p1 = new Person("jack", 20);
+p1.name // jack
+
+let p2 = Person("jack", 20);
+p2.name // jack
 ```
 
 ### 原型
