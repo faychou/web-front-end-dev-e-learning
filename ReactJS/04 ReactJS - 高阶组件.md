@@ -1,6 +1,22 @@
 # 高阶组件(HOC)
-Higher-Order Function（高阶函数），是函数式编程中的一个基本概念，它描述了一种函数接受函数作为参数，然后输出一个函数。比如常用的工具方法 reduce，map 等都是高阶函数。
+## 高阶函数
+Higher-Order Function（高阶函数），是函数式编程中的一个基本概念，它描述了一种函数接受另一个函数作为参数，然后返回一个函数。比如常用的工具方法 reduce，map 等都是高阶函数。
 
+简单的例子：
+
+``` js
+function add(a,b,fn){
+  return fn(a) + fn(b);
+}
+
+var fn = function (a) {
+  return a * a;
+}
+
+add(2,3,fn); //13
+```
+
+## 高阶组件
 而 Higher-Order Components（高阶组件）其实也是类似于高阶函数，它接受一个或多个组件作为参数，返回一个全新的组件。
 
 ``` javascript
