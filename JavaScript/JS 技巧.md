@@ -130,3 +130,34 @@ if(self==top){
   //in iframe
 }
 ```
+
+### 生成n位随机数
+``` js
+let getRandom = n => Math.random().toString().slice(-n);
+getRandom(6)   //6位随机数
+```
+
+### 生成16进制颜色
+``` js
+let colorCode = '#' +('00000' +(Math .random()* 0x1000000 << 0).toString(16)).slice(- 6);
+```
+
+### n到m间随机整数
+``` js
+et randomNum = (n,m) => Math.floor(Math.random()*(m-n) + n);
+randomNum(2,10)   //2-10之间的整数
+```
+
+### url参数转json
+``` js
+let urlToJson = url => {
+  let json = {};
+  if (!!!url) return json;
+  let data = url.split('?')[1] ? url.split('?')[1].split('&') : [];
+  for(let i=0; i<data.length; i++) {
+    let k = data[i].split('=');
+    k[0] && (json[k[0]] = k[1] || '');
+  }
+  return json;
+}
+```
