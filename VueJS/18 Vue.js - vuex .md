@@ -161,6 +161,9 @@ const store = new Vuex.Store({
   getters: {
     doneTodos: state => {
       return state.todos.filter(todo => todo.done)
+    },
+    getReverseName: state => {
+      return state.name.split('').reverse().join('')
     }
   }
 })
@@ -197,6 +200,11 @@ getters: {
 store.getters.getTodoById(2) // -> { id: 2, text: '...', done: false }
 ```
 
+#### 在组件中使用 getter
+``` js
+this.$store.getters.doneTodosCount
+```
+
 #### mapGetters 辅助函数
 mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。
 
@@ -210,7 +218,7 @@ const store = new Vuex.Store({
   state: {
     count: 1
   },
-  mutations: {
+  mutations: { //同步
     increment (state) {
       // 变更状态
       state.count++
@@ -280,20 +288,20 @@ Action 类似于 mutation，不同在于：
 * Action 是触发 mutation 修改数据，而不是直接变更状态。
 * Action 可以包含任意异步操作。
 
-常见的例子有从服务端获取数据，在数据获取完成后会调用 store.commit() 来调用更改 Store 中的状态。可以在组件中使用 dispatch 来发出 Actions。
+常见的例子有从服务端获取数据，在数据获取完成后会调用 store.commit() 方法来触发 mutation 修改数据，然后 Actions 可以在组件中使用 dispatch 来发出。
 
 ``` js
 const store = new Vuex.Store({
   state: {
     count: 0
   },
-  mutations: {
+  mutations: { //同步
     increment (state,n) {
       state.count += n
     }
   },
-  actions: {
-    loadData (context) {
+  actions: { //异步
+    incrementActions (context) {
       this.axios.get(url)
       .then((res) => {
         context.commit('increment',{n:res.data})
@@ -346,6 +354,11 @@ store.dispatch({
 ```
 
 #### 在组件中触发 Action
+``` js
+this.$store.dispatch('incrementActions')
+```
+
+#### mapActions
 ``` js
 import { mapActions } from 'vuex'
 
