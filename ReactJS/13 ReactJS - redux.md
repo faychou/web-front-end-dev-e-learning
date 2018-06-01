@@ -158,17 +158,16 @@ function reducer(state, action) {
 }
 
 var store = createStore(reducer);
-
 console.log( store.getState() ); // { counter: 0 }
 
-store.dispatch(inc());
-console.log( store.getState() ); // { counter: 1 }
+//监视当前 state 的变化
+store.subscribe(function() {
+  console.log(store.getState());
+});
 
 store.dispatch(inc());
-console.log( store.getState() ); // { counter: 2 }
-
+store.dispatch(inc());
 store.dispatch(dec());
-console.log( store.getState() ); // { counter: 1 }
 ```
 
 规则：view => 触发 dispatch(action)  => reducer 根据 action.type 返回数据 => store 被更新 => view 被更新。
