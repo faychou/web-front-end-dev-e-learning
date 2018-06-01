@@ -8,17 +8,28 @@
 * 类：对象的类型模板，通过类可以创建任意多个具有相同属性和方法的对象
 * 实例：根据类创建的对象
 
-在 ES6 出现之前， JavaScript 是没有类的概念，但是 javascript 也是面向对象的语言，而这种面向对象的方式是基于原型的。如果要理解基于原型实现面向对象的思想，那么掌握以下几个概念就显得尤为重要： 对象（Object）、构造函数（constructor）、原型（prototype）、原型链（prototype chain） 。
+在 ES6 出现之前， JavaScript 是没有类的概念，但是 javascript 也是面向对象的语言，而这种面向对象的方式是基于原型模式的面向对象语言。如果要理解基于原型实现面向对象的思想，那么掌握以下几个概念就显得尤为重要： 对象（Object）、构造函数（constructor）、原型（prototype）、原型链（prototype chain） 。
 ## 理解对象
 对象是属性的集合，而属性包含了一系列内部特性，这些特性描述了属性的特征。
+
+### 动态添加属性
+``` js
+var person = new Object();
+
+// 通过明确的属性名添加
+person.name ='jack';
+
+var str = "age";
+
+// 通过不明确的属性名添加
+person[str] = 13;
+```
 ## 创建对象
 创建对象包括了几种经典的模式；工厂模式，构造函数模式，原型模式，混合构造函数/原型模式，动态原型模式，寄生构造函数模式等。
 
 ### 创建 Object 实例
 ``` js
 var person = new Object();person.firstname = "Fay";person.lastname = "Chou";person.age = 18;person.eyeColor = "black";```
-
-由此可见 属性是可以动态添加，修改的。
 
 ### 对象字面量
 ``` js
@@ -44,7 +55,7 @@ alert(newPerson2 instanceof Object);  //true
 ```
 
 ### 构造函数
-构造函数是用来初始化对象的，像原生的构造函数 Object, Array 一样，可以创建自定义的构造函数，从而自定义对象的属性与方法。上面的 createPerson 并不是真正的构造函数，构造函数的语法和定义一个 function 其实是一样的：
+上面的工厂模式并不是真正的构造函数，JavaScript 中提供了真正的构造函数，它的语法和定义一个 function 其实是一样的。构造函数是用来初始化对象的，像原生的构造函数 Object, Array 一样，可以创建自定义的构造函数，从而自定义对象的属性与方法。上面的 createPerson 并不是真正的构造函数，构造函数的语法和定义一个 function 其实是一样的：
 
 ``` js
 function Person(firstname,lastname,age) {  this.firstname = firstname;
@@ -131,7 +142,8 @@ var p2 = new Person('jery');
 
 p1.sayHi === p2.sayHi // false
 ```
-实例化两个对象，虽然 sayHi 输出的内容是一样的，但是 sayHi 方法是不一样的，就是说每实例化一个对象就生成一个新的 sayHi 方法。而所有的 sayHi 方法都是同样的行为，这完全是可以共享的。
+
+从上面可以看出，虽然 sayHi 输出的内容是一样的，但是 sayHi 方法是不一样的，就是说每实例化一个对象就生成一个新的 sayHi 方法。而所有的 sayHi 方法其实都是同样的行为，这就会造成内存空间的浪费，因为 sayHi 方法完全是可以共享的。
 
 而通过原型我们就可以实现这样的共享。
 
@@ -144,7 +156,7 @@ function Person(firstname,lastname,age) {  this.firstname = firstname;
 由此可以看出 Person 函数中有一个 prototype 属性，并且在 prototype 上定义的成员，可以在每个实例中引用，并且是共用的。
 
 ## 原型
-Js 所有的函数在创建的时候都会自动为其添加一个 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
+Js 所有的函数在创建的时候都会自动为其添加一个 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。是 JavaScript 面向对象开发中最重要的一个概念。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
 
 所以 JavaScript 是一种基于原型的面向对象语言，即每一个对象都有一个原型，对象从原型中继承属性和方法。
 
