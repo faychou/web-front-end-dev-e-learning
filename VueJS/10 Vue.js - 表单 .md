@@ -1,4 +1,8 @@
 # Vue 表单
+
+### v-model 
+是 vue.js 提供的语法糖，根据不同的表单控件监听不同的事件。
+
 ``` html
 <input v-model="message">
 
