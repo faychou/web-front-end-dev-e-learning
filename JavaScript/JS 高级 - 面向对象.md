@@ -156,7 +156,7 @@ function Person(firstname,lastname,age) {  this.firstname = firstname;
 由此可以看出 Person 函数中有一个 prototype 属性，并且在 prototype 上定义的成员，可以在每个实例中引用，并且是共用的。
 
 ## 原型
-Js 所有的函数在创建的时候都会自动为其添加一个 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。是 JavaScript 面向对象开发中最重要的一个概念。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
+JS 所有的函数在创建的时候都会自动为其添加一个 prototype 属性，它记录着一些属性和方法。这个属性引用了一个对象，即原型对象，也简称原型。是 JavaScript 面向对象开发中最重要的一个概念。通俗点讲，原型对象就是内存中为其他对象提供共享属性和方法的对象。
 
 所以 JavaScript 是一种基于原型的面向对象语言，即每一个对象都有一个原型，对象从原型中继承属性和方法。
 
@@ -181,22 +181,16 @@ person.greet();
 //实例化一个对象时，People 这个类首先会将 person 的 __proto 属性指向 People.prototype
 console.log(person.__proto__ === People.prototype); // true
 ```
-### JavaScript 原型链
-每个对象都有一个内部属性 prototype，称之为 原型。原型的值可以是一个对象，也可以是 null 。如果它的值是一个对象，则这个对象也一定有自己的原型，这样就形成了一条线性的链，直到原型为 null。
-
-原型的优点是能够以对象结构为载体，创建大量的实列，这些实列能共享原型中的成员(属性和方法)；同时也可以使用原型实现面向对象中的继承机制 。
-
-如果跟着原型链一层层的寻找，所有对象都可以寻找到最顶层，Object.prototype, 即 Object 的构造函数的 prototype 属性，而 Object.prototype 对象指向的就是没有任何属性和方法的 null 对象。
-
-``` js
-Object.getPrototypeOf(Object.prototype)
-// null
-```
-
-对象查找他的属性的过程：首先在对象本身上面找 -> 没找到再到对象的原型上找 ->还是找不到就到原型的原型上找 —>直到 Object.prototype 找不到 -> 返回 undefined。
 
 ### constructor
 每个 prototype 对象都有一个 constructor 属性，这个属性始终指向 prototype 对象所在的构造函数。
+
+``` js
+function Person() {
+
+}
+console.log(Person === Person.prototype.constructor); // true
+```
 
 由于 constructor 属性有原型对象与构造函数的关联关系，所以修改原型对象的时候，务必要小心。
 
@@ -216,7 +210,15 @@ Pet.prototype.constructor = Pet;
 ```
 
 ### `__proto__`
-每个被 new 实例化的对象都会包含一个 `__proto__` 属性，它是对构造函数 prototype 的引用。
+每个 JavaScript 对象(除了 null )都具有一个 `__proto__` 属性，它是对构造函数的 prototype 对象的引用。
+
+``` js
+function Person() {
+
+}
+var person = new Person();
+console.log(person.__proto__ === Person.prototype); // true
+```
 
 ``` js
 function Foo() {};
@@ -296,5 +298,16 @@ myObject.doCool(); // "cool!"
 
 调用的 myObject.doCool() 是实际存在于 myObject 中的，这可以让我们的 API 设 计更加清晰。从内部来说，我们的实现遵循的是委托设计模式，通过 Prototype 委托到 anotherObject.cool()。换句话说，内部委托比起直接委托可以让 API 接口设计更加清晰。
 
+### JavaScript 原型链
+每个对象都有一个内部属性 prototype，称之为 原型。原型的值可以是一个对象，也可以是 null 。如果它的值是一个对象，则这个对象也一定有自己的原型，这样就形成了一条线性的链，直到原型为 null。
+
+原型的优点是能够以对象结构为载体，创建大量的实列，这些实列能共享原型中的成员(属性和方法)；同时也可以使用原型实现面向对象中的继承机制 。
+
+如果跟着原型链一层层的寻找，所有对象都可以寻找到最顶层，Object.prototype, 即 Object 的构造函数的 prototype 属性，而 Object.prototype 对象指向的就是没有任何属性和方法的 null 对象。
+
+``` js
+console.log(Object.prototype.__proto__ === null) // true
+```
+
 ### 属性优先级
-对象 > 原型。
+对象查找属性的过程：首先在对象本身上面找 -> 没找到再到对象的原型上找 ->还是找不到就到原型的原型上找 —>一直找到最顶层 Object.prototype 为止，如果找不到就返回 undefined。
