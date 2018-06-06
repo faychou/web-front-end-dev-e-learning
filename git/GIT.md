@@ -432,3 +432,11 @@ Thumbs.db
 *.*~
 ~*.*
 ```
+
+## GIT 常见错误
+### 情境一
+``` bash
+Your branch is up-to-date with 'origin/master'.
+```
+
+说明当前分支已经是最新的了，不需要再 commit 了。
