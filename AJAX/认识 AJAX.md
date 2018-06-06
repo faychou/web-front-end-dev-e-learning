@@ -344,7 +344,7 @@ npm install --save whatwg-fetch
 ```
 
 ## axios 库
-### Get 请求
+### GET 请求
 ``` js
 const url = 'https://www.faychou.cn/api/list'
 
@@ -365,7 +365,7 @@ axios.get('/user', {
 })
 ```
 
-### Post 请求
+### POST 请求
 默认情况下，axios 会将JS对象序列化为 JSON 对象。为了使用 `application/x-www-form-urlencoded` 格式发送请求，我们可以这样：
 
 ``` js

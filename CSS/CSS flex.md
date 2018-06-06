@@ -160,3 +160,5 @@ flex-grow 属性定义项目的放大比例，flex-grow 值是一个单位的正
   align-self: auto | flex-start | flex-end | center | baseline | stretch;
 }
 ```
+
+> 注意：Flex Item 的 float,clear 和 vertical-align 均无效。
