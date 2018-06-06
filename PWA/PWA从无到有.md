@@ -55,8 +55,11 @@ PWA 全称 Progressive Web Apps，中文名叫渐进式网络应用。是 Google
 ### short_name
 用作当应用安装后出现在用户主屏幕上的文本。
 
+### description
+应用描述。
+
 ### start_url
-start_url 用来指定当用户从设备启动应用时加载的第一个页面。如果给定的是相对路径，那么基础路径就是清单的路径。如果你想追踪有多少人是通过主屏幕图标访问网站的，你可能想要在查询字符串中追加追踪代码，比如 /index.html?homescreen=1 这样的 URL 。这样一来，你的 Web 分析软件包就可以分辨出通过主屏幕图标到达的用户。
+start_url 用来指定当用户从设备启动应用时加载的第一个页面，默认为 `/`。如果给定的是相对路径，那么基础路径就是清单的路径。如果你想追踪有多少人是通过主屏幕图标访问网站的，你可能想要在查询字符串中追加追踪代码，比如 /index.html?homescreen=1 这样的 URL 。这样一来，你的 Web 分析软件包就可以分辨出通过主屏幕图标到达的用户。
 
 ### display
 Web 应用显示模式。
@@ -66,8 +69,14 @@ Web 应用显示模式。
 * Minimal-ui - 此模式类似于 fullscreen，但为终端用户提供了可访问的最小 UI 元素集合，例如，后退按钮、前进按钮、重载按钮以及查看网页地址的一些方式。
 * Browser - 使用操作系统内置的标准浏览器来打开 Web 应用。
 
+### orientation
+优先旋转方向，可选的值有：any, natural, landscape, landscape-primary, landscape-secondary, portrait, portrait-primary, and portrait-secondary 等。
+
+### background_color
+欢迎页面的背景颜色和浏览器的背景颜色。
+
 ### theme_color
-可以对浏览器的地址栏进行着色，以符合网站的主色调。
+应用的主题颜色，一般都会和背景颜色一样。
 
 ### icons
 字段决定了当 Web 应用被添加到设备主屏幕时所显示的图标。
@@ -137,6 +146,8 @@ if(navigator.serviceWorker != null) {
 ```
 
 使用 `navigator.serviceWorker.register('/service-worker.js')` 函数注册，该函数返回 promise，然后通知浏览器下载 Service Worker 文件，如果注册成功，它会开始 Service Worker 生命周期的剩余阶段。
+
+如果您不需要离线的相关功能，您可以只创建一个 /service-worker.js文件，这样用户就可以直接安装您的Web应用了！
 
 ### 处理静态缓存
 当 service worker 被注册以后，用户首次访问页面的时候，一个 install 事件函数就会被触发。在这个事件的回调函数中，我们能够缓存所有应用需要用到的资源。
