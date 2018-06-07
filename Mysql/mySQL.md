@@ -121,60 +121,11 @@ update mysql.user set authentication_string=password('123456') where user='root'
 > 注意：注意密码字段名 5.7 版本的是 authentication_string，之前的为 password。
 
 ## 语法规则
-在 window 系统中要区分大小写，但是在其他系统中不区分；
+* 在 window 系统中要区分大小写，但是在其他系统中不区分；
 
-MySQL 语句都以分号为结束；
+* MySQL 语句都以分号为结束；
 
-## 数据类型
-MySQL 有三大类数据类型, 分别为数字、字符串、日期\时间。
-
-### 整数类型
-|   整数类型  | 字节数  |
-| :--------- | :---- |
-|   TINYINT  | 	1   |
-|  SMALLINT  |  	2   |
-|  MEDIUMINT  | 	3    |
-| INT, INTEGER | 	4 |
-| BIGINT | 	8 |
-
-|  浮点数类型  |  字节数 |
-| :--------- | :---- |
-|  FLOAT  | 	4 |
-|  DOUBLE  | 	8 |
-
-|  定点数类型	 |  字节数 |
-| :--------- | :---- |
-|  DEC(M,D)  | 	M+2 |
-|  DECIMAL(M,D)  | 	M+2 |
-
-|  位类型  | 	字节数 |
-| :--------- | :---- |
-|  BIT(M)  | 	1~8(M: 1~64)
-
-### 字符串类型
-|  字符串类型	  | 分类 | 字节数  | 	描述 |
-| :--------- | :---- |:---- | :---- |
-|  CHAR(M)  | 字符串 | M  | 	M: 0~255, 固定长度 |
-|  VARCHAR(M) | 字符串 |		 | M: 0~65535, 可变长 |
-|  TINYBLOB | 二进制(图片、音乐等) | 0~255 |  |
-|  BLOB | 二进制 | | 0~65535 |
-|  MEDIUMBLOB	 |二进制 | 	  | |
-|  LONGBLOB | 二进制 |	 | 	 |
-|  TINYTEXT | 文本 |  | 0~255 |
-|  TEXT |  文本 | 	 | 0~65535 |
-|  MEDIUMTEXT	 | 文本|  | 	 |
-|  LONGTEXT |文本| 	 | 	 |
-|  BINARY(M) | 	 | 	 |
-|  VARBINARY	 |  | 	 |
-
-### 日期类型
-|  日期类型 | 	字节数 | 	描述 |
-| :--------- | :---- | :---- | 
-|  DATETIME | 	8 | 	YYYY-MM-DD HH:MM:SS |
-|  DATE | 	4	 | YYYY-MM-DD |
-|  TIME | 	3	 | HH:MM:SS |
-|  TIMESTAMP | 	4	 | 时间戳 |
-
+* 数据库名或者表名只能包含字母、数字、下划线（_）、@、# 等；
 
 ## 数据库操作
 ### 创建数据库
@@ -244,31 +195,36 @@ MySQL 中所有的数据操作都是针对表来操作的，所以先要创建�
 use test;
 
 # 创建表
+# 语法： create table 表名(列名1 数据类型 约束,列名2 数据类型 约束);
 create table user(
   name nvarchar(40),
   age int(5)
 );
 ```
 
-`create table` 是固定的关键字，后面紧跟要创建的表的名称，括号里面是表中每一列的内容，每一列都可以设置内容是否为空、是否为主键等，比如说 name、age 为每列的名称, 后面跟的是数据类型描述。
+括号里面是表中每一列的内容，name、age 为每列的名称, 后面跟的是数据类型，其后可以设置每一列的约束条件，如：内容是否为空、是否为主键等。
 
-以创建一个 user 表为例，表中将存放 id、姓名(name)、性别(sex)、年龄(age)、联系电话(tel) 这些内容:
+以创建一个 t_user 表为例，表中将存放 id、姓名(name)、性别(sex)、年龄(age)、联系电话(tel) 这些内容:
 
 ``` bash
-create table user(
-  id int not null auto_increment primary key,
-  name char(8) not null default "jack",
-  sex char(4) not null,
-  age int(5) unsigned not null,
-  tel char(13) null default "-"  
-);
+create table t_user(
+  u_id int not null auto_increment primary key,
+  u_name char(8) not null default "jack",
+  u_sex char(4) not null,
+  u_age int(5) unsigned not null,
+  u_tel char(13) null default "-"  
+) engine=innodb auto_increment=1 default charset=utf8;
 ```
 
 * not null 代表该列的值不能为空；
 * auto_increment 代表该列的值自增，在每张表中仅能有一个这样的值且所在列必须为索引列；
-* primary key 表示该列是表的主键, 本列的值必须唯一, MySQL 将自动索引该列；
+* primary key 表示该列是表的主键, 本列的值必须唯一且不能为空, MySQL 将自动索引该列；
 * unsigned 表示该类型为无符号型；
-* default 表示该列值为空时的默认值。
+* unique 唯一约束，用于保证数据表中字段的唯一性；
+* default 表示如果插入新字段时，该列值为空时系统自动插入默认值。
+* engine=innodb 使用innodb引擎，是 mysql 数据库引擎之一；
+* auto_increment=1 自增键的起始序列号为1；
+* charset=utf8 数据库默认编码为 utf8。
 
 #### 通过 select 来创建表
 ``` bash
@@ -276,6 +232,54 @@ create table user_new select * from user_old;
 ```
 
 代表从 user_old 的表中复制一份数据，添加到新的 user_new 数据库表中。
+
+### 数据类型
+MySQL 有三大类数据类型, 分别为数字、字符串、日期\时间。
+
+#### 整数类型
+|   整数类型  | 大小  |
+| :--------- | :---- |
+|   TINYINT  | 	1   |
+|  SMALLINT  |  	2   |
+|  MEDIUMINT  | 	3    |
+| INT, INTEGER | 	4 |
+| BIGINT | 	8 |
+
+|  浮点数类型  |  大小 |  精度  |
+| :--------- | :---- | :---- |
+|  FLOAT  | 	4 | 7为小数 |
+|  DOUBLE  | 	8 | 15为小数 |
+|  DECIMAL(M,D)  | 17 | 30为小数 |
+
+> DECIMAL(M,D) 中，M 指数字的总位数，包括整数位个数和小数位个数，D 指小数位的个数，所以 M 肯定是大于 D 的。
+
+|  位类型  | 	字节数 |
+| :--------- | :---- |
+|  BIT(M)  | 	1~8(M: 1~64)
+
+#### 字符串类型
+|  字符串类型	  | 分类 | 字节数  | 	描述 |
+| :--------- | :---- |:---- | :---- |
+|  CHAR(M)  | 字符串 | 固定 M字节  | 	M: 0~255, 固定长度 |
+|  VARCHAR(M) | 字符串 |	 最大 M字节 | M: 0~65535, 可变长 |
+|  TINYBLOB | 二进制(图片、音乐等) | 0~255 |  |
+|  BLOB | 二进制 | | 0~65535 |
+|  MEDIUMBLOB	 |二进制 | 	  | |
+|  LONGBLOB | 二进制 |	 | 	 |
+|  TINYTEXT | 文本 |  | 0~255 |
+|  TEXT |  文本(如存储文章详情) | 	 | 0~65535 |
+|  MEDIUMTEXT	 | 文本 |  | 	 |
+|  LONGTEXT | 长文本 | 	 | 	 |
+|  BINARY(M) | 	 | 	 |
+|  VARBINARY	 |  | 	 |
+
+#### 日期类型
+|  日期类型 | 	字节数 | 	描述 |
+| :--------- | :---- | :---- | 
+|  DATETIME | 	8 | 	YYYY-MM-DD HH:MM:SS |
+|  DATE | 	4	 | YYYY-MM-DD |
+|  TIME | 	3	 | HH:MM:SS |
+|  TIMESTAMP | 	4	 | 时间戳 |
 
 ### 显示数据库表信息
 查看某个数据库下的所有数据库表，或者根据like模糊查看某个数据库表：
