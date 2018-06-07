@@ -5,8 +5,68 @@ MySQL 具有运行速度很快、容易使用、支持查询语言、多个用�
 
 ## 环境搭建
 ### Linux 系统配置
+#### centos
+第一步、由于 centos 的 yum 源中没有 mysql ，需要到 mysql 的官网下载 yum repo 配置文件：
 
-### MacOS 系统配置
+``` bash
+wget http://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
+```
+
+第二步、安装 yum repo 文件：
+
+``` bash
+rpm -ivh mysql57-community-release-el7-9.noarch.rpm
+```
+
+执行完后会在 `/etc/yum.repos.d/` 目录下生成 `mysql-community.repo` 和 `mysql-community-source.repo` 两个文件。
+
+第三步、更新 yum 缓存：
+
+``` bash
+yum clear all
+yum makecache
+```
+
+第四步、安装 mysql：
+
+``` bash
+yum install mysql-community-client.x86_64 mysql-community-common.x86_64 mysql-community-devel.x86_64 mysql-community-libs.x86_64 mysql-community-server.x86_64
+
+# 或者
+rpm install mysql-server
+```
+
+第五步、启动 mysql：
+
+``` bash
+service mysqld start
+```
+
+第六步、查看初始密码：
+
+``` bash
+grep 'temporary password' /var/log/mysqld.log
+```
+
+得到类似以下内容：
+
+```
+a temporary password is generated for root@localhost:50azqgpiat
+```
+
+最后面的 `50azqgpiat` 就是初始密码。
+
+第七步、使用初始密码登陆：
+
+``` bash
+mysql -u root -p
+```
+
+第八步、更改初始密码：
+
+``` bash
+alter user 'root'@'localhost' identifide by '新密码'
+```
 
 ### Windows 系统配置
 1、 直接官网下载 mysql.zip [下载地址](https://dev.mysql.com/downloads/mysql/)，注意 MySQL Community Server 表示的是个人免费版，其他版本都是要收费的；
@@ -70,7 +130,7 @@ mysqld -install
 
 提示 "Service successfully installed." 则表示安装成功。
 
-### MySQL服务的启动、停止与卸载
+#### MySQL服务的启动、停止与卸载
 ``` bash
 # 安装完毕后，执行以下命令启动 MySQL 服务
 net start MySQL
@@ -81,6 +141,9 @@ net stop MySQL
 # 删除服务，MySQL 为服务的名字
 sc delete MySQL
 ```
+
+### MacOS 系统配置
+官网下载 mysql 的 dmg 版本傻瓜式安装即可。安装完成后在系统偏好设置的其他下，点击 ‘mysql’ 的图标，然后点击 start mysql server 按钮，启动 mysql 。
 
 ### 登录 MySQL
 当 MySQL 服务已经运行时, 此时 mysql 还没有密码，我们可以通过以下命令设置新密码：
