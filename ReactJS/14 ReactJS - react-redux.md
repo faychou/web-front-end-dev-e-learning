@@ -3,14 +3,14 @@ redux 可以直接在 react 中使用，因为 redux 本身是独立于其他框
 
 react-redux 将所有组件分成两大类：UI 组件（presentational component）和容器组件（container component）。也就是说 UI 组件负责 UI 的呈现，不处理逻辑，容器组件负责管理数据和逻辑。
 
-### UI组件特点
+### 展示 UI 组件特点
 * 只负责 UI，不带任何逻辑；
 * 无状态组件；
 * 所有数据都是通过 props 提供；
 * 不使用任何 Redux API；
 
 ### 容器组件特点
-* 负责管理数据和业务逻辑，不负责 UI；
+* 负责获取数据，处理业务逻辑，通常在render()函数内返回展示型组件；
 * 带有内部状态；
 * 使用 Redux API；
 
@@ -180,10 +180,46 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps)(Counter);
 ```
-
-# react-router-redux
-利用 react-router-redux 提供的 syncHistoryWithStore 可以结合 store 同步导航事件。
+## 路由与 Redux
+同时使用 React-Router 和 Redux 时，大多数情况是正常的，但是也可能出现路由变更组件未更新的情况，因为 Redux 会实现组件的 shouldComponentUpdate 方法，当路由变化时，该组件并没有接收到 props 表明发生了变更，需要更新组件。要解决这个问题只需要简单的使用 react-router-dom 提供的 withRouter 方法包裹组件：
 
 ``` js
-import { syncHistoryWithStore } from 'react-router-redux'
+import { withRouter } from 'react-router-dom'
+export default withRouter(connect(mapStateToProps)(Home))
+```
+
+## react-router-redux
+在使用 Redux 以后，需要遵循 redux 的原则：单一可信数据来源，即所有数据来源都只能是 reudx store，react 路由状态也不应例外，所以需要将路由 state 与 store state 连接。
+
+``` bash
+yarn add react-router-redux@next
+yarn add history
+```
+
+然后，在创建store时，需要实现如下配置：
+
+1、创建一个 history 对象，对于 web 应用，我们选择 browserHisotry，对应需要从 `history/createBrowserHistory` 模块引入 createHistory 方法以创建 history 对象；
+
+2、添加 routerReducer 和 routerMiddleware 中间件“，其中 routerMiddleware 中间件接收 history 对象参数，连接 store 和 history，等同于旧版本的 syncHistoryWithStore；
+
+``` js
+import createHistory from 'history/createBrowserHistory'
+import { ConnectedRouter, routerReducer, routerMiddleware, push } from 'react-router-redux'
+// Create a history of your choosing (we're using a browser history in this case)
+export const history = createHistory()
+
+// Build the middleware for intercepting and dispatching navigation actions
+const middleware = routerMiddleware(history)
+
+// Add the reducer to your store on the `router` key
+// Also apply our middleware for navigating
+const store = createStore(
+  combineReducers({
+    ...reducers,
+    router: routerReducer
+  }),
+  applyMiddleware(middleware)
+)
+
+return store
 ```

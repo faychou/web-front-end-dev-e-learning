@@ -259,6 +259,10 @@ redux-thunk 支持 dispatch function，并且可以异步调用它。
 #### redux-persist
 要实现 redux 的持久化，包括 redux store 的本地持久化存储及恢复启动两个过程，如果完全自己编写实现，代码量比较复杂，可以使用开源库 redux-persist，它提供 persistStore 和 autoRehydrate 方法分别持久化本地存储 store 及恢复启动 store，另外还支持自定义传入持久化及恢复 store 时对 store state 的转换拓展。
 
+``` bash
+yarn add redux-persist
+```
+
 #### redux-saga
 redux-saga 是一个致力于使应用中如数据获取，本地缓存访问等异步任务易于管理，高效运行，便于测试，能更好的处理异常的三方库。只负责管理异步任务，它可以接受应用主进程的 redux action 以决定启动，暂停或者是取消进程任务，它也可以访问 redux 应用 store state，然后分发 action。
 
