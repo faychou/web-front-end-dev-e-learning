@@ -106,6 +106,21 @@ function ExpandableForm({ onExpand, expanded = false, children, onSubmit }) {
 }
 ```
 
+### 添加 prop-types
+``` js
+PureComponent.propTypes = {
+  onSubmit: func.isRequired,
+  expanded: bool,
+  onExpand: func.isRequired
+}
+
+const PureComponent = (props) => (
+  <div>
+    //use props
+  </div>
+)
+```
+
 ## 组件生命周期
 ### componentWillMount
 该方法在整个组件生命周期只会被调用一次，所以可以利用该方法做一些组件内部的初始化工作。

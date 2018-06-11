@@ -5,7 +5,7 @@
 import React from 'react'
 
 // 注意加上 export default 是指该组件能够被引用
-export default class Person extends React.Component {
+export default class MyComponent extends React.Component {
 
   // 构造函数
   constructor (props) {
@@ -35,14 +35,14 @@ export default class Person extends React.Component {
 
 }
 
-Person.defaultProps = {
+MyComponent.defaultProps = {
   name: 'Guest'
 }
 
 /**
  * 统一都要定义 propTypes
  */
-Person.propTypes = {
+MyComponent.propTypes = {
   name: React.PropTypes.string
 }
 ```
@@ -52,21 +52,21 @@ Person.propTypes = {
 ``` js
 // 方式一：
 import React from 'react'
-class Person extends React.Component {
+class MyComponent extends React.Component {
   // ...
 }
 
 // 方式二：
 import React, { Component } from 'react'
-class Person extends Component {
+class MyComponent extends Component {
   // ...
 }
 ```
 
-state 、 propTypes 和 defaultProps 的 ES7 写法：
+最新 state 、 propTypes 和 defaultProps 的 ES7 写法：
 
 ``` js
-export default class Person extends Component {
+export default class MyComponent extends Component {
   state = { expanded: false }
     
   static propTypes = {
@@ -83,6 +83,12 @@ export default class Person extends Component {
   
   constructor(props) {
     super(props);
+  }
+  
+  // 事件
+  handleSubmit = (e) => {
+    e.preventDefault()
+    //
   }
   
   // ……
@@ -108,18 +114,40 @@ npm install --save prop-types
 import React,{Component} from 'react'
 import PropTypes from 'prop-types'  //引入 prop-types
 
-class MyComponent extends Component {
+export default class MyComponent extends Component {
   static propTypes = {
     title:PropTypes.string  //设置类型
   }
   static defaultProps = {
-    title:'使用 prop-types 包'
+    title:'默认 props'
   }
   constructor() {
     super()
   }
   render() {
     // ... do things with the props
+  }
+}
+```
+
+### 解构 Props
+``` js
+export default class MyComponent extends Component {
+  constructor() {
+    super()
+  }
+  render() {
+    const {
+      model,
+      title
+    } = this.props
+    
+    <div>
+      <h1>{title}</h1>
+      <input
+        type="text"
+        value={model.name} />
+    </div>
   }
 }
 ```
