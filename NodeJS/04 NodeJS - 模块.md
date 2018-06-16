@@ -62,7 +62,7 @@ module.parent === null
 ```
 
 ### require 函数
-用于在当前模块中加载和使用别的模块。require 过的文件会加载到缓存，所以多次 require 同一个文件（模块）不会重复加载
+用于在当前模块中加载和使用别的模块。require 过的文件都会加入到缓存，以避免二次加载带来的性能开销，所以多次 require 同一个文件（模块）不会重复加载
 
 ``` js
 var foo1 = require('./foo');
@@ -80,6 +80,12 @@ require.resolve('./a.js')
 //该对象表示缓存了所有已经被加载的模块的缓存区
 require.cache对象 
 ```
+
+#### 模块路径分析
+沿路径逐级向上查找，直到根目录下的 node_modules 目录。
+
+#### 文件扩展名分析
+node.js 会按照 `.js` 、`.json`、`.node` 的后缀名一次尝试。
 
 ### exports 对象
 是当前模块的导出对象，用于导出模块公有方法和属性。别的模块通过 require 函数使用当前模块时得到的就是当前模块的 exports 对象。
