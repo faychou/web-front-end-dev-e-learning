@@ -84,6 +84,94 @@ this.setState(function(prevState, props) {
 });
 ```
 
+### 状态的类型是数组
+如有一个数组类型的状态 books，当向 books 中增加一本书时，使用数组的 concat 方法或 ES6 的数组扩展语法（spread syntax）即可。
+
+``` js
+// 方法一：将state先赋值给另外的变量，然后使用concat创建新数组
+var books = this.state.books; 
+this.setState({
+  books: books.concat(['React Guide']);
+});
+
+// 方法二：使用preState、concat创建新数组
+this.setState(preState => ({
+  books: preState.books.concat(['React Guide']);
+}));
+
+// 方法三：ES6 spread syntax
+this.setState(preState => ({
+  books: [...preState.books, 'React Guide'];
+}));
+```
+
+当需要从 books 中截取部分元素作为新状态时，使用数组的 slice 方法。
+
+``` js
+// 方法一：将state先赋值给另外的变量，然后使用slice创建新数组
+var books = this.state.books; 
+this.setState({
+  books: books.slice(1,3);
+});
+
+// 方法二：使用preState、slice创建新数组
+this.setState(preState => ({
+  books: preState.books.slice(1,3);
+}));
+```
+
+当从 books 中过滤部分元素后，作为新状态时，使用数组的 filter 方法。
+
+``` js
+// 方法一：将state先赋值给另外的变量，然后使用filter创建新数组
+var books = this.state.books; 
+this.setState({  
+books: books.filter(item => {   
+ return item != 'React'; 
+  });
+});
+
+// 方法二：使用preState、filter创建新数组
+this.setState(preState => ({ 
+ books: preState.books.filter(item => {    
+ return item != 'React'; 
+  });
+}));
+```
+
+> 注意：不要使用 push、pop、shift、unshift、splice 等方法修改数组类型的状态，因为这些方法都是在原数组的基础上修改，而 concat、slice、filter 会返回一个新的数组。
+
+### 状态的类型是普通对象
+使用 ES6 的 Object.assgin 方法。
+
+``` js
+// 方法一：将state先赋值给另外的变量，然后使用 Object.assign 创建新对象
+var owner = this.state.owner;
+this.setState({
+  owner: Object.assign({}, owner, {name: 'Jason'});
+});
+
+// 方法二：使用 preState、Object.assign 创建新对象
+this.setState(preState => ({
+  owner: Object.assign({}, preState.owner, {name: 'Jason'});
+}))
+```
+
+使用对象扩展语法：
+
+``` js
+// 方法一：将 state 先赋值给另外的变量，然后使用对象扩展语法创建新对象
+var owner = this.state.owner;
+this.setState({
+  owner: {...owner, name: 'Jason'};
+});
+
+// 方法二：使用preState、对象扩展语法创建新对象
+this.setState(preState => ({
+  owner: {...preState.owner, name: 'Jason'};
+}));
+```
+
 ## 函数组件
 函数组件是指没有状态、没有方法的纯组件，也称为无状态组件，是最基础的组件形式，由于没有状态的影响所以就是纯静态展示的作用。如按钮、标签、输入框等。我们应该最大限度地编写和使用这一类组件。编写这类组件的方法通常是使用 ES6 的箭头函数，将 props 作为函数的参数。
 
