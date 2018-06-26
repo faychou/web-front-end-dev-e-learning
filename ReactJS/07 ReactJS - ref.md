@@ -31,6 +31,8 @@ export default class AutoFocus extends Component{
 }
 ```
 
+该方式是比较推荐的一种，但是写起来略显麻烦，而且 update 过程中有发生清除可能会有多次调用 (callback 收到 null 的情况)。
+
 ### 方式二：
 ``` js
 export default class AutoFocus extends Component{
@@ -61,22 +63,52 @@ export default class AutoFocus extends Component{
 在 react 16.3 中，新增 React.createref() 函数使 ref 创建变得更容易。
 
 ``` js
-// 在 class 中声明
-third = React.createRef();
-// 或者在 constructor 中声明
-this.third = React.createRef();
-
+constructor(props) {
+  super(props);
+  this.input = React.createRef();
+  // 或者在 class 中声明：input = React.createRef();
+}
+componentDidMount() {
+  // 获取 ref：this.input.current;
+  // 获取 input 的 value：this.input.current.value;
+  console.log(this.input);
+}
 // 在 render 函数中:
-<input type="text" ref={this.third} />;
-
-// 获取 ref
-this.third.current;
-
-// 获取 input 的 value 
-this.third.current.value;
+<input type="text" ref={this.input} />;
 ```
 
 > 注意：ref 是不能作为 props 传递的，因为它会在组件一加载时就会触发回调函数。
+
+## ForwardRef API 
+在 react 16.3 中还提供了 ForwardRef API 来辅助简化嵌套组件、component 至 element 间的 ref 传递，避免出现 this.ref.ref.ref 的问题。
+
+``` js
+import { createRef, forwardRef } from "react";
+
+const MyButton = forwardRef((props, ref) => (
+  <button ref={ref}>
+    {props.children}
+  </button>
+));
+
+class App extends Component {
+  constructor(props){
+    super(props);
+    this.realButton = createRef();
+  }
+  componentDidComponent{
+    //直接拿到 inner element ref
+    console.log(this.realButton);
+  }
+  render(){
+    return (
+    <MyButton ref={this.realButton}>
+      Press here
+    </MyButton>
+    );
+  }
+}
+```
 
 ## 为 类(Class) 组件添加 Ref
 当 ref 属性用于类(class)声明的自定义组件时，ref 回调函数收到的参数是装载(mounted)的组件实例。

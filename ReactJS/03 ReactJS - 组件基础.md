@@ -217,5 +217,3 @@ class ScrollingList extends React.Component {
 组件将要卸载时调用，一些事件监听和定时器需要解除。
 
 > 注意：以下生命周期方法都不能调用 setState：shouldComponentUpdate、componentWillUpdate 和 render 中调用 setState，组件本次的更新还没有执行完成，又会进入新一轮的更新，导致不断循环更新，进入死循环。componentWillUnmount 调用时，组件即将被卸载，setState 是为了更新组件，在一个即将卸载的组件上更新 state 显然是无意义的。
-
-## 组件通信
