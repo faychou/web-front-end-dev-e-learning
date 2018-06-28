@@ -85,40 +85,19 @@ TodoList 是 UI 组件，通过 React-Redux 的 connect 方法自动生成为容
 connect 是一个高阶函数，接受两个参数，定义了 UI 组件的业务逻辑。
 
 #### mapStateToProps
-该函数是属于输入逻辑，接收一个从 reducer 传递过来的 state 作为参数，定义从 state 转换成 UI 组件 props 的规则，并返回 props 对象。
+该函数是属于输入逻辑，接收一个从 reducer 传递过来的 state 作为参数，定义从 state 转换成 UI 组件 props 的规则，并返回 props 对象。也就是说该方法从 Redux 状态树中提取需要的部分作为 props 传递给当前的组件。
 
 此函数还可以接收第二个 ownProps 参数，代表直接在 UI 组件上声明的 props。
 
 #### mapDispatchToProps
-该函数是属于输出逻辑，接收 Store 中的  dispatch 方法作为参数，用户发出的动作如何变为 Action 对象，从 UI 组件传出去，并返回 props 对象。
+该函数是属于输出逻辑，接收 Store 中的  dispatch 方法作为参数，用户发出的动作如何变为 Action 对象，从 UI 组件传出去，并返回 props 对象。也就是说将需要绑定的响应事件（action）作为 props 传递到组件上。
 
 ### 案例
 ``` javascript
 import React, { Component } from 'react'
-import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom'
 import { createStore } from 'redux'
 import { Provider, connect } from 'react-redux'
-
-// 计数器组件，它是一个纯的 UI 组件
-// value 需要从 state 计算得到
-// onIncreaseClick 向外发出的 Action
-class Counter extends Component {
-  render() {
-    const { value, onIncrease } = this.props
-    return (
-      <div>
-        <span>{value}</span>
-        <button onClick={onIncrease}>Increase</button>
-      </div>
-    )
-  }
-}
-
-Counter.propTypes = {
-  value: PropTypes.number.isRequired,
-  onIncrease: PropTypes.func.isRequired
-}
 
 // Store
 const store = createStore(counter)
@@ -148,6 +127,21 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     onIncrease: () => dispatch(increaseAction)
+  }
+}
+
+// 计数器组件，它是一个纯的 UI 组件
+// value 需要从 state 计算得到
+// onIncreaseClick 向外发出的 Action
+class Counter extends Component {
+  render() {
+    const { value, onIncrease } = this.props
+    return (
+      <div>
+        <span>{value}</span>
+        <button onClick={onIncrease}>Increase</button>
+      </div>
+    )
   }
 }
 

@@ -31,7 +31,34 @@ export default class AutoFocus extends Component{
 }
 ```
 
-该方式是比较推荐的一种，但是写起来略显麻烦，而且 update 过程中有发生清除可能会有多次调用 (callback 收到 null 的情况)。
+该方式是比较推荐的一种，但是写起来略显麻烦，而且 update 过程中可能会有多次调用 (callback 收到 null 的情况)。
+
+另外一种情形，如果 textarea 是通过遍历数组动态生成的，我们会发现 `this.textarea` 被不断的重新赋值，所以最后在 componentDidMount 中拿到的永远都是数组最后一次遍历创建的 dom 节点。解决办法是：
+
+``` js
+export default class AutoFocus extends Component{
+  componentDidMount() {
+    console.log(this.textarea0);
+    console.log(this.textarea1);
+    console.log(this.textarea2);
+  }
+
+  render() {
+    const arr = [{content:'内容一'},{content:'内容二'},{content:'内容三'}];
+    
+    const domP = arr.map((item,i) => {
+      return <textarea ref={(dom) => this['textarea' + i] = dom} key={i}>{item.content}</textarea>
+    });
+    retuen (
+      <div>
+        {domP}
+      </div>
+    );
+  }
+}
+```
+
+也可以采用以下方法二，直接通过调用函数的形式获取 dom 节点。
 
 ### 方式二：
 ``` js
@@ -57,7 +84,7 @@ export default class AutoFocus extends Component{
 }
 ```
 
-组件被卸载或者原有的 ref 属性本身发生变化时，回调也会被立即执行，此时回调函数参数为 null，以确保内存泄露。
+> 注意：该方式中组件被卸载或者原有的 ref 属性本身发生变化时，回调函数都会被立即执行，此时回调函数参数为 null，以确保内存泄露。
 
 ## 使用 React.createRef()
 在 react 16.3 中，新增 React.createref() 函数使 ref 创建变得更容易。
