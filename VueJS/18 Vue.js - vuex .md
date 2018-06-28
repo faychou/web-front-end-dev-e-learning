@@ -1,14 +1,61 @@
 # vuex（状态管理）
 Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化。
 
-## 安装
-	npm install vuex --save
-	
+## 初识
+``` bsh
+# 安装
+npm install vuex --save
+```
+
+``` html
+<div id="app">
+  <p>{{ count }}</p>
+  <p>
+    <button @click="increment">+</button>
+    <button @click="decrement">-</button>
+  </p>
+</div>
+```
+
 ``` js
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-Vue.use(Vuex)
+Vue.use(Vuex) // Vuex 注册到 Vue 中
+
+// 创建一个 store
+const store = new Vuex.Store({
+  // 初始化 state   
+  state: {
+    count: 0
+  },
+  // 改变状态唯一声明处
+  mutations: {
+  	 increment: state => state.count++,
+    decrement: state => state.count--
+  }
+});
+
+new Vue({
+  el: '#app',
+  // 从根组件将 store 的实例注入到所有的子组件  
+  store,  
+  computed: {
+    count () {
+      // Vuex 的状态存储是响应式的，从 store 实例中读取状态最简单的方法就是在计算属性中返回某个状态,
+      // 每当状态 count 发生变化，都会重新求取计算
+	   return this.$store.state.count
+    }
+  },
+  methods: {
+    increment () {
+      this.$store.commit('increment')
+    },
+    decrement () {
+    	this.$store.commit('decrement')
+    }
+  }
+});
 ```
 
 ## API
@@ -58,10 +105,10 @@ const store = new Vuex.Store({
 
 ``` js
 // 触发状态变更，这是改变 state 的唯一途径
-store.commit('increment')
+store.commit('increment'); //组件中使用：this.$store.commit('increment');
 
 // 通过 store.state 来获取状态对象
-console.log(store.state.count) // -> 1
+console.log(store.state.count); // 组件中使用：this.$store.state.count
 ```
 
 ### 二、state
@@ -148,7 +195,7 @@ export default {
 ### 三、Getters
 Getters 相当于从数据库里获取数据的 API，由于是取数据，所以 getters 是一个“纯函数”，也就是不会对原数据造成影响的函数。
 
-Vuex 允许我们在 store 中定义 getters，就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。Getters 接受 state 作为其第一个参数：
+Vuex 允许我们在 store 中定义 getters，就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。也是就将直接获取到 State 后在 computed 里进行再次的过滤、包装逻辑统统提取出放到 Getter 里进行，提高了代码的复用性、可读性。Getters 接受 state 作为其第一个参数：
 
 ``` js
 const store = new Vuex.Store({
@@ -206,7 +253,34 @@ this.$store.getters.doneTodosCount
 ```
 
 #### mapGetters 辅助函数
-mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。
+mapGetters 辅助函数仅仅是将 store 中的 getter 映射到局部计算属性。和前面 mapState 辅助函数作用和使用上基本相同。
+
+``` js
+import { mapGetters } from 'vuex'
+
+// getter 名称和 计算属性名称相同的情况下，可以传递字符串数组
+
+export default {
+  // ...
+  computed: {
+  	...mapGetters([
+    	'doneTodos'
+    ])
+  }
+}
+
+// 传递对象的方式
+
+export default {
+  // ...
+  computed: {
+  	...mapGetters({
+    	doneTodos: 'doneTodos',
+        getTodoById: 'getTodoById' // 此处传递回来的是一个函数，所以在使用的时候 => {{ getTodoById(2) }}
+    })
+  }
+}
+```
 
 ### 四、Mutations
 这是更改 state 的唯一方法，并且这个过程是同步的。说白了 Mutations 就类似于把数据存入数据库的 API。
@@ -277,6 +351,31 @@ export default {
     ]),
     ...mapMutations({
       add: 'increment' // 映射 this.add() 为 this.$store.commit('increment')
+    })
+  }
+}
+```
+
+#### mapMutation
+使用方式跟 mapState 和 mapGetters 基本相同。
+
+``` js
+import { mapMutations } from 'vuex'
+
+export default {
+  // ...
+  methods: {
+    // 传递字符串数组，同名哦～  
+    ...mapMutations([
+      'increment', // 将 `this.increment()` 映射为 `this.$store.commit('increment')`
+
+      // `mapMutations` 也支持载荷：
+      'incrementBy' // 将 `this.incrementBy(amount)` 映射为 `this.$store.commit('incrementBy', amount)`
+    ]),
+      
+    // 传递对象  
+    ...mapMutations({
+      add: 'increment' // 将 `this.add()` 映射为 `this.$store.commit('increment')`
     })
   }
 }
@@ -359,6 +458,8 @@ this.$store.dispatch('incrementActions')
 ```
 
 #### mapActions
+和 mapMutions 使用方式基本一致。
+
 ``` js
 import { mapActions } from 'vuex'
 
@@ -374,6 +475,8 @@ export default {
   }
 }
 ```
+
+#### 组合 Action
 
 ### 六、Modules
 由于使用单一状态树，应用的所有状态会集中到一个比较大的对象。当应用变得非常复杂时，store 对象就有可能变得相当臃肿。
