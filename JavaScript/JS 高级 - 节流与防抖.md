@@ -1,39 +1,32 @@
 # 节流与防抖
 函数节流和函数防抖都是对大量频繁调用代码的一种优化。
 
-## 节流
-不管怎么触发，都是按照指定的时间间隔来执行。简单地说，就是限制函数在一定时间内调用的次数。
+## 节流（throttle）
+不管你触发了多少次函数，在规定的时间内都只会执行一次。简单地说，就是限制函数在一定时间内调用的次数。
 
 ``` js
-// 实现方案
-let throttleIndentify = 0;
-$dragable.addEventListener('mousemove', () => {
-  if(throttleIndentify) return;
-  throttleIndentify = setTimeout(() => throttleIdentify = 0, 500);
-  console.log('trigger');
-})
-
 // 简易版本
-var my_throttled_timeout = null,
-  prev_time = null,
-  my_function = function() {
-    document.querySelector('.j_my_throttle_sum').innerHTML = parseInt(document.querySelector('.j_my_throttle_sum').innerHTML) + 1;
-    my_throttled_timeout = null
-    prev_time = new Date().getTime();
-
-  };
-
-window.addEventListener('mousemove', function(){
-  if (my_throttled_timeout) return;
-  remaining = 3000 - ( new Date().getTime() - prev_time )
-  if ( remaining <= 0 ) {
-    my_function()
-  } else {
-    my_throttled_timeout = setTimeout(function() {
-      my_function()
-    }, remaining)
-  }   
-})
+function throttle(fn, threshhold) {
+  var timeout;
+  var start = new Date;
+  var threshhold = threshhold || 160;
+  
+  return function () {
+    var context = this, args = arguments, curr = new Date() - 0;
+ 
+    clearTimeout(timeout); // 总是干掉事件回调
+    if(curr - start >= threshhold) { 
+      console.log("now", curr, curr - start);
+      fn.apply(context, args); // 这些方法是在某个时间段内执行一次
+      start = curr;
+    } else {
+      // 让方法在脱离事件后也能执行一次
+      timeout = setTimeout(function() {
+        fn.apply(context, args);
+      }, threshhold);
+    }
+  }
+}
 ```
 
 ``` js
@@ -81,17 +74,24 @@ _.throttle = function(func, wait, options) {
   };
 ```
 
-## 防抖
-不管你触发了多少次，都等到你最后触发后过一段你指定的时间才触发。应用场景: 拖动 window 的 size, 不断触发 resize, 当停止拖动时, 才做处理。
+## 防抖（debounce）
+无论你触发了多少次函数，都只会执行最后一次函数。应用场景: 如 size 事件、表单提交等。
 
 ``` js
-let debounceIdentify = 0;
-window.addEventListener('resize', () => {
-  debounceIdentify && clearTimeout(debounceIdentity)
-  debounceIdentity = setTimeout(() => {
-    console.log('trigger')
-  }, 300)
-});
+// 简易版本
+function debounce(func, delay) {
+  var timeout;
+  return function(e) {
+    console.log("清除",timeout,e.target.value)
+    clearTimeout(timeout);
+    var context = this, args = arguments;
+    console.log("新的",timeout, e.target.value);
+    timeout = setTimeout(function() {
+      console.log("----")
+      func.apply(context, args);
+    },delay)
+  };
+}
 ```
 
 ``` js
@@ -156,3 +156,5 @@ function debounce(func, wait, leading, trailing) {
   }
 }
 ```
+
+函数节流一般用在 resize, touchmove, mousemove, scroll 等事件中。throttle 会强制函数以固定的速率执行，因此这个方法比较适合应用于动画相关的场景。
