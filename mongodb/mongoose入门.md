@@ -1,11 +1,13 @@
 # mongoose入门
-Mongoose是MongoDB的一个对象模型工具，是基于node-mongodb-native开发的MongoDB nodejs驱动，可以在异步的环境下执行。同时它也是针对MongoDB操作的一个对象模型库，封装了MongoDB对文档的的一些增删改查等常用方法，让NodeJS操作Mongodb数据库变得更加灵活简单。
+Mongoose 是 MongoDB 的一个对象模型工具，是基于 node-mongodb-native 开发的MongoDB nodejs 驱动，是在异步的环境下执行。同时它也是针对 MongoDB 操作的一个对象模型库，封装了 MongoDB 对文档的的一些增删改查等常用方法，让 NodeJS 操作 Mongodb 数据库变得更加灵活简单。
 
 ## 一、环境准备
-### 安装mongoose
-	npm install mongoose --save
+### 安装 mongoose
+```
+npm install mongoose --save
+```
 	
-### 引用mongoose
+### 引用 mongoose
 ``` js
 const mongoose = require("mongoose");
 ```
@@ -15,15 +17,15 @@ const mongoose = require("mongoose");
 mongoose.connect("mongodb://user:pass@ip:port/database");
 ```
 
-* user ：mongodb的用户名
-* pass ：mongodb用户密码
-* ip ：mongodb服务器地址，比如本地为127.0.0.1
-* port ：mongodb服务器端口，默认是27017
-* database ：mongodb数据库名
+* user ：mongodb 的用户名
+* pass ：mongodb 用户密码
+* ip ：mongodb 服务器地址，比如本地为127.0.0.1
+* port ：mongodb 服务器端口，默认是27017
+* database ：mongodb 数据库名
 	
-## 二、语法
+## 二、概念
 ### Schema
-schema是mongoose里会用到的一种数据模式，可以理解为数据库结构的定义；每个schema会映射到mongodb中的一个collection，它不具备操作数据库的能力。
+schema 是 mongoose 里会用到的一种数据模式，相当于一个数据库的模板，不具备操作数据库的能力，每个 schema 会映射到 mongodb 中的一个 collection。定义 Schema 非常简单，指定字段名和类型即可：
 
 ``` js
 const kittySchema = mongoose.Schema({
@@ -36,14 +38,48 @@ const blogSchema = mongoose.Schema({
   author: String,
   body:   String,
   comments: [{ body: String, date: Date }],
-  date: { type: Date, default: Date.now },
+  date: Date,
   hidden: Boolean,
   meta: {
     votes: Number,
     favs:  Number
   }
 });
-  
+```
+
+基本属性类型有：String、Number、Boolean、ObjectId、Array、Date、Buffer、Mixed等。
+
+在 mongoose 中,提供了 Schema 的类，可以通过实例化来实现创建 Schema 的效果，从而不需要每次调用 mongoose.Schema() 这个 API：
+
+``` js
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+const kittySchema = new Schema({
+  name: String,
+  friends: [String],  age: Number
+});
+
+```
+
+#### 文档验证
+如果不进行文档验证，保存文档时，就可以不按照 Schema 设置的字段进行设置，这样肯定是要出问题的，所以在新建 Schema 的时候要设置验证：
+
+* required: 数据必须填写
+
+* default: 默认值
+
+* validate: 自定义匹配
+
+* min: 最小值(只适用于数字)
+
+* max: 最大值(只适用于数字)
+
+* match: 正则匹配(只适用于字符串)
+
+* enum:  枚举匹配(表示该属性值,只能出席哪些，只适用于字符串)
+
+``` js
 const userSchema = mongoose.Schema({
   username: {// 真实姓名
     type: String,
@@ -52,11 +88,12 @@ const userSchema = mongoose.Schema({
   },
   password: { // 密码
     type: String,
-    required: true
+    required:[true,"password 是必须的"], // 第二个参数是错误提示信息
+    match:/\d/ //必须包含数字
   },
   time: { 
     type:Date, 
-    default:new Date()
+    default:new Date() //如果没有设置，则采用这个值
   },
   token: {
     type: String
@@ -64,23 +101,115 @@ const userSchema = mongoose.Schema({
 });
 ```
 
-基本属性类型有：String、Number、Boolean、null、Object、Array、Date、Buffer、Mixed等。
+创建 Schema 对象时，声明字段类型有两种方法，一种是首字母大写的字段类型，另一种是引号包含的小写字段类型：
+
+``` js
+var mySchema = mongoose.Schema({title:String, author:String});
+
+//或者 
+var mySchema = mongoose.Schema({title:'string', author:'string'});
+```
+
+如果需要在 Schema 定义后添加其他字段，可以使用 add() 方法：
+
+``` js
+mySchema.add({ name: 'string', color: 'string', price: 'number' });
+```
+
+在 schema 中设置 timestamps 为 true，schema 映射的文档 document 会自动添加 createdAt 和 updatedAt 这两个字段，代表创建时间和更新时间：
+
+``` js
+var UserSchema = mongoose.Schema(
+  {...},
+  { timestamps: true }
+);
+```
+
+#### 设置索引：
+设置索引分两种,一种设在 Schema filed, 另外一种设在 Schema.index 里。
+
+``` js
+//在 field 设置
+var animalSchema = new Schema({
+  name: String,
+  type: String,
+  tags: { type: [String], index: true } 
+});
+
+// 在 Schema.index 中设置.
+animalSchema.index({ name: 1, type: -1 }); // 1 表示正序, -1 表示逆序
+```
+
+由于在创建字段时, 数据库会自动根据自动排序(ensureIndex)，有可能严重拖慢查询或者创建速度，所以一般需要将该 option 关闭：
+
+``` js
+mongoose.connect('mongodb://user:pass@localhost:port/database', { config: { autoIndex: false } });  //真心推荐
+// or  
+mongoose.createConnection('mongodb://user:pass@localhost:port/database', { config: { autoIndex: false } });  //不推荐
+// or
+animalSchema.set('autoIndex', false);  //推荐
+// or
+new Schema({..}, { autoIndex: false }); //懒癌不推荐
+```
+
+每一个文档 document 都会被 mongoose 添加一个不重复的 `_id`，`_id` 的数据类型不是字符串，而是 ObjectID 类型。如果在查询语句中要使用 `_id`，则需要使用 findById 语句，而不能使用 find 或 findOne 语句。
+
+#### 实例方法
+Schema 类似创建表时的数据定义(不仅仅可以定义文档的结构和属性，还可以定义文档的实例方法、静态模型方法、复合索引等)：
+
+``` js
+//定义一个schema
+let Schema = mongoose.Schema({
+  category:String,
+  name:String
+});
+
+// 定义实例方法
+Schema.methods.eat = function(){
+  console.log("I've eatten one "+this.name);
+};
+    
+```
 
 ### Model
-model是由schema生成的模型，可以对数据库进行操作。
+model 是由 schema 生成的模型，是一个构造器或者称为类，具有抽象属性和行为，实际上就相当于一个 collectio，可以对数据库进行增删查改。
 
 ``` js
 // 它在数据库中会创建一个名为 users 的 collection
 var User = mongoose.model('User', kittySchema);
 ```
 
-User 是模型名称，它对应到 mongodb 里就是数据库中的集合名称，默认会转成复数，变为'users',当我们对其添加数据时如果 users 已经存在，则会保存到其目录下，如果未存在，则会创建 users 集合，然后在保存数据。
+model() 方法的第一个参数 User 是模型名称，它对应到 mongodb 里就是数据库中的集合名称，默认会将集合名称设置为模型名称的小写版。如果名称的最后一个字符是字母，则会变成复数；如果名称的最后一个字符是数字，则不变，所以这里创建的集合名字为'users',当我们对其添加数据时如果 users 已经存在，则会保存到其目录下，如果未存在，则会创建 users 集合，然后在保存数据。
 
-为Model添加方法：``` js
-// methods 必须加在 mongoose.model() 之前userSchema.methods.speak = function () {  var greeting = this.name ? "my name is " + this.name : "I don't have a name";  console.log(greeting);}var User = mongoose.model('User', kittySchema);```
+> 注意：一定要将 model() 方法的第一个参数和其返回值设置为相同的值，否则会出现不可预知的结果。
+
+通过 Schema 对象的 statics 属性给 Model 添加静态方法：
+
+``` js
+const userSchema = mongoose.Schema({
+  name: String, 
+  age: Number
+});
+userSchema.statics.findByName = function (name,cb) {  return this.find({name: new RegExp(name,'i')},cb);};
+
+var User = mongoose.model('user', userSchema);
+User.findByName('fido', function (err, doc) {
+  console.log(doc);
+});
+```
+
+通过 schema 对象的 query 属性，给 model 添加查询方法：
+
+``` js
+const userSchema = mongoose.Schema({
+  name: String, 
+  age: Number
+});
+userSchema.query.byName = function (name) {  return this.find({name: new RegExp(name)});}
+```
 
 ### Entity
-由Model创建的实体，他的操作也会影响数据库。
+由 Model 创建的真实的数据，他的操作也会影响数据库。
 
 ``` js
 var user = new User({ 
@@ -91,42 +220,113 @@ var user = new User({
 console.log(user.name);  // 'faychou'
 ```
 
-> Schema、Model、Entity的关系：Schema生成Model，Model创造Entity，Model和Entity都可对数据库操作造成影响，但Model比Entity更具操作性。
+为 Entity 添加自定义方法，必须在 Schema 对象的 methods 属性中扩展 ：``` js
+const userSchema = mongoose.Schema({
+  name: String, 
+  age: Number
+});
 
-### 创建
-1. 方法一：调用 save 方法后，就会在数据库中存入一条记录。
+// methods 必须加在 mongoose.model() 之前userSchema.methods.speak = function () {  var greeting = this.name ? "my name is " + this.name : "I don't have a name";  console.log(greeting);}
+const User = mongoose.model('User', userSchema);
+const user = new User({name:'fay',age:18});
+
+user.speak();```
+
+Mongoose 还有一个super featrue-- virtual property 该属性是直接设置在Schema上的。但是 VR 并不会真正的存放在 db 中，他只是一个提取数据的方法：
 
 ``` js
+// schema 添加虚拟属性
+userSchema.virtual('fullName').get(function(){
+  return this.first+" "+this.last;
+});
+
+// 调用
+user.fullName; 
+```
+
+> Schema、Model、Entity 的关系：Schema 生成 Model，Model 创造 Entity，Model 和 Entity 都可对数据库操作造成影响，但 Model 比 Entity 更具操作性。
+
+## 语法
+### 文档插入
+通过 Model 创建的 Entity，必须通过 save() 方法才能将创建的文档保存到数据库的集合中：
+
+```
+save([options], [options.safe], [options.validateBeforeSave], [fn])
+```
+
+``` js
+// err 为错误信息
+// docs 为保存的文档对象
 user.save(function (err,docs) {  if (err) return console.error(err);  console.log('数据插入成功！' + docs);});
 ```
 
-2. 方法二：
+也可以使用模型 Model 的 create() 方法完成数据插入：
 
 ``` js
-var doc = {name:’fay’ , password:'0123456789'}; User.create(doc,function(err,docs) {  if(err) return console.log(err);   console.log(’数据插入成功：' + docs);});
+var user = {name:’fay’ , age:18}; User.create(user,function(err,docs) {  if(err) return console.log(err);   console.log(’数据插入成功：' + docs);});
+
+// 也可以同时插入多条记录
+User.create({name:’fay’,age:18},{name:’jay’,age:28},function(err,docs1,docs2) {  if(err) return console.log(err);   console.log(’数据插入成功：',docs1,docs2);});
 ```
 
-3. 插入多条数据方法：``` js
+也可以使用 Model 的 insertMany() 方法同时插入多条数据：``` js
 User.insertMany([   {name: ”jack", password:'0123456789'},   {name : ”baur", password:'0123456789'}  ], function(err, docs) {   if(err) return console.log(err);   console.log('保存成功：' + docs); });```
 
-### 删除
 ``` js
-Model.remove([conditions], [callback]) // 根据条件查找到并删除
+// 简单 demo
+const mongoose = require('mongoose');
 
-Model.findByIdAndRemove(id, [options], [callback]) // 根据id查找到并删除
-
-Model.findOneAndRemove(conditions, [options], [callback])
+mongoose.connect('mongodb://localhost:27017/test');
+const con = mongoose.connection;
+con.on('error', console.error.bind(console, '连接数据库失败'));
+con.once('open',()=>{
+  //定义一个schema
+  let Schema = mongoose.Schema({
+    name:String,
+    age:Number
+  });
+    
+  // 自定义方法
+  Schema.methods.getAge = function() {
+    console.log("I am "+this.age + "years old");
+  }
+    
+  //继承一个 schema
+  let Student = mongoose.model("Student",Schema);
+  
+  //生成一个 document
+  let student = new Student({
+    name:'faychou',
+    age:18
+  });
+    
+  //存放数据
+  student.save((err,res) => {
+    if(err) return console.log(err);
+    res.getAge();
+    
+    //查找数据
+    Model.find({name:'hanmeimei'},(err,data)=>{
+      console.log(data);
+    })
+  });
+});
 ```
 
-``` js
-var param = {name:’fay’}; Kitten.remove(param , function(err,docs) {  if(err) return console.log(err);   console.log('删除成功：' + docs);});```
-
 ### 查询
+Mongoose 提供了三种方法来查询文档：find()、findById()、findOne()。
+
 ``` js
-Model.find(conditions, [fields], [options], [callback])```
+Model.find(conditions, [fields], [options], [callback]);
+
+Model.findById(id, [projection], [options], [callback]);
+
+// 返回查找到的所有实例的第一个
+Model.findOne([conditions], [projection], [options], [callback]);```
 
 * Model：集合名字，如：User
-* conditions：查询条件；* fields：控制返回的字段；* options：控制选项；* callback：回调函数
+* conditions：查询条件；* fields：控制返回的字段；* options：配置查询参数；* callback：回调函数
+
 
 ``` js
 Model.find({},callback) // 参数1忽略,或为空对象则返回所有集合文档
@@ -142,15 +342,7 @@ Model.findById('obj._id', callback) // 查询找到的第一个文档, 只接受
 Model.count(conditions, [callback])  // 数量查询
 ```
 
-``` js
-// 表示查询年龄大于等21而且小于等于65岁
-User.find({age: {$gte: 21, $lte: 65}}, callback);
-
-// 模糊查询
-User.find({'username':{$regex:/m/i}}, callback);
-```
-
-其他筛选条件：
+查询条件：
 
 * `$or`：或关系
 * `$nor`：或关系取反
@@ -175,7 +367,54 @@ User.find({'username':{$regex:/m/i}}, callback);
 * `$centerSphere`：范围查询，球形范围（基于LBS）
 * `$slice`：查询字段集合中的元素（比如从第几个之后，第N到第M个元素）
 
-分页查询：
+``` js
+// 查询年龄大于 18 的数据
+User.find({age:{$gte:18}}, callback);
+        
+// 查询年龄大于等 21 而且小于等于 65 岁
+User.find({age: {$gte: 21, $lte: 65}}, callback);
+
+// 模糊查询
+User.find({'username':{$regex:/m/i}}, callback);
+
+// 找出年龄大于 18 且名字里存在'huo'的数据
+User.find({age:{$gte:18},name:/huo/}, callback);
+
+// 找出名字里存在'a'的数据，且只输出'name'字段
+User.find({name:/a/},'name', callback);
+
+// 找出 age>20 的文档中的第一个文档，且只输出 name 字段
+User.findOne({age:{$gt : 20}},{name:1,_id:0}, callback);
+
+// 找出 age>20 的文档中的第一个文档，且输出包含 name 字段在内的最短字段
+User.findOne({age:{$gt : 20}},"name",{lean:true}, callback);
+```
+
+> 注意：如果使用第三个参数，前两个参数如果没有值，需要设置为 null:
+
+``` js
+User.find(null,null,{skip:2}, callback);
+```
+
+如果要进行更复杂的查询，需要使用 `$where` 操作符，`$where` 操作符功能强大而且灵活，它可以使用任意的 JavaScript 语法作为查询的一部分，包含 JavaScript 表达式的字符串或者 JavaScript 函数：
+
+``` js
+User.find({$where:"this.x == this.y"},function(err,docs) {
+  //[ { _id: 5972ed35e6f98ec60e3dc887,name: 'wang',age: 18,x: 1,y: 1 },
+  //{ _id: 5972ed35e6f98ec60e3dc889, name: 'li', age: 20, x: 2, y: 2 } ]
+});
+
+
+User.find({$where:function() {
+  return this.x !== this.y;
+}},function(err,docs) {
+  //[ { _id: 5972ed35e6f98ec60e3dc886,name: 'huochai',age: 27,x: 1,y: 2 },
+  //{ _id: 5972ed35e6f98ec60e3dc888, name: 'huo', age: 30, x: 2, y: 1 } ]
+});
+```
+
+
+案例：分页查询：
 
 ``` js
 var User = require("./user.js");
@@ -199,28 +438,250 @@ function getByPager(){
 getByPager();
 ```
 
-### 修改
+### 文档更新
+更新文档可以使用以下几种方法：update()、updateOne()、updateMany()、findByIdAndUpdate()、fingOneAndUpdate()。
+
 ``` js
-Model.update(conditions, update, [options], [callback])```
+Model.update(conditions, update, [options], [callback]);
+
+// 一次更新多条:Model.updateMany(conditions, doc, [options], [callback])
+// 找到一条记录并更新
+Model.findOneAndUpdate([conditions], [update], [options], [callback])// 更新指定ID：Model.findByIdAndUpdate(id, [update], [options], [callback])```
 
 * Model：集合名字，如：User
 * conditions：查询条件；* update：需要修改的数据，不能修改主键（_id）；* options：控制选项；* callback：回调函数
 
+options 选项：
+
+* safe (boolean)： 默认为 true。安全模式。
+
+* upsert (boolean)： 默认为 false。如果不存在则创建新记录。
+
+* multi (boolean)： 默认为 false。是否更新多个查询记录。
+
+* runValidators： 如果值为 true，执行 Validation 验证。
+
+* setDefaultsOnInsert： 如果 upsert 选项为 true，在新建时插入文档定义的默认值。
+
+* strict (boolean)： 以 strict 模式进行更新。
+
+* overwrite (boolean)： 默认为 false。禁用 update-only 模式，允许覆盖记录。
+
 ``` js
-// 一次更新多条:Model.updateMany(conditions, doc, [options], [callback])
-// 找到一条记录并更新
-Model.findOneAndUpdate([conditions], [update], [options], [callback])// 更新指定ID：Model.findByIdAndUpdate(id, [update], [options], [callback])
+var param = {name:'fay',age:18}; var date = {$set:{name:'jack',age:26}};Kitten.update(param,date,function(err,docs) {  if(err) return console.log(err);   console.log('更改成功：' + docs);});
+
+// 查询 age 大于 20 的数据，并将其年龄更改为 40 岁
+User.update({age:{$gte:20}},{age:40}, callback);
+
+//同时更新多个记录，需要设置 options 里的 multi 为 true。下面将名字中有'a'字符的年龄设置为10岁
+User.update({name:/a/},{age: 10},{multi:true}, callback)```
+
+如果设置的查找条件，数据库里的数据并不满足，默认什么事都不发生。
+
+> 注意：update() 方法中的回调函数不能省略，否则数据不会被更新。如果回调函数里并没有什么有用的信息，则可以使用 exec() 简化代码：
+
+``` js
+User.update({name:/aa/},{age: 0},{upsert:true}).exec();
 ```
 
-``` js
-var param = {name:’fay’,age:18}; var date = {$set:{name:’jack’,age:26}};Kitten.update(param,date,function(err,docs) {  if(err) return console.log(err);   console.log('更改成功：' + docs);});```
+### 文档删除
+同样也是提供多种方法：remove()、findOneAndRemove()、findByIdAndRemove()。
 
-## 三、搭配node.js
+``` js
+Model.remove([conditions], [callback]) // 根据条件查找到并删除
+
+Model.findByIdAndRemove(id, [options], [callback]) // 根据id查找到并删除
+
+Model.findOneAndRemove(conditions, [options], [callback])
+```
+
+> 注意：
+> 
+> 1、remove 有两种形式，一种是文档的 remove() 方法，一种是 Model 的 remove() 方法。
+
+> 2、回调函数不能省略，否则数据不会被删除。
+
+``` js
+var param = {name:’fay’}; Kitten.remove(param , function(err,docs) {  if(err) return console.log(err);   console.log('删除成功：' + docs);});```
+
+### 前后钩子
+前后钩子即pre()和post()方法，又称为中间件，是在执行某些操作时可以执行的函数。
+
+``` js
+// 在执行find()方法之前，执行pre()方法
+schema.pre('find',function(next) {
+  console.log('我是pre方法');
+  next();
+});
+```
+
+post()方法并不是在执行某些操作后再去执行的方法，而在执行某些操作前最后执行的方法：
+
+``` js
+schema.post('find',function(docs){
+  console.log('我是post方法1');
+});
+```
+
+### 查询后处理方法
+* sort() : 排序
+
+* skip() : 跳过
+
+* limit() : 限制
+
+* select() : 显示字段
+
+* exect() : 执行
+
+* count() : 计数
+
+* distinct() : 去重
+
+``` js
+// 按 age 从小到大排序
+User.find().sort("age").exec(function(err,docs) {
+  console.log(docs);
+});
+
+// 按 x 从小到大，age 从大到小排列
+User.find().sort("x -age").exec(function(err,docs) {
+  console.log(docs);
+});
+
+// 跳过1个，显示其他
+User.find().skip(1).exec(function(err,docs) {
+  console.log(docs);
+});
+
+//显示2个
+User.find().limit(2).exec(function(err,docs) {
+  console.log(docs);
+});
+
+// 显示 name、age 字段，不显示 _id 字段
+User.find().select("name age -_id").exec(function(err,docs) {
+  console.log(docs);
+}); 
+
+// 显示集合中的文档数量
+User.find().count(function(err,count) {
+  console.log(count);//4
+}); 
+
+// 返回集合中 x 的值
+User.find().distinct('x',function(err,distinct) {
+  console.log(distinct);//[ 1, 2 ]
+}); 
+```
+
+## 三、搭配 node.js
+### 连接数据库
+使用 connect(url) 方法连接到 MongoDB 的数据库，数据库的名字是 test：
+
+``` js
+// 引入 mongoose
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost/test');
+```
+
+如果还需要传递用户名、密码，则可以使用如下方式：
+
+``` js
+// mongoose.connect('mongodb://用户名:密码@主机地址:端口号/数据库,options');
+mongoose.connect("mongodb://root:123456@localhost/test", options);
+```
+
+connect() 方法还接受一个可选对象 options，这里所包含的所有选项优先于连接字符串中传递的选项：
+
+``` js
+mongoose.connect(uri, options);
+```
+
+options的配置信息如下：
+
+* db - 数据库设置
+* server - 服务器设置
+* replset - 副本集设置
+* user - 用户名
+* pass - 密码
+* auth - 鉴权选项
+* mongos - 连接多个数据库
+* promiseLibrary
+
+``` js
+var options = {
+  db: { native_parser: true },
+  server: { poolSize: 5 },
+  replset: { rs_name: 'myReplicaSetName' },
+  user: 'myUserName',
+  pass: 'myPassword'
+}
+mongoose.connect(uri, options);
+```
+
+如果要连接多个数据库，只需要设置多个 url 并以 `,` 隔开，同时设置 options 的字段 mongos:true：
+
+``` js
+mongoose.connect('urlA,urlB,...', {
+  mongos : true 
+});
+```
+
+connect() 函数也可以接受一个回调参数：
+
+``` js
+const mongoose = require('mongoose');
+mongoose.connect("mongodb://localhost/test", function(err) {
+  if(err) return console.log('连接失败');
+  console.log('连接成功');
+});
+```
+
+### 断开连接
+使用 disconnect() 方法可以断开数据库的连接：
+
+``` js
+var mongoose = require('mongoose');
+mongoose.connect("mongodb://u1:123456@localhost/db1", function(err) {
+  if(err) return console.log('连接失败');
+  console.log('连接成功');
+});
+
+setTimeout(function(){
+  mongoose.disconnect(function() {
+    console.log("断开连接");
+  });
+}, 2000);
+```
+
+### 创建 schema
+``` js
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+
+var mySchema = new Schema({
+  title:  String,
+  author: String,
+  body:   String,
+  comments: [{ body: String, date: Date }],
+  date: { type: Date, default: Date.now },
+  hidden: Boolean,
+  meta: {
+    votes: Number,
+    favs:  Number
+  }
+});
+```
+
+### 简单案例：
+
 ``` js
 // app.js
 const mongoose = require('mongoose');
 
-//连接到 test 数据库
+// 连接数据库 test
 mongoose.connect('mongodb://localhost/test');
 
 // 实例化连接对象
@@ -252,4 +713,198 @@ kitty.save(function (err) {
 
   console.log('save sucess');
 });
+```
+
+### population
+mongodb 本来就是一门非关系型数据库。 但有时候又需要联合其他的集合进行数据查找。 population 就是用来连接多集合数据查询，只要提供某一个 collection 的`_id` , 使用关键字 ref 来指明外联的数据库的名字，就可以实现完美的联合查询。一般,我们需要在 schema 中就定义好：
+
+``` js
+var mongoose = require('mongoose')
+  , Schema = mongoose.Schema
+  
+var personSchema = Schema({
+  _id     : Number,
+  name    : String,
+  age     : Number,
+  stories : [{ type: Schema.Types.ObjectId, ref: 'Story' }]
+});
+ 
+var storySchema = Schema({
+  _creator : { type: Schema.Types.ObjectId, ref: 'Person' },
+  title    : String
+});
+```
+
+> 注意：实际上, 就是通过 `_id` 的相互索引即可. 这里需要说明的是, `_id` 应该是某个具体 model 的 id。
+
+``` js
+const fay = new Person({
+  name: 'fay',
+  _id: 1,
+  age: 18,
+  stories: []
+});
+fay.save((err,doc) => {
+  if(err) return err;
+  let story = new Story({
+    _creator:doc._id,
+    title:"逗比"
+  });
+});
+ 
+Story.findOne({title:"逗比"}).populate('_creator').exec((err,doc) => {
+    if(err)console.log(err);
+    console.log(doc._creator.name);
+});
+```
+
+#### 简单联表操作 demo
+``` js
+// 类别 category
+const mongoose = require('mongoose');
+
+const CategorySchema = mongoose.Schema({
+  number: { 
+    type: Number, 
+    required: true, 
+    index: true, 
+    unique: true, 
+    min:[1000000000, '位数不足'], 
+    max: [9999999999, '位数过长'] 
+  },
+  name: { 
+    type: String, 
+    required: true, 
+    validate: { 
+      validator: (v) => v.trim().length, 
+      message: '名称不能为空'
+    } 
+  },
+  description: { type: String },
+  posts: [{ 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Post' 
+  }],
+  recommend: { type: Boolean },
+  index: { type: Number }
+},
+{ timestamps: true }
+);
+
+module.exports = mongoose.model('Category', CategorySchema)
+```
+
+``` js
+// 文章 post
+const mongoose = require('mongoose');
+
+const PostSchema = mongoose.Schema({
+  title: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  description: { type: String },
+  content: { type: String },
+  category: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Category', 
+    index: true 
+  },
+  comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
+  likes: [{ type: Schema.Types.ObjectId, ref: 'Like' }],
+  imgUrl: { type: String },
+  recommend: { type: Boolean },
+  index: { type: Number }
+},
+{
+  timestamps: true
+}
+)
+
+module.exports = mongoose.model('Post', PostSchema);
+```
+
+在对类别的操作中， 都需要使用 populate 操作符显示出所包括的 posts 中的 title ：
+
+``` js
+/* 加载所有类别 */
+app.get('/categories', (req, res) => {
+  Category.find().populate('posts','title').select("number name description recommend index").exec((err, docs) => {
+    if (err) return res.status(500).json({code: 0, message: err.message, err});
+    return res.status(200).json({code: 1, message: '获取类别成功', result: {docs}})
+  });
+});
+
+/* 新增一个类别 */
+app.post('/categories', adminAuth, (req, res) => {
+  Category(req.body).save((err, doc) => {
+    if (err) return res.status(500).json({code: 0, message: err.message, err});
+    doc.populate({path:'posts',select:'title'}, (err, doc) => {
+      if (err) return res.status(500).json({code:0, message: err.message, err});
+      return res.status(200).json({code: 1, message: '新增成功', result: {doc}});
+    })      
+  })
+})
+// ...
+```
+
+在对文章的操作中，则需要显示出类别 category 的 number 属性：
+
+``` js
+/* 按照 id 加载一篇文章 */
+app.get('/posts/:id', (req, res) => {
+  Post.findById(req.params.id).populate('category','number').exec((err, doc) => {
+    if (err) return res.status(500).json({code:0, message:err.message, err});
+    if (doc === null) return res.status(404).json({code:0, message:'文章不存在'});
+    return res.status(200).json({code:1, message:'获取文章成功', result:{doc}});
+  })
+})
+
+/* 加载所有文章 */
+app.get('/posts', (req, res) => {
+  Post.find().select("title likes comments recommend imgUrl index").populate('category','number').sort("-createdAt").exec((err, docs) => {
+    if (err) return res.status(500).json({code: 0, message: err.message, err});
+    return res.status(200).json({code: 1, message: '获取文章成功', result: {docs}});
+  });
+});
+```
+
+在新增、更新和删除文章的操作中，都需要重建与 category 的关联
+
+``` js
+// 关联 category 的 posts 数组
+fnRelatedCategory = _id => {
+  Category.findById(_id).exec((err, categoryDoc) => {
+    if (err) return res.status(500).json({ code: 0, message: err.message, err });
+    if (categoryDoc === null) return res.status(404).json({code:0, message:'该类别不存在，请刷新后再试'});
+    Post.find({ category: _id }).exec((err, postsDocs) => {
+      if (err) return res.status(500).json({ code: 0, message: err.message, err })
+      categoryDoc.posts = postsDocs.map(t => t._id)
+      categoryDoc.save(err => {
+        if (err) return res.status(500).json({ code: 0, message: err.message, err })
+      })
+    })
+  })
+}
+
+/* 按照 id 更新一篇文章 */
+app.put('/posts/:id', adminAuth, (req, res) => {
+  Post.findById(req.params.id).exec((err, doc) => {
+    if (err) return res.status(500).json({code: 0, message: err.message, err});
+    if (doc === null) return res.status(404).json({code: 0, message: '文章不存在，请刷新后再试'});
+    for (prop in req.body) {
+      doc[prop] = req.body[prop]
+    }
+    doc.save((err) => {
+      if (err) return res.status(500).json({code: 0, message: err.message, err});
+      doc.populate({path:'category',select:'number'}, (err, doc) => {
+        if (err) return res.status(500).json({code:0, message: err.message, err});
+        fnRelatedCategory(doc.category._id)        
+        return res.status(200).json({code: 1, message: '更新成功', result: {doc}})
+      });
+    });
+  });
+});
+//...
 ```

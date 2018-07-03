@@ -11,9 +11,9 @@ MongoDB 是一个基于分布式文件存储的数据库。由 C++ 语言编写�
 |  table joins |                |  表连接,MongoDB不支持              |
 |  primary key |    primary key |  主键,MongoDB自动将_id字段设置为主键 |
 
-MongoDB是一个开源的NoSQL数据库，相比MySQL那样的关系型数据库，它更显得轻巧、灵活，非常适合在数据规模很大、事务性不强的场合下使用。同时它也是一个对象数据库，没有表、行等概念，也没有固定的模式和结构，所有的数据以文档的形式存储。
+MongoDB 是一个开源的 NoSQL 数据库，相比 MySQL 那样的关系型数据库，它更显得轻巧、灵活，非常适合在数据规模很大、事务性不强的场合下使用。同时它也是一个对象数据库，没有表、行等概念，也没有固定的模式和结构，所有的数据以文档的形式存储。
 
-在MongoDB中，一行纪录就是一个文档，它是一个由键值对构成的数据结构，MongoDB文档与JSON对象类似。键的值可以包含其他的文档，数组，文档数组。
+在 MongoDB 中，一行纪录就是一个文档，它是一个由键值对构成的数据结构，MongoDB 文档与 JSON 对象类似。键的值可以包含其他的文档，数组，文档数组。
 
 ``` js
 {
@@ -47,41 +47,127 @@ MongoDB是一个开源的NoSQL数据库，相比MySQL那样的关系型数据库
 ### Lunix 平台安装
 
 ### Mac 平台安装
-
-### Window 平台安装
-官网直接下载.msi安装包，按照提示进行安装；### 启动服务
-1、 MongoDB需要一个目录来保存数据，默认的数据目录是`\data\db`，但是这个目录需要我们自己去创建：
-
 ``` bash
-# mkdir –p的意思是同时创建data及下级目录dbmkdir –p data/db  
+# 安装
+brew install mongodb
+# brew install mongodb --devel
+
+# 创建一个数据库存储目录 /data/db
+mkdir -p /data/db
+
+# 设置环境变量
+export PATH=<mongodb-install-directory>/bin:$PATH
+
+# 启动 Mongodb
+mongod
+# mongod --dbpath <path to data directory>
+## 如果看到类似这样信息代表启动成功 [initandlisten] waiting for connections on port 27017
+
+# 重新打开一个新开窗口，进入 mongodb 命令行模式
+mongo
+# mongo --host 127.0.0.1:27017
+
+
+## 更新
+brew update
 ```
 
-2、 创建存放日志的文件夹：
+### Window 平台安装
+官网直接下载 `.msi` 格式的安装包，按照提示进行安装。启动服务：
+
+1、 MongoDB 需要一个目录来保存数据，默认的数据目录是 `\data\db`，但是这个目录需要我们自己去创建，进入 mongodb 的安装目录：
+
+``` bash
+# mkdir –p 的意思是同时创建 data 及下级目录 dbmkdir –p data/db  
+```
+
+2、 同样还是在安装目录下创建存放日志的文件夹：
 
 ``` bash
 mkdir logs
 ```
 
-3、 启动MongoDB（注意路径中不应该包含空格）
+3、 创建配置文件夹（可以省略）：
 
-``` bash
-# 启动MongoDB服务主进程，并指定数据目录
-C:\mongodb\bin\mongod.exe --dbpath C:\mongodb\data\db
+```
+mkdir etc
 ```
 
-执行完此命令后，在控制台会打印一系列的启动信息，包括MongoDB的版本，是否根据journal日志执行recovery，进程的信号，操作系统的信息等乖。最后一行会提示你启动成功，监听了27017端口，等待连接消息。
-
-4、 连接MongoDB，打开另一个命令行窗口，输入如下命令：
+4、在 etc 文件夹下新建 mongodb.config 文件配置文件：
 
 ``` bash
+# 数据库路径
+dbpath=C:\Program Files\data\db
+
+# 日志输出文件路径
+logpath=C:\Program Files\logs\mongodb.log
+
+# 错误日志采用追加模式
+logappend = true
+
+# 启用日志文件，默认启用
+journal=true
+
+# 端口号,默认为 27017
+port = 27017
+
+fork = true
+auth = true
+```
+
+5、添加环境变量：
+
+``` bash
+# mongodb 安装目录
+"C:\Program Files\MongoDB\bin"
+```
+
+6、 启动 MongoDB（注意路径中不应该包含空格）:
+
+``` bash
+# 通过配置文件启动 MongoDB 服务主进程
+mongod --config C:\mongodb\etc\mongodb.conf
+
+# 也可以自定义数据库位置启动 MongoDB 服务主进程
+mongod --dbpath C:\mongodb\data\db
+```
+
+执行完此命令后，在控制台会打印一系列的启动信息，包括 MongoDB 的版本，是否根据 journal 日志执行 recovery，进程的信号，操作系统的信息等乖。最后一行会提示你启动成功，监听了 27017 端口，等待连接消息。
+
+7、 连接 MongoDB，打开另一个命令行窗口，输入如下命令：
+
+``` bash
+# 默认配置
 C:\mongodb\bin\mongo.exe
+
+# [or] 配置启动
+mongo --host localhost --port 27017
+
+# [or] 连接其他网络下
+mongo --username <user> --password <pass> --host <Host.IP.Adrs> --port 27017
 ```
 
-执行些命令后，就能连接上MongoDB服务。
+执行些命令后，就能连接上 MongoDB 服务。
 
-> mongod 是用来连接到mongodb数据库服务器的，即服务器端。
+> mongod 是用来连接到 mongodb 数据库服务器的，即服务器端。
 > 
-> mongo 是用来启动MongoDB shell的，是mongodb的命令行客户端。
+> mongo 是用来启动 MongoDB shell 的，是 mongodb 的命令行客户端。
+
+#### 关闭服务
+1、关闭服务：Ctrl + C
+
+2、关闭进程：
+
+``` bash
+ps -ef | grep mongo
+
+# 返回信息
+# 501 28883     1   0 10:16上午 ??         0:15.23 mongod --config /Users/faychou/web/faychou-blog/code/blog-react-v2/server/data/mongodb.config
+# 501 29744 25278   0 11:34上午 ttys002    0:00.00 grep mongo
+
+# 根据返回信息选择相应进程关闭
+kill 28883
+```
 
 ## 二、设置用户
 在默认情况下，MongoDB 不会进行身份验证，也没有账号，只要能连接上服务就可以对数据库进行各种操作，但是这样是不安全的。
@@ -90,11 +176,16 @@ C:\mongodb\bin\mongo.exe
 
 1、 首次连接：
 
-	mongod --port 27017 --dbpath /data/db
+```
+mongod --port 27017 --dbpath /data/db
+```
 	
-2、 连接shell：
+2、 连接 shell：
 
-	mongo --port 27017
+``` bash
+mongo
+# mongo --port 27017
+```
 	
 3、 创建超级管理员账号（必须先添加）：
 
@@ -109,47 +200,60 @@ db.createUser(
 )
 ```
 
-4、 重启mongodb：
+db：对指定数据库的操作。
 
-	mongod --auth --port 27017 --dbpath /data/db
+roles 角色： 
+
+* Read：允许用户读取指定数据库
+
+* readWrite：允许用户读写指定数据库
+
+* dbAdmin：允许用户在指定数据库中执行管理函数，如索引创建、删除，查看统计或访问 system.profile
+
+* userAdmin：允许用户向 system.users 集合写入，可以找指定数据库里创建、删除和管理用户
+
+* clusterAdmin：只在 admin 数据库中可用，赋予用户所有分片和复制集相关函数的管理权限。
+
+* readAnyDatabase：只在 admin 数据库中可用，赋予用户所有数据库的读权限
+
+* readWriteAnyDatabase：只在 admin 数据库中可用，赋予用户所有数据库的读写权限
+
+* userAdminAnyDatabase：只在 admin 数据库中可用，赋予用户所有数据库的 userAdmin 权限
+
+* dbAdminAnyDatabase：只在 admin 数据库中可用，赋予用户所有数据库的 dbAdmin 权限。
+
+* root：只在 admin 数据库中可用。超级账号，超级权限
+
+这一步完成后，也可以不重启服务，直接使用以下方式也能继续：
+
+``` bash
+db.auth('myUserAdmin','abc123');
+# 状态1表示验证成功，0表示验证失败
+```
+
+4、 重启 mongodb：
+
+```
+mongod --auth --port 27017 --dbpath /data/db
+```
 	
 5、 使用账号连接：
 
-	mongo --port 27017 -u "myUserAdmin" -p "abc123" --authenticationDatabase "admin"
+```
+mongo --port 27017 -u "myUserAdmin" -p "abc123" --authenticationDatabase "admin"
+```
 	
 6、创建用户角色：
 
 ```
 use test
-db.createUser(
-  {
-    user: "myTester",
-    pwd: "xyz123",
-    roles: [ { role: "readWrite", db: "test" },
-             { role: "read", db: "reporting" } ]
+db.createUser({
+  user: "myTester",
+  pwd: "xyz123",
+  roles: [ { role: "readWrite", db: "test" },
+     { role: "read", db: "reporting" } ]
   }
 )
-```
-
-7、以用户账号连接：
-
-	mongo --port 27017 -u "myTester" -p "xyz123" --authenticationDatabase "test"
-
-添加用户：
-
-``` bash
-db.addUser("guest", "pass", true)
-```
-该方法包含三个参数：
-
-* user - 字符串，表示用户名
-* password - 字符串，对应的密码
-* readOnly - boolean，可选参数，默认值为 false，表示是否是只读用户
-
-修改用户密码：
-
-``` bash
-db.addUser("guest", "newpass")
 ```
 
 删除用户：
@@ -164,7 +268,7 @@ MongoDB 中默认的数据库为 test，如果你没有创建新的数据库，�
 
 ``` bash
 # 如果数据库不存在，则创建数据库，否则切换到该数据库。
-use database-name```
+use database-name```
 
 #### 查看数据库
 默认为存在“admin”和“local”两个数据库。
@@ -172,7 +276,7 @@ use database-name```
 ``` bash
 show dbs```
 
-新创建的数据库并不在数据库的列表中， 要显示它，需要向数据库插入一些数据，所以看不到test这个数据库，因为里面还没有数据。
+新创建的数据库并不在数据库的列表中， 要显示它，需要向数据库插入一些数据，所以看不到 test 这个数据库，因为里面还没有数据。
 
 ### 新建集合
 ``` bash
@@ -285,16 +389,41 @@ dataset.json的数据内容
 
 mongoimport命令连接到本机运行的mongod实例，如果要把数据导到不同主机，不同端口的实例，可以指定主机和端口，使用参数 --host和--port。
 
-## 三、node.js 链接 mongodb
-	# 安装
-	npm install mongodb --save
-	
-创建 server对象：
+## 四、node.js 链接 mongodb
+### 项目中安装 mongodb
+``` bash
+npm install mongodb --save
+```
+
+### 创建连接文件 connect.js
+``` js
+var MongoClient = require('mongodb').MongoClient;
+
+// 连接数据库
+var url = 'mongodb://localhost:27017/test'; //数据库test本不存在，连接时会自动创建
+
+var insertData = function(client) {
+  // 向 test 数据库里新建一个 site 集合，并插入一条数据
+  client.collection('site').insertOne({name: 'guojc', age: 99, hobby: 'movie'}, function(err, result){
+    console.log('inserted successly');
+    console.log(result);
+    client.close();
+    console.log('close');
+  });
+}
+
+MongoClient.connect(url, function(err, client) {
+  console.log('Connected successly to server.');
+  insertData(client);
+});
+```
+
+也可以使用以下方法创建 server 对象：
 
 ```
 new mongo.Server(host,port,[options]);host：必须，服务器所在地址port：必须，服务器端口号options：一个对象，服务器相关属性```
 
-创建一个代表MongoDB数据库的Db对象：
+创建一个代表 MongoDB 数据库的 Db 对象：
 
 ```
 new mongn.Db(databaseName,server,[options])databaseName：必须，连接的数据库名server：必须，数据库所在服务器options：可选，一个设置数据库配置选项的对象```
@@ -314,4 +443,20 @@ db.open(function(err, db) {
 });
 
 // 关闭数据库：db.close([forceClose],function (err) {    //})
+```
+
+## 五、bug 解决
+### mongodb 非正常关闭
+``` bash
+# 首先删除 mongod.lock 文件
+rm data/db/mongod.lock
+
+# 删除 mongodb.log 
+
+# 修复
+mongod --dbpath /Users/faychou/mongodb/data/db --repair
+## 注意，这里一定要写 --dbpath
+
+# 最后重启
+mongod --config /Users/faychou/mongodb/data/db/mongodb.config
 ```

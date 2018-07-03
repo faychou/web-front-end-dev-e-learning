@@ -157,4 +157,4 @@ function debounce(func, wait, leading, trailing) {
 }
 ```
 
-函数节流一般用在 resize, touchmove, mousemove, scroll 等事件中。throttle 会强制函数以固定的速率执行，因此这个方法比较适合应用于动画相关的场景。
+函数防抖一般用在 resize, touchmove, mousemove, scroll 等事件中。throttle 会强制函数以固定的速率执行，因此这个方法比较适合应用于动画相关的场景。

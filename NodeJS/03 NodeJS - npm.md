@@ -115,6 +115,9 @@ npm outdated <package-name>
 # 查看包的安装路径
 npm root
 
+# 查看模块所有的版本
+npm view node versions
+
 # 查看 package.json 信息 
 npm view <package-name>
 
