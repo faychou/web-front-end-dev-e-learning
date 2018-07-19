@@ -303,7 +303,7 @@
 }
 ```
 
-使用了 relative 相对定位、float 和 负值 margin ，将 left 和 right 部分「安装」到 wrap 的两侧，顾名「圣杯」。
+使用了 relative 相对定位、float 和 负值 margin ，将 left 和 right 部分「安装」到 center 的两侧，顾名「圣杯」。
 
 圣杯布局在正常情况下是没有问题的，但是特殊情况下就会暴露此方案的弊端，如果将浏览器无线变窄，「圣杯」将会「破碎」掉。如图，当 center 部分的宽小于 left 部分时就会发生布局混乱。
 

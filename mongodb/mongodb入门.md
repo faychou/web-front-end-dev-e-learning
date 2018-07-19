@@ -317,11 +317,14 @@ use my-dbdb.dropDatabase()
 # 查询集合中的所有文档
 db.usercollection.find()
 
-# 格式化输出内容db.usercollection.find().pretty()# 查询集合中所有borough字段值为"Manhattan"的文档
-db.usercollection.find({ "borough": "Manhattan" })
+# 格式化输出内容db.usercollection.find().pretty()# 返回匹配文档的所有字段
+db.usercollection.find( { type: 'food' } )
 
-# 查询grades包括一个内嵌文档
-db.usercollection.find({ "grades.grade": "B" })
+# 返回匹配文档的指定字段（只有 item 和 qty 字段，默认 _id 字段也是返回的）
+db.usercollection.find( { type: 'food' }, { item: 1, qty: 1 } )
+
+# 仅返回匹配文档的指定字段（排除 _id 字段）
+db.usercollection.find( { type: 'food' }, { item: 1, qty: 1, _id:0 } )
 
 # 查询所有grades数组的内嵌文档中score字段的值大于30的文档。
 db.usercollection.find({ "grades.score": { $gt: 30 } })
@@ -342,11 +345,66 @@ db.usercollection.find().skip(2)
 # 根据age升序,1表示升序，-1表示降序db.usercollection.find().sort({age:1})
 
 # 先按borough字段升序排列，再按address.zipcode升序排。
-db.usercollection.find().sort({ "borough": 1, "address.zipcode": 1 })```
+db.usercollection.find().sort({ "borough": 1, "address.zipcode": 1 })
+
+# 统计个数
+db.usercollection.find({gender:true}).count()```
+
+查询 tags 含有 a 的记录：
+
+``` js
+db.doc.find({"tags":{$in:[1]}});
+{ "_id" : ObjectId("59f589f5641e44b4c51cb340"), "id" : 1, "name" : "one", "tags" : [ "a", "b", "c" ] }
+{ "_id" : ObjectId("59f589f5641e44b4c51cb722"), "id" : 3, "name" : "polly", "tags" : [ "a", "c", "e" ] }
+```
+
+> 注意，`$in` 只能检查集合内每一个元素是否匹配，只要任意一个匹配就返回记录，并不能检查同时匹配多个元素的情况。
+
+查询 tags 同时含有 a 和 b 的记录：
+
+``` js
+db.doc.find({"tags":{$all:['a','b']}});
+{ "_id" : ObjectId("59f58ddfa874fe2b3da34065"), "id" : 4, "name" : "one", "tags" : [ "a", "b", "c" ] }
+```
+
+判断字段长度同时判断字段是否存在：
+
+``` js
+db.test.find({
+  content: {
+    $type:2, // 字段类型为2，表示有此字段，或者用: $exists: true
+    $regex: /^.{600,}$/    // 长度大于600
+  }     
+});
+```
+
+#### 聚合查询
+一般查询可以通过 find 方法，但如果是比较复杂的查询或者数据统计的话，find 可能就无能为力了，这时需要的是 aggregate（聚合）。它可以对数据文档进行变换和组合。聚合是基于数据流概念，数据进入管道经过一个或多个 stage，每个 stage 对数据进行操作（筛选，投射，分组，排序，限制或跳过）后输出最终结果。
+
+mongoDB 中有许多操作符，在 aggregate 中每个 stage 可以使用的操作符叫做管道操作符：
+
+* `$project`：投射操作符，用于重构每一个文档的字段，可以提取字段，重命名字段，甚至可以对原有字段进行操作后新增字段
+
+* `$match`：匹配操作符，用于对文档集合进行筛选
+
+* `$group`：分组操作符，用于对文档集合进行分组
+
+* `$unwind`：拆分操作符，用于将数组中的每一个值拆分为单独的文档
+
+* `$sort`：排序操作符，用于根据一个或多个字段对文档进行排序
+
+* `$limit`：限制操作符，用于限制返回文档的数量
+
+* `$skip`：跳过操作符，用于跳过指定数量的文档
+
+* `$lookup`：连接操作符，用于连接同一个数据库中另一个集合，并获取指定的文档，类似于populate
+
+* `$count`：统计操作符，用于统计文档的数量
+
 
 #### 修改数据
 ``` bash
-db.usercollection.update({'name':'faychou'},{'name','jaychou'})# 默认更新会替换掉之前所有的，加上$set后只更新部分，其他不变db.usercollection.update({'age':18},{$set:{'name':'jaychou'}})```
+db.usercollection.update({'name':'faychou'},{'name','jaychou'})# 默认更新会替换掉之前所有的，加上$set后只更新部分，其他不变db.usercollection.update({'age':18},{$set:{'name':'jaychou'}})```
 
 ### 创建索引
 ``` bash

@@ -14,7 +14,7 @@ const mongoose = require("mongoose");
 
 ### 连接数据库
 ``` js
-mongoose.connect("mongodb://user:pass@ip:port/database");
+mongoose.connect("mongodb://user:pass@ip:port/database", options);
 ```
 
 * user ：mongodb 的用户名
@@ -22,7 +22,39 @@ mongoose.connect("mongodb://user:pass@ip:port/database");
 * ip ：mongodb 服务器地址，比如本地为127.0.0.1
 * port ：mongodb 服务器端口，默认是27017
 * database ：mongodb 数据库名
-	
+
+options 可选选项对象，该对象将传递给底层驱动程序。这里所包含的所有选项优先于连接字符串中传递的选项：
+
+* db            -数据库设置
+* server        -服务器设置
+* replset       -副本集设置
+* user          -用户名
+* pass          -密码
+* auth          -鉴权选项
+* mongos        -连接多个数据库
+* promiseLibrary
+
+连接多个数据库，只需要设置多个 url 以 `,` 隔开，同时设置 mongos 为 true：
+
+``` js
+mongoose.connect('urlA,urlB,...', {
+  mongos : true 
+});
+```
+
+connect() 函数还接受一个回调参数：
+
+``` js
+var mongoose = require('mongoose');
+mongoose.connect("mongodb://localhost/test", function(err) {
+  if(err) {
+    console.log('连接失败');
+  } else {
+    console.log('连接成功');
+}
+});
+```
+
 ## 二、概念
 ### Schema
 schema 是 mongoose 里会用到的一种数据模式，相当于一个数据库的模板，不具备操作数据库的能力，每个 schema 会映射到 mongodb 中的一个 collection。定义 Schema 非常简单，指定字段名和类型即可：
