@@ -91,8 +91,21 @@ console.log(typeof new RegExp()) //object
 #### instanceof
 instanceof 不仅检验构造这个对象的构造器，还检验原型链上的构造器，所以所有非基本类型 & undefined & null, instanceof Object 都是 true。主要用来判断自定义对象。
 
-#### 对象检测
-检测一个对象的类型，强烈推荐使用 `Object.prototype.toString` 方法，这是唯一一个可依赖的方式。
+``` js
+console.log(a instanceof Array);    //true
+```
+
+但是此种方法还是有漏洞。
+
+#### 对象数组检测
+ECMAScript 5 加入了 `Array.isArray()` 方法，可以准确地检测一个值是否为数组。但是它不支持 IE8 之前的版本：
+
+``` js
+var a = [];
+console.log(Array.isArray(a));   //true
+```
+
+检测一个对象的类型，强烈推荐使用 `Object.prototype.toString` 方法，这个方式不存在兼容性。
 
 ``` js
 Object.prototype.toString.call([])    // "[object Array]"

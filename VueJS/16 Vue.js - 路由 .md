@@ -471,6 +471,29 @@ http.createServer((req, res) => {
 // Express，请考虑使用 connect-history-api-fallback 中间件。
 ```
 
+## 路由元信息
+定义路由的时候可以配置 meta 字段可以匹配 meta 字段。
+
+### 例子一：改变浏览器 title 的值
+``` js
+import Vue from 'vue'
+import Router from 'vue-router'
+import Login from '../login/Login'
+import Home from '../pages/Home'
+export default new Router({
+  mode: 'history',
+  routes: [
+    {path: 'home', name: 'Home', component: Home,meta:{title:"主页"}}
+    {path: 'login', name: 'Login', component: Login,meta:{title:"登录"}}
+  ]
+});
+
+//可以在跳转之前判断跳转的组件的名字并用 window.document.title 赋值
+Router.beforeEach((to,from,next) => {
+  window.document.title=to.meta.title
+});
+```
+
 ## 嵌套路由
 ``` html
 <div id="app">
@@ -604,7 +627,8 @@ const router = new VueRouter({
 ## 导航守卫(beforeRouteUpdate)
 参数或查询的改变并不会触发进入/离开的导航守卫。你可以通过观察 `$route` 对象来应对这些变化，或使用 beforeRouteUpdate 的组件内守卫。
 
-## 全局守卫(router.beforeEach)
+## 全局守卫
+### router.beforeEach
 ``` js
 const router = new VueRouter({ ... })
 
@@ -625,6 +649,16 @@ next: Function: 一定要调用该方法来 resolve 这个钩子。执行效果�
   next(error): (2.4.0+) 如果传入 next 的参数是一个 Error 实例，则导航会被终止且该错误会被传递给 router.onError() 注册过的回调。
   确保要调用 next 方法，否则钩子就不会被 resolved。
 */
+```
+
+### afterEach
+这个是在组件跳转之后调用比较适用于返回页面之前浏览过的区域或者是让页面返回顶部的操作。
+
+``` js
+//直接使用 afterEach 方法去实现组件的 scrollTo 归零
+Router.afterEach((to,from,next) => {
+    window.scrollTo(0,0)
+})
 ```
 
 ## 路由拦截
