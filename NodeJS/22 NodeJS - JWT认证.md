@@ -35,20 +35,19 @@ JWT（json web token）是为了在网络应用环境间传递声明而执行的
 
 而 JWT 只需要服务端生成 token，客户端保存这个 token，每次请求携带这个 token，服务端认证解析就可。
 
-### JWT生成编码后的样子：
+#### JWT生成编码后的样子：
 
 ```
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiend6IiwiYWdlIjoiMTgifQ.UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 ```
 
-### 构成
-JWT由三部分组件，分别是 头部（header),载荷（payload) 以及 签证（signature)。
+从上面可以看出 JWT 由三部分组件，分别是 头部（header),载荷（payload) 以及 签证（signature)。
 
-#### header
-* 类型，如 jwt
-* 加密的算法 通常直接使用 HMAC SHA256
+### header
+* 令牌类型：如 jwt；
+* 加密的算法：默认为 HMAC SHA256（HS256）或者 RSA。
 
-完整的头部就像下面这样的JSON：
+完整的头部就像是下面这样的一个 JSON 对象：
 
 ``` json
 {
@@ -57,50 +56,46 @@ JWT由三部分组件，分别是 头部（header),载荷（payload) 以及 签�
 }
 ```
 
-然后将头部进行base64加密（该加密是可以对称解密的),构成了第一部分：
+然后将头部进行 base64 加密（该加密是可以对称解密的),构成了第一部分：
 
 ```
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 ```
 
-#### playload
-载荷就是存放有效信息的地方。这些有效信息包含三个部分：
+### playload
+载荷就是存放有效信息的地方。总共提供了七个可选字段：
 
-##### 标准中注册的声明 (建议但不强制使用) ：
-* iss: jwt签发者
-* sub: jwt所面向的用户
-* aud: 接收jwt的一方
-* exp: jwt的过期时间，这个过期时间必须要大于签发时间
-* nbf: 定义在什么时间之前，该jwt都是不可用的.
-* iat: jwt的签发时间
-* jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击。
+* iss: jwt 签发者
+* sub: jwt 所面向的用户
+* aud: 接收 jwt 的一方
+* exp: jwt 的过期时间，这个过期时间必须要大于签发时间
+* nbf: 生效时间
+* iat: jwt 的签发时间
+* jti: 编号，jwt 的唯一身份标识，主要用来作为一次性 token ,从而回避重放攻击
 
-##### 公共的声明
-公共的声明可以添加任何的信息，一般添加用户的相关信息或其他业务需要的必要信息.但不建议添加敏感信息，因为该部分在客户端可解密。
+除了这几个可选字段外，我们还可以在这个部分定义私有字段：
 
-##### 私有的声明
-私有声明是提供者和消费者所共同定义的声明，一般不建议存放敏感信息，因为base64是对称解密的，意味着该部分信息可以归类为明文信息。所以不可以在载荷部分保存用户密码等敏感信息。
-
-##### 定义一个payload:
 ``` json
 {
-  "name": "zwz",
-  "age": "18"
+  "sub": "admin",
+  "exp": 1441594722,
+  "name": "zf",
+  "admin": true
 }
 ```
 
-然后将其进行base64加密，得到Jwt的第二部分：
+然后将其进行 base64 加密，得到 JWT 的第二部分：
 
 ```
 eyJuYW1lIjoiend6IiwiYWdlIjoiMTgifQ
 ```
 
-#### signature
-* header (base64后的)
-* payload (base64后的)
-* secret
+> 注意：JWT 默认是不加密的，任何人都可以读到，所以不要把秘密信息放在这个部分。
 
-这个部分需要base64加密后的header和base64加密后的payload，再用加密算法加密一下，加密的时候要放进去一个 Secret ，这个相当于是一个密码，这个密码秘密地存储在服务端。
+### signature
+这个部分是对前两个部分进行 base64 加密，再用 Header 里面指定的签名算法加密，加密的时候要指定一个 Secret ，这个相当于是一个密码，该密码存储在服务端，不能泄露给用户用于防止数据篡改。
+
+最后把 Header、Payload、Signature 三个部分拼成一个字符串，每个部分之间用 `.` 分隔，然后返回给用户：
 
 ``` js
 var encodedString = base64UrlEncode(header) + "." + base64UrlEncode(payload); 
@@ -125,6 +120,8 @@ UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 * 服务端收到请求，然后去验证客户端请求里面带着的 Token，如果验证成功，就向客户端返回请求的数据
 
 ### express 中使用
+需要使用 express-jwt 和 jsonwebtoken 这两个包：
+
 ``` bash
 npm install express --save
 npm install express-jwt --save
