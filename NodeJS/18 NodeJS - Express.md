@@ -905,8 +905,11 @@ app.get('/users/:userId', (req, res, next) => {
 })
 ```
 
+## bcrypt
+对用户密码进行 hash 加密。
+
 ## passport
-综合的用户验证解决方案，可以实现 qq，微信登录。
+非常流行的权限验证库，综合的用户验证解决方案，可以实现 qq，微信登录。
 
 ``` bash
 # 安装

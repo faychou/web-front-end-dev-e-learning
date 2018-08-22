@@ -119,8 +119,13 @@ UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 * 客户端每次向服务端请求资源的时候需要带着服务端签发的 Token
 * 服务端收到请求，然后去验证客户端请求里面带着的 Token，如果验证成功，就向客户端返回请求的数据
 
+如果想自己生成 JWT 会有点复杂，所以可以直接利用第三方库来支持 JWT。如 ： jsonwebtoken。
+
+* sign 用于生成 token
+
+* verify 用于检验 token
+
 ### express 中使用
-需要使用 express-jwt 和 jsonwebtoken 这两个包：
 
 ``` bash
 npm install express --save
@@ -200,4 +205,14 @@ app.post("/user", function(req, res) {
 })
 
 app.listen(3000);
+```
+
+前端拿到 token 后可以直接存储在 localStorage 中，然后每次请求的时候挂载 Authorization：
+
+``` js
+axios.get(`/home`, {
+  headers: {
+    Authorization: token
+  }
+})
 ```
