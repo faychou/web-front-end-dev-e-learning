@@ -125,86 +125,129 @@ UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 
 * verify 用于检验 token
 
+但是 jsonwebtoken 提供的 verify 比较简单，如果想要实现更加复杂的验证，可以通过 express-jwt 来实现。
+
 ### express 中使用
 
 ``` bash
-npm install express --save
+# 安装
 npm install express-jwt --save
-npm install body-parser --save
 npm install jsonwebtoken --save
-npm install shortid --save
 ```
 
 ``` js
-var express = require("express");
-var expressJwt = require("express-jwt");
-var bodyParser = require("body-parser");
-var jwt = require("jsonwebtoken");
-var shortid = require("shortid");
+//app.js 配置
+const express = require('express');
+const ejs = require('ejs');
+const path = require('path');
+const bodyParser = require('body-parser');
+const logger = require('morgan');
 
-var app = express();
+const app = express();
 
+const routes = require('./routes');
+
+// 模版引擎设置
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+// 每一次服务请求都会将信息打印在控制台中
+app.use(logger('dev'));
+
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// express-jwt 作为 express 的一个中间件，需要设置 secret 作为秘钥，unless 可以排除某个接口
-app.use(expressJwt({secret: "secret"}).unless({path: ["/login"]}));
+//设置静态资源
+app.use(express.static(path.join(__dirname, 'public')));
 
-// 默认的情况下，解析 JWT 失败会抛出异常，可以通过以下设置来处理该异常
-app.use(function (err, req, res, next) {
-  if (err.name === "UnauthorizedError") {
-    res.status(401).send("invalid token");
-  }
-});
-
-
-app.post("/login", function(req, res) {
-  var username = req.body.username;
-  var password = req.body.password;
-
-  if (!username) {
-    return res.status(400).send("username require");
-  }
-  if (!password) {
-    return res.status(400).send("password require");
-  }
-
-  if (username != "admin" && password != "password") {
-    return res.status(401).send("invaild password");
-  }
-
-  var authToken = jwt.sign({username: username}, "secret");
-  res.status(200).json({token: authToken});
-
-});
-
-app.post("/user", function(req, res) {
-  var username = req.body.username;
-  var password = req.body.password;
-  var country = req.body.country;
-  var age = req.body.age;
-
-  if (!username) {
-    return res.status(400).send("username require");
-  }
-  if (!password) {
-    return res.status(400).send("password require");
-  }
-  if (!country) {
-    return res.status(400).send("countryrequire");
-  }
-  if (!age) {
-    return res.status(400).send("age require");
-  }
-
-  res.status(200).json({
-    id: shortid.generate(),
-    username: username,
-    country: country,
-    age: age
-  })
-})
+routes(app); // 路由引入
 
 app.listen(3000);
+```
+
+``` js
+// routes/index.js 配置
+const expressJWT = require('express-jwt');
+const util = require('../util/util');
+
+module.exports = (app) => {
+  // 设置需要保护的 API，这里需要设置 secret 作为秘钥
+  app.use(expressJWT({
+    secret: util.secretOrPrivateKey   
+  }).unless({
+    path: ['/login']  //除了这个地址，其他的URL都需要验证
+  }));
+
+  app.get('/', (req, res) => {
+    res.json({ message: 'hello!'});
+  });
+
+  app.use('/login', require('./login'));
+  app.use('/list', require('./list'));
+
+  // 404
+  app.use(function(req, res, next) {
+    next(createError(404));
+  });
+
+  // 5错误
+  app.use(function(err, req, res, next) {
+    //校验 token 失败时的处理
+    // 默认的情况下，解析 JWT 失败会抛出异常，可以通过以下设置来处理该异常
+    if (err.name === 'UnauthorizedError') {   
+      // 这个需要根据自己的业务逻辑来处理
+      res.status(401).json({
+        message: 'invalid token',
+        error: err
+      });
+      return;
+    }
+
+    res.status(err.status || 500).json({
+      message: err.message,
+      error: err
+    });
+  });
+};
+```
+
+``` js
+// routes/user.js
+const express = require('express');
+const jwt = require('jsonwebtoken'); // 引入 jsonwebtoken
+const util = require('../util/util');
+const router = express.Router();
+
+//模拟用户数据
+let user = {
+  name:'admin',
+  pass:'123',
+  role:0
+};
+
+router.post('/', function(req, res) {
+  console.log(req.body);
+  if(req.body.name === user.name && req.body.pass === user.pass) {
+    console.log('账号正确');
+
+    const token = jwt.sign({
+      user_name: req.body.name
+    }, util.secretOrPrivateKey , { // 秘钥
+        expiresIn: '60 * 60' // 过期时间
+    });
+
+    res.json({
+      msg:'登陆成功',
+      token:token
+    });
+  } else {
+    res.json({
+      msg:'登录失败'
+    });
+  }
+});
+
+module.exports = router;
 ```
 
 前端拿到 token 后可以直接存储在 localStorage 中，然后每次请求的时候挂载 Authorization：
