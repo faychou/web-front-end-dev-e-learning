@@ -22,7 +22,9 @@ npm start
 也可以选择使用和 HTML 文件类似的 ejs 模版：
 
 ``` bash
-express -e project-name && cd project-name
+# express -e project-name && cd project-name
+# 新版本最新写法
+express --view=ejs project-name && cd project-name
 
 npm install 
 

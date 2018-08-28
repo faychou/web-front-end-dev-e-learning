@@ -212,7 +212,7 @@ module.exports = (app) => {
 ```
 
 ``` js
-// routes/user.js
+// routes/login.js
 const express = require('express');
 const jwt = require('jsonwebtoken'); // 引入 jsonwebtoken
 const util = require('../util/util');
@@ -233,7 +233,7 @@ router.post('/', function(req, res) {
     const token = jwt.sign({
       user_name: req.body.name
     }, util.secretOrPrivateKey , { // 秘钥
-        expiresIn: '60 * 60' // 过期时间
+        expiresIn: 60 * 60 // 过期时间
     });
 
     res.json({
@@ -253,9 +253,92 @@ module.exports = router;
 前端拿到 token 后可以直接存储在 localStorage 中，然后每次请求的时候挂载 Authorization：
 
 ``` js
+const token = localStorage.getItem('token');
 axios.get(`/home`, {
   headers: {
-    Authorization: token
+    Authorization: Bearer ' + token
   }
 })
 ```
+
+封装 axios 请求：
+
+``` js
+// http.js
+import axios from 'axios';
+import { createBrowserHistory } from 'history';
+
+// 创建历史对象
+const history = createBrowserHistory();
+
+// 添加一个新的 axios 实例
+var http = axios.create();
+
+// 拦截请求，给所有的请求都带上 token
+http.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // 设置 token ，一般是在 headers 里加入 Authorization，并加上 Bearer 标注
+      // 最好通过此种形式设置 request.headers['Authorization']
+      config.headers['Authorization'] = 'Bearer ' + token;
+    }
+    return config;
+  },
+  error => {
+    console.log(error);
+    return Promise.reject(error);
+});
+
+// 拦截响应，遇到 token 不合法则报错
+http.interceptors.response.use(
+  response => {
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response;
+  },
+  error => {
+    if (error.response.status === 401) {
+      // 401 说明 token 验证失败
+      // 可以直接跳转到登录页面，重新登录获取 token
+      localStorage.removeItem('token');
+      console.log(error.response.data.error.message);
+      history.replace('/login');
+    } else if(error.response.status === 500) {
+      // 服务器错误
+      return Promise.reject('服务器出错：',error.response.data);
+    }
+    return Promise.reject(error.response.data);   // 返回接口返回的错误信息
+  });
+
+export default http;
+```
+
+react 引用：
+
+``` js
+home.js
+import React, { Component } from 'react';
+import http from './http';
+
+export default class Home extends Component{
+  componentDidMount() {
+    let that = this;
+    http.get(url)
+    .then(response => {
+      //...
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+  render() {
+    return (
+      //...
+    )
+  }
+}
+```
+
+
