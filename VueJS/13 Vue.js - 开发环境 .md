@@ -138,6 +138,8 @@ static 放不会变动的文件 assets 放可能会变动的文件。
 ```
 
 ## vue-cli 3.0
+vue-cli 3.0 的名字现在已经改为 @vue/cli 了。
+
 ### 安装
 ``` bash
 npm install -g @vue/cli
@@ -162,6 +164,8 @@ npm run serve
 
 ### 区别
 大部分配置都集成到 vue.config.js 这里了，包括了配置 常用的输出路径名、跟目录、预处理、devServer 配置、pwa、dll、第三方插件等。
+
+最大的优化在于实现了界面化创建和操作项目，使用 `vue ui` 可以启动脚手架页面。
 
 ## 开发工具
 vue-devtools
