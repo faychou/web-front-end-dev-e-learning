@@ -160,3 +160,46 @@ https 是更安全的 http 协议：
 * 客户端和服务器端的双向认证；
 * 完整性检查；
 * 内容加密。
+
+## 例子
+### 例一
+
+``` js
+const { createServer } = require("http");
+const fs = require("fs");
+const url = require("url");
+const path = require("path");
+
+const FOLDER_NAME = process.env.FOLDER_NAME;
+const PORT = process.env.PORT || 8080;
+const server = createServer((req, res) => {
+  const parsedURL = url.parse(req.url);
+
+  const pathname = parsedURL.pathname.slice(1);
+
+  if (pathname.startsWith(".")) {
+    res.statusCode = 403;
+     res.end("Relative paths are not allowed");
+  } else if (pathname.includes("/")) {
+    res.statusCode = 403;
+    res.end("Nested paths are not allowed");
+  } else {
+    const filePath = path.join(__dirname, FOLDER_NAME, pathname);
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+    fileStream.on("error", e => {
+      if (e.code === "ENOENT") {
+        res.statusCode = 404;
+        res.end("This file does not exist.");
+      } else {
+        res.statusCode = 500;
+        res.end("Internal server error");
+      }
+    });
+  }
+});
+
+server.listen(PORT, () => {
+  console.log(application is listening at the port ${PORT});
+});
+```

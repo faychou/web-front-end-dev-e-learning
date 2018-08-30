@@ -4,6 +4,7 @@
 #### createReadStream(src)
 ``` js
 var fs = require('fs');
+var result;
 
 // 打开一个流:
 var rs = fs.createReadStream('sample.txt', 'utf-8');
@@ -12,11 +13,13 @@ var rs = fs.createReadStream('sample.txt', 'utf-8');
 rs.on('data',function (chunk) {
   console.log('DATA:')
   console.log(chunk);
+  result += chunk;
 });
 
-// end事件表示这个流已经到末尾了，没有数据可以读取了
+// end 事件表示这个流已经到末尾了，没有数据可以读取了
 rs.on('end',function () {
   console.log('END');
+  console.log('result结果：', result);
 });
 
 rs.on('error',function (err) {
