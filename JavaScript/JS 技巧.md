@@ -17,7 +17,7 @@ function addEventHandler(oTarget, sEventType, fnHandler) {
 ```
 
 ### 使用!!操作符转换布尔值
-有时候我们需要对一个变量查检其是否存在或者检查值是否有一个有效值，如果存在就返回 true 值。为了做这样的验证，我们可以使用 `!!` 操作符来实现是非常的方便与简单。对于变量可以使用 `!!variable` 做检测，只要变量的值为:0、null、" "、undefined 或者 NaN 都将返回的是 false，反之返回的是 true。
+有时候我们需要对一个变量查检其是否存在或者检查值是否有一个有效值，如果存在就返回 true 值。为了做这样的验证，我们可以使用 `!!` 操作符来实现是非常的方便与简单。对于变量可以使用 `!!variable` 做检测，只要变量的值为:0、null、" "、undefined 或者 NaN 都将返回的是 false，反之返回的是 true。这种做法也就是强制转任何值为布尔值。
 
 ``` js
 console.log(!!10); //true

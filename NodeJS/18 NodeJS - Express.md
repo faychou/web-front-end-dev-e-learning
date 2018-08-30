@@ -22,7 +22,7 @@ npm start
 也可以选择使用和 HTML 文件类似的 ejs 模版：
 
 ``` bash
-# express -e project-name && cd project-name
+# express -e project-name && cd project-name #老版本写法
 # 新版本最新写法
 express --view=ejs project-name && cd project-name
 
@@ -159,12 +159,67 @@ node app.js
 6、打开浏览器，输入 127.0.0.1:3000 进行访问，然后在 url 地址的最后添加 '/about'，观察页面变化。
 
 ## app
+路由（Routing）是由一个 URI（或者叫路径）和一个特定的 HTTP 方法（GET、POST 等）组成的，每一个路由都可以有一个或者多个处理器函数，当匹配到路由时，这个/些函数将被执行。
+
+路由的定义由如下结构组成：
+
+`app.METHOD(PATH, HANDLER)`。
+
+* METHOD：是某个 HTTP 请求方式中的一个；
+* PATH：是服务器端的路径；
+* HANDLER：是当路由匹配到时需要执行的函数。
+
 ### app.get
+``` js
+app.get('/', function(req, res) {
+  res.send('hello world');
+});
+```
+
+匹配规则：
+
+``` js
+// 匹配 acd 或者 abcd
+app.get('/ab?cd', function(req, res) {
+  res.send('ab?cd');
+});
+
+// 匹配 abcd、abbcd、abbbcd 等
+app.get('/ab+cd', function(req, res) {
+  res.send('ab+cd');
+});
+
+// 匹配 abcd、abxcd、abRABDOMcd、ab123cd等
+app.get('/ab*cd', function(req, res) {
+  res.send('ab*cd');
+});
+
+// 匹配 /abe 和 /abcde
+app.get('/ab(cd)?e', function(req, res) {
+ res.send('ab(cd)?e');
+});
+
+//使用正则表达式的路由路径示例：
+// 匹配任何路径中含有 a 的路径：
+app.get(/a/, function(req, res) {
+  res.send('/a/');
+});
+
+// 匹配以 fly 结尾的路径，如 butterfly
+app.get(/.*fly$/, function(req, res) {
+  res.send('/.*fly$/');
+});
+```
 
 ### app.post
+``` js
+app.post('/', function (req, res) {
+  res.send('POST request');
+});
+```
 
 ### app.use(path, callback)
-如果path没有设置，默认为/。
+如果 path 没有设置，默认为 `/`。
 
 ``` js
 var express = require('express');
@@ -247,7 +302,7 @@ res.set({
 发送响应。
 
 #### res.json([body])
-返回json响应，参数为对象或者数组时与res.send()等价。
+返回 json 响应，参数为对象或者数组时与 res.send() 等价。
 
 ``` js
 res.json(null);
@@ -307,7 +362,7 @@ app.listen(3000);
 匹配所有HTTP方法。
 
 ### app.route
-创建路由路径的链式路由句柄。
+创建路由路径的链式路由句柄，可以帮助减少代码冗余和拼写错误。
 
 ``` js
 // 可链式调用
@@ -367,6 +422,90 @@ app.use((req, res, next) => {
         res.locals.authenticated = !req.user.anonymous;
         next();
     });
+```
+
+## express.Router
+创建模块化、可挂载的路由句柄。
+
+``` js
+// 根目录下新建 routes/index.js  
+
+var express = require('express');
+var router = express.Router(); 
+
+// 访问根路由 渲染 index 模板
+router.get('/', function (req, res) {
+    res.render('index');
+});
+
+module.exports = router;
+```
+
+``` js
+// 修改入口文件 app.js
+
+var express = require('express');
+var path = require('path');
+var ejs = require('ejs');
+var app = express();
+
+var port = process.env.PORT || 3000;
+
+// 引入路由模块
+var router = require('./routes/index');
+app.use('/', router);
+
+// 设置视图文件目录
+app.set('views', path.join(__dirname,'views'));  
+
+app.set('view engine' , 'ejs'); //设置模板引擎为ejs
+
+// 配置静态资源目录
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.listen(port);
+console.log('server started at port ' + port);
+```
+
+也可以使用 `router.route` 或 `app.route` 直接在应用程式上新增路由,这种方式的好处是程式可以在 `/login` 这个路由上將 GET 与 POST 分开处理，而且这样的写法既方便又简洁。
+
+``` js
+// app.js文件
+
+var express = require('express');
+var app = express();
+var router = express.Router();
+
+router.route('/login')
+    // 显示登陆(GET http://localhost:3000/login)
+    .get(function(req,res){
+        res.send('this is the login form');    
+    })
+    // 处理登陆表单 (POST http://localhost:3000/login)
+    .post(function(req,res){
+        console.log('processing');
+        res.send('processing the login form');
+    });
+
+app.use('/',router);
+app.listen(3000);
+```
+
+router对象的param方法用于路径参数的处理。
+
+``` js
+// app.js文件
+
+var express = require('express');
+var app = express();
+var router = express.Router();
+
+router.get('/hello/:name',function(req,res){
+    res.send('hello ' + req.params.name + '!');
+});
+
+app.use('/',router);
+app.listen(3000);
 ```
 
 ## 模版引擎
@@ -541,90 +680,8 @@ app.listen(app.get('port'), function () {
 
 表达式：
 
-	{{{body}}}
-
-## 路由
-创建模块化、可挂载的路由句柄。
-
-``` js
-// 根目录下新建 routes/index.js  
-
-var express = require('express');
-var router = express.Router(); 
-
-// 访问根路由 渲染 index 模板
-router.get('/', function (req, res) {
-    res.render('index');
-});
-
-module.exports = router;
 ```
-
-``` js
-// 修改入口文件 app.js
-
-var express = require('express');
-var path = require('path');
-var ejs = require('ejs');
-var app = express();
-
-var port = process.env.PORT || 3000;
-
-// 引入路由模块
-var router = require('./routes/index');
-app.use('/', router);
-
-// 设置视图文件目录
-app.set('views', path.join(__dirname,'views'));  
-
-app.set('view engine' , 'ejs'); //设置模板引擎为ejs
-
-// 配置静态资源目录
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.listen(port);
-console.log('server started at port ' + port);
-```
-
-也可以使用router.route或app.route直接在应用程式上新增路由,这种方式的好处是程式可以在 /login 这个路由上將 GET 与 POST 分开处理，而且这样的写法既方便又简洁。
-
-``` js
-// app.js文件
-
-var express = require('express');
-var app = express();
-var router = express.Router();
-
-router.route('/login')
-    // 显示登陆(GET http://localhost:3000/login)
-    .get(function(req,res){
-        res.send('this is the login form');    
-    })
-    // 处理登陆表单 (POST http://localhost:3000/login)
-    .post(function(req,res){
-        console.log('processing');
-        res.send('processing the login form');
-    });
-
-app.use('/',router);
-app.listen(3000);
-```
-
-router对象的param方法用于路径参数的处理。
-
-``` js
-// app.js文件
-
-var express = require('express');
-var app = express();
-var router = express.Router();
-
-router.get('/hello/:name',function(req,res){
-    res.send('hello ' + req.params.name + '!');
-});
-
-app.use('/',router);
-app.listen(3000);
+{{{body}}}
 ```
 
 ## 静态资源
@@ -658,6 +715,16 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 ```
 http://localhost:3000/static/images/kitten.jpg
 http://localhost:3000/static/css/style.css
+```
+
+## 错误处理
+### 404
+在 Express 中，404 并不是一个错误。而是因为 Express 执行了所有中间件、路由之后还是没有获取到任何输出。所以需要在其他所有中间件的后面添加一个处理 404 的中间件：
+
+``` js
+app.use(function(req, res, next) {
+  res.status(404).send('Sorry cant find that page!');
+});
 ```
 
 ## body-parser
