@@ -297,7 +297,7 @@ db.getCollection('collection_name')
 db.usercollection.insert({'key':'value'})
 db.usercollection.insert({ 'username' : 'faychou', 'email' : 'faychou@163.com' })```
 
-### 删除数据
+#### 删除数据
 ``` bash# 删除当前集合指定内容，option为匹配条件，如{'name':'jaychou'}：db.usercollection.remove(option)
 
 # 默认地，remove()方法将删除匹配指定条件的所有文档。使用justOne可选参数可以限制删除操作只删除一条。
@@ -446,6 +446,22 @@ dataset.json的数据内容
 ```
 
 mongoimport命令连接到本机运行的mongod实例，如果要把数据导到不同主机，不同端口的实例，可以指定主机和端口，使用参数 --host和--port。
+
+### 备份、还原
+``` bash
+# 还原数据库，–drop：先删除所有的记录，然后恢复
+mongorestore -h IP –port 端口 -u 用户名 -p 密码 -d 数据库 –drop 文件存在路径
+
+# -d 表示导出指定数据库，不加则表示导出所有数据库
+mongodump -h IP –port 端口 -u 用户名 -p 密码 -d 数据库 -o 文件存在路径
+
+# 导出表格格式的数据库
+mongoexport -h IP –port 端口 -u 用户名 -p 密码 -d 数据库 -c 表名 -f 字段 -q 条件导出 –csv -o 文件名
+
+# -f：导出指定字段，以分号分割，如：-f name,email,age
+# -q：根据查询条件导出，如：-q '{ "uid" : "100" }'
+# –csv：导出文件格式为 csv 的，因为大部分的关系型数据库都是支持 csv
+```
 
 ## 四、node.js 链接 mongodb
 ### 项目中安装 mongodb
