@@ -173,15 +173,110 @@ mysql -h 主机名 -u 用户名 -p
   2、接着重启 MySQL 即可。
   
 ### 修改用户密码
-打开终端, 执行命令: 
+打开终端, 直接执行以下命令: 
 
 ``` bash
-update mysql.user set authentication_string=password('123456') where user='root';
+mysqladmin -u root -p password 新密码
 ```
 
 执行后提示输入旧密码完成密码修改, 当旧密码为空时直接按回车键确认即可。
 
-> 注意：注意密码字段名 5.7 版本的是 authentication_string，之前的为 password。
+## 重置密码
+
+### mac 下重置密码
+比较靠谱的重置密码方法：
+
+第一步：在系统偏好里关闭 MySQL ，或者使用以下命令关闭；
+
+``` bash
+sudo /usr/local/mysql/support-files/mysql.server stop
+```
+
+第二步：进入以下目录：
+
+``` bash
+cd/usr/local/mysql/bin
+```
+
+第三步：获取权限：
+
+``` bash
+sudo su
+```
+
+第四步：重启服务：
+
+``` bash
+./mysqld_safe --skip-grant-tables &
+```
+
+第五步：重新打开一个终端，配置短命令：
+
+``` bash
+alias mysql=/usr/local/mysql/bin/mysql
+```
+
+第六步：进入 mysql 命令模式：
+
+``` bash
+mysql
+```
+
+第七步：进入 mysql 数据库：
+
+``` bash
+use mysql
+```
+
+第八步：获取权限，否则无法修改：
+
+``` bash
+flush privileges;
+```
+
+第九步：设置新密码：
+
+``` bash
+set password for 'root'@'localhost'=password('新密码');
+```
+
+#### 方法二：
+第一步：在系统偏好中,中止 MYSQL 服务；
+
+第二步：
+
+``` bash
+cd/usr/local/mysql/bin
+```
+
+第三步：
+
+``` bash
+sudo ./mysqld_safe--skip-grant-tables &
+```
+
+第四步：登录 MySQL：
+
+``` bash
+mysql
+```
+
+第五步；置空 root 用户的密码：
+
+``` bash
+update mysql.user set password='' where user='root';
+
+# 或者，密码字段名 5.7 版本的是 authentication_string，之前的为 password
+update mysql.user set authentication_string=password('123456') where user='root';
+```
+
+第六步：
+
+``` bash
+flush privileges; 
+```
+
+第七步：退出 mysql 后，重启服务即可。
 
 ## 语法规则
 * 在 window 系统中要区分大小写，但是在其他系统中不区分；
