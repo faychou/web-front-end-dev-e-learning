@@ -134,11 +134,42 @@ collation-server = utf8_general_ci
 #### 删除数据库
     DROP DATABASE [IF EXISTS] users;
 
-## 二、安装node-mysql：
-当然进行这一步的前提是已安装了node.js，然后新建项目并cd到项目根目录下，依次执行以下操作：
+## 二、安装 node-mysql：
+当然进行这一步的前提是已安装了node.js，然后新建项目并 cd 到项目根目录下，依次执行以下操作：
 
     npm init
     npm install mysql --save
+
+简单例子：
+
+``` js
+const mysql = require('mysql');
+// 连接数据库的配置
+const connection = mysql.createConnection({
+  // 主机名称
+  host: 'localhost',
+  // 数据库的端口号，默认是3306
+  port: 3306
+  // 用户名
+  user: 'root',
+  // 密码
+  password: 'root',
+  // 要链接的数据库
+  database: 'test'
+});
+
+// 连接数据库
+connection.connect();
+
+// 查询数据库
+connection.query('SELECT username from user', function(err, rows, fields) {
+  if (err) throw err;
+  console.log('The solution is: ', rows);
+});
+
+// 关闭连接
+connection.end();
+```
 
 ## 三、基本使用：
 在项目根目录下新建index.js文件，编写以下代码：
@@ -156,7 +187,7 @@ connection.connect(); //建立连接
 // 执行SQL语句
 connection.query('SELECT * FROM users', function(err, rows, fields) {
     if (err) throw err;
-    console.log('The solution is: ', rows[0].solution);
+    console.log('The solution is: ', rows);
 });
 
 connection.end(); //关闭连接
@@ -213,17 +244,68 @@ var connection = mysql.createConnection({
 connection.connect();
 ```
 
-2、 方法二
+2、当然也可以在连接的时候处理错误
+
+``` js
+var mysql = require('mysql');
+var connection = mysql.createConnection(...);
+connection.connect(function(err){
+  if(err){
+    // 连接失败时的错误处理
+    console.log(err);
+    return;
+  } 
+  connection.query('SELECT * from user', function(err, rows, fields) {
+    if(err){
+      // 查询失败时的错误处理
+      console.log(err);
+      return err;
+    }
+    console.log('The solution is: ', rows);
+  });
+  connection.end();
+});
+```
+
+3、 方法三，使用连接池：
 
 ``` javascript
 var pool  = mysql.createPool({
-    connectionLimit : 10,
+    connectionLimit : 10, // 最大连接数，默认为10
     host: 'localhost',
     user: 'me',
     password: 'secret',
     database: 'my_db'
 });
+
+pool.getConnection(function(err,connection){
+  if(err){
+    console.log(err);
+    return;
+  }
+  connection.query('SELECT 1 + 1 AS solution',function(err,result){
+    connection.release();
+    if(err){
+      console.log(err);
+      return;
+    }
+    console.log('The solution is: ', result[0].solution);
+  })
+});
 ```
+
+每次我们需要和数据库建立连接的时候不再是直接建立连接，而是去连接池中通过 `pool.getConnection()` 方法“捞取”已有的连接。
+
+每次查询完数据库是都要使用 `release()` 方法释放数据库连接，这样数据库连接又回到了连接池中。释放后如果再使用 connection 将会报错。
+
+一般数据库连接池不需要关闭，但是如果使用完连接池需要将所有的连接关闭，我们可以使用 `pool.end()` 方法将其关闭。
+
+``` js
+pool.end(function (err) {
+  // 所有连接池中的数据库连接将会被关闭
+});
+```
+
 ### 查询数据库
 #### 方法一
 ``` javascript

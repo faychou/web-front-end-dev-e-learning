@@ -302,8 +302,13 @@ create database if not exists db_name;
 还可以在创建数据库时通过 character set 为数据库指定字符编码：
 
 ``` bash
-create database user character set utf-8;
+create database user character set utf8;
+
+# or
+create database user character set utf8mb4;
 ```
+
+> 注意：utf-8 编码可能是 2个字节、3个字节、4个字节的字符，但是 MySQL 的 utf8 编码只支持3字节的数据，而移动端的表情数据是4个字节的字符。所以就引入了 utf8mb4 编码，该编码是 utf8 编码的超集，兼容 utf8，并且能存储4字节的表情字符。采用 utf8mb4 编码的好处是：存储与获取数据的时候，不用再考虑表情字符的编码与解码问题。utf8mb4 的最低 mysql 版本支持版本为 5.5.3+ 。
 
 ### 显示数据库
 查询所有的数据库：
@@ -377,7 +382,8 @@ create table t_user(
 * not null 代表该列的值不能为空；
 * auto_increment 代表该列的值自增，在每张表中仅能有一个这样的值且所在列必须为索引列；
 * primary key 表示该列是表的主键, 本列的值必须唯一且不能为空, MySQL 将自动索引该列；
-* unsigned 表示该类型为无符号型；
+* unsigned 表示该类型为无符号型，也就是不能为负数,当你插入负数时就显示0；
+* zerofill 自动填充，如 int(4),你插入1，显示0001，你插入6666，显示也是6666，并且会为该列自动地增加 UNSIGNED 属性；
 * unique 唯一约束，用于保证数据表中字段的唯一性；
 * default 表示如果插入新字段时，该列值为空时系统自动插入默认值。
 * engine=innodb 使用innodb引擎，是 mysql 数据库引擎之一；
@@ -663,6 +669,14 @@ where 子句指定哪些记录应该删除。它是可选的，如果不指定�
 
 ``` bash
 delete from students;
+```
+
+## 数据库连接池
+数据库连接池负责分配、管理和释放数据库连接，它允许应用程序重复使用一个现有的数据库连接，而不是再重新建立一个。这项技术能明显提高对数据库操作的性能。
+
+## 外键
+```
+ALTER TABLE vet_specialties ADD FOREIGN KEY FK_SPECIALTY_ID(specialty_id) REFERENCES specialties (id)
 ```
 
 
