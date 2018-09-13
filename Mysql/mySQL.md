@@ -527,25 +527,33 @@ drop table user,labels;
 > 注意：`drop table` 删除一个或多个数据库表，所有表中的数据和表定义均被删除。
 
 ## 添加数据
+``` bash
+insert into 表名 values(值1,值2,...);
+# or
+insert 表名 (字段1,字段2,...) values(值1,值2,...);
+```
+
+使用 into 关键字，此时 values 里面的数据必须一一对应表中所有的字段，也就是说,表中有几个字段,那么 value s里面就必须有几个值；
+
+第二种不使用 into 则不需要一一对应所有字段，只需要将第一个括号的字段名与第二个括号的值对应即可，
+
 ### 添加单条数据
 ``` bash
 # 向 user 表中添加一条数据
-insert into user values('faychou',18);
+insert into user values(null,'faychou',18);
 ```
-
-* into 是可选；
-* values 必须包含表中每列的值，并且按表中列的存放次序给出。
 
 如果设置了主键并且自动增长，添加的时候需要把对应的主键值设置为 null 或者数字 “0”：
 
-``` bash
-insert user values(null,'jack',23);
-```
-
-有时我们只需要插入部分数据, 或者不按照列的顺序进行插入, 可以使用这样的形式进行插入:
+插入部分数据, 或者不按照列的顺序进行插入, 可以使用这样的形式进行插入:
 
 ``` bash
 insert user (name, sex, age) values("lily", "女", 21);
+```
+
+### 将每一列插入默认值
+```
+INSERT INTO users () VALUES();
 ```
 
 ### 添加多条数据

@@ -1,26 +1,26 @@
 # node + mysql 入门教程
 MySQL 是最流行的关系型数据库管理系统，关联数据库将数据保存在不同的表中，而不是将所有数据放在一个大仓库内，这样就增加了速度并提高了灵活性。
 
-## 一、安装与配置MySQL
-### MAC安装
-1、 官网直接下载MySQL社区版（MySQL Community Edition）;
+## 一、安装与配置 MySQL
+### MAC 安装
+1、 官网直接下载 MySQL 社区版（MySQL Community Edition）;
 
-2、 选择dmg的文件进行下载，下载完毕后，双击安装，一路默认即可；
+2、 选择 dmg 的文件进行下载，下载完毕后，双击安装，一路默认即可；
 
->注意：最后会有一个弹出框，这里是你的mysql root账号的初始密码。
+>注意：最后会有一个弹出框，这里是你的 mysql root 账号的初始密码。
 
-3、 打开系统偏好设置，选择mysql，点击start mysql server按钮开启服务;
+3、 打开系统偏好设置，选择 mysql，点击 start mysql server 按钮开启服务;
 
-4、 打开终端输入以下命令将mysql添加进环境变量
+4、 打开终端输入以下命令将 mysql 添加进环境变量
 
     echo "export PATH=$PATH:/usr/local/mysql/bin" >> ~/.bash_profile
-5、 重启终端后输入以下代码查看，可以看到/usr/local/mysql/bin已经添加到PATH中
+5、 重启终端后输入以下代码查看，可以看到 `/usr/local/mysql/bin` 已经添加到 PATH 中：
 
     echo $PATH
     
-6、 在Windows上，安装时请选择UTF-8编码，以便正确地处理中文。
+6、 在 Windows 上，安装时请选择 UTF-8 编码，以便正确地处理中文。
 
-在Mac或Linux上，需要编辑MySQL的配置文件，把数据库默认的编码全部改为UTF-8。MySQL的配置文件默认存放在/etc/my.cnf或者/etc/mysql/my.cnf：
+在 Mac 或 Linux 上，需要编辑 MySQL 的配置文件，把数据库默认的编码全部改为 UTF-8。MySQL 的配置文件默认存放在 `/etc/my.cnf` 或者 `/etc/mysql/my.cnf` ：
 
 ```
 [client]
@@ -32,7 +32,7 @@ character-set-server = utf8
 collation-server = utf8_general_ci
 ```
 
-7、 直接输入以下命令来登陆mysql，密码就是安装时弹出框中的初始密码（注意mysql中每条语句以分号结束）：
+7、 直接输入以下命令来登陆 mysql，密码就是安装时弹出框中的初始密码（注意 mysql 中每条语句以分号结束）：
 
     mysql -u root -p;
 
@@ -376,7 +376,7 @@ connection.query('SELECT * FROM `users` WHERE `name` = "Jack"',  function(err, r
 });
 ```
 
-2、 connection.query(sqlString, values, callback)
+2、 connection.query(sqlString, values, callback)，推荐：
 
 ``` javascript
 connection.query('SELECT * FROM `users` WHERE `name` = ?', ['Jack'],  function(err, results, fields) {
@@ -489,7 +489,7 @@ connection.on('close',function(err) {
 注意: connection.config 对象保存着最近的链接信息，你可以通过它重新连接到mysql服务器。可以添加到console.log()中输出。
 
 ## 四、增查改删
-对数据的使用也就是增查改删，所以接下来看看如何实现这几步的。
+### 添加数据
 
 ``` javascript
 var mysql  = require('mysql');
@@ -502,12 +502,19 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-// 增加记录
+// 增加
 connection.query('INSERT INTO users(id,name,age) VALUES(0,"faychou",22)',function(err,rows,fields) {
-    if(err) throw err;
-    console.log(rows);
-    console.log(rows.insertId);
+  if(err) throw err;
+  console.log(rows);
+  console.log(rows.insertId);
 });
+
+// 或者
+var userAdd = 'INSERT INTO users(id,name,age) VALUES(0,?,?)';
+var userAddParams = ['faychou', 22];
+
+connection.query(userAdd,userAddParams,function (err, result) {});
+
 // 或者
 var post = {name:"faychou",age:18};
 connection.query('INSERT INTO users SET ?',post,function(err,rows,fields) {
@@ -516,19 +523,30 @@ connection.query('INSERT INTO users SET ?',post,function(err,rows,fields) {
     console.log(rows.insertId);
 });
 
-// 删除记录
+connection.end();
+```
+
+### 删除数据
+``` js
+// 删除
 connection.query('DELETE FROM users WHERE id=?',[12],function(err,rows,fields) {
     if(err) throw err;
     console.log(rows.affectedRows);
 });
+```
 
-// 修改记录
+### 修改数据
+``` js
+// 修改
 connection.query('UPDATE users SET name=?,age=? WHERE id=?',["fay",18,1],function(err,rows,fields) {
     if(err) throw err;
     console.log(rows.affectedRows);
 });
+```
 
-// 查询记录
+### 查询数据
+``` js
+// 查询
 connection.query("SELECT * FROM users" , function(err, rows, fields) {
     if (err) {
         throw err;
@@ -539,6 +557,4 @@ connection.query("SELECT * FROM users" , function(err, rows, fields) {
         }
     }
 });
-
-connection.end();
 ```
