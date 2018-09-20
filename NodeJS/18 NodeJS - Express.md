@@ -975,7 +975,21 @@ app.get('/users/:userId', (req, res, next) => {
 ```
 
 ## bcrypt
-对用户密码进行 hash 加密。
+在 NodeJS 中，直接使用官方内建的 crypto 包对用户密码进行不可逆的 MD5 或者 SHA-1 加密。
+
+``` js
+let pwt = '123456';
+
+// MD5 Hash
+require('crypto').createHash('md5').update(pwt).digest('hex');
+
+// SHA-1 Hash
+require('crypto').createHash('sha1').update(pwt).digest('hex');
+```
+
+当用户注册时，将用户提交的密码先不可逆加密，然后将密文保存在数据库内。
+
+当用户登录时，将用户提交的密码先以相同方式加密，然后与数据库中的密文比对，来判断密码的正误。
 
 ## passport
 非常流行的权限验证库，综合的用户验证解决方案，可以实现 qq，微信登录。

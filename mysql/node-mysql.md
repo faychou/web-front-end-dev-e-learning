@@ -489,38 +489,73 @@ connection.on('close',function(err) {
 注意: connection.config 对象保存着最近的链接信息，你可以通过它重新连接到mysql服务器。可以添加到console.log()中输出。
 
 ## 四、增查改删
-### 添加数据
+### 查询数据
+首先链接数据库（connection，pool），这里直接使用 connection：
 
-``` javascript
+``` js
 var mysql  = require('mysql');
 var connection = mysql.createConnection({
-    host  : 'localhost',
-    user : 'me',
-    password : 'secret',
-    database : 'my_db'
+  host  : 'localhost',
+  user : 'me',
+  password : 'secret',
+  database : 'my_db'
 });
 
 connection.connect();
+```
 
-// 增加
-connection.query('INSERT INTO users(id,name,age) VALUES(0,"faychou",22)',function(err,rows,fields) {
+#### 方法一：直接使用 `.query(sqlString,callback)`
+参数一是 sql 语句，参数二是回掉函数：
+
+``` js
+connection.query("SELECT * FROM users" , function(err, results, fields) {
+  if (err) {
+    throw err;
+  }
+  if (results) {
+    for(var i = 0 ; i < results.length ; i++) {
+      console.log(results);
+    }
+  }
+});
+
+//或者
+connection.query("SELECT * FROM users where username = 'fay'",callback);
+```
+
+#### 方法二：使用 `.query(sqlString,values,callback)` 占位符：
+``` js
+connection.query("SELECT * FROM users where username = ?",['fay'],callback);
+```
+
+#### 方法三：使用选项参数 `.query(options,callback)` 的形式：
+``` js
+connection.query({
+  sql: 'SELECT * FROM users where username = ?',
+  values: ['fay'],
+  timeout: 3000
+}, callback);
+```
+
+### 添加数据
+
+``` javascript
+connection.query('INSERT INTO users(id,name,age) VALUES(0,"faychou",22)',function(err, result,fields) {
   if(err) throw err;
-  console.log(rows);
-  console.log(rows.insertId);
+  console.log(result);
 });
 
 // 或者
 var userAdd = 'INSERT INTO users(id,name,age) VALUES(0,?,?)';
 var userAddParams = ['faychou', 22];
 
-connection.query(userAdd,userAddParams,function (err, result) {});
+connection.query(userAdd,userAddParams,function (err, result, fields) {});
 
 // 或者
 var post = {name:"faychou",age:18};
-connection.query('INSERT INTO users SET ?',post,function(err,rows,fields) {
-    if(err) throw err;
-    console.log(rows);
-    console.log(rows.insertId);
+connection.query('INSERT INTO users SET ?',post,function(err, results,fields) {
+  if(err) throw err;
+  console.log(results);
 });
 
 connection.end();
@@ -529,32 +564,18 @@ connection.end();
 ### 删除数据
 ``` js
 // 删除
-connection.query('DELETE FROM users WHERE id=?',[12],function(err,rows,fields) {
-    if(err) throw err;
-    console.log(rows.affectedRows);
+connection.query('DELETE FROM users WHERE id=?',[1],function(err, results,fields) {
+  if(err) throw err;
+  console.log(results);
 });
 ```
 
 ### 修改数据
 ``` js
 // 修改
-connection.query('UPDATE users SET name=?,age=? WHERE id=?',["fay",18,1],function(err,rows,fields) {
-    if(err) throw err;
-    console.log(rows.affectedRows);
-});
-```
-
-### 查询数据
-``` js
-// 查询
-connection.query("SELECT * FROM users" , function(err, rows, fields) {
-    if (err) {
-        throw err;
-    }
-    if (rows) {
-        for(var i = 0 ; i < rows.length ; i++) {
-            console.log(rows[i].id,rows[i].username,rows[i].password);
-        }
-    }
+connection.query('UPDATE users SET name=?,age=? WHERE id=?',["fay",18,1],function(err, results,fields) {
+  if(err) throw err;
+  
+  console.log(results);
 });
 ```
