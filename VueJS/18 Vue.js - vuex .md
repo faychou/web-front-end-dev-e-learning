@@ -737,3 +737,13 @@ store.registerModule(['nested', 'myModule'], {
 模块动态注册功能使得其他 Vue 插件可以通过在 store 中附加新模块的方式来使用 Vuex 管理状态。例如，vuex-router-sync 插件就是通过动态注册模块将 vue-router 和 vuex 结合在一起，实现应用的路由状态管理。
 
 你也可以使用 store.unregisterModule(moduleName)来动态卸载模块。注意，你不能使用此方法卸载静态模块（即创建 store 时声明的模块）。
+
+## 七、状态持久化
+页面刷新后 vuex 中状态被清空，解决方案：
+
+### 方案1：localStorage 
+使用 localStorage 进行数据本地化，但电商类型的项目可能并不是太适合，因为 localStorage 是长时间缓存，有可能导致数据不同步。
+
+
+### 方案2
+判断数据是否存在，不存在重新从服务器端获取，或者可以进行路由懒加载保持数据在内存中也是可以的。

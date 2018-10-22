@@ -1,18 +1,15 @@
 # Vue 其他 API
-## Vue.set(target,key,value)
-设置对象属性。
-
-## Vue.set(目标数组，索引，替换值)
-重设属性值。
+## nextTick
+在使用自定义组件的时候，或者使用第三方的组件（轮播图等），因为数据是异步获取的，所以组件初始化会在数据获取之前完成，此时可能导致组件无法正常工作，就拿轮播图举例子，正确的写法是在 watch 中进行深度监视，当数据请求完成后进行组件的初始化：
 
 ``` js
-methods: {
-  addItem () {
-    //使用Vue.set()方法
-    Vue.set(this.list,1,{
-      name: 'app',
-      price: 100
+watch: {
+  getData() {
+    this.$nextTick(() => {
+      // ...
     })
   }
 }
 ```
+
+nextTick 主要作用在于将回调延迟到下次 DOM 更新循环之后执行;在修改数据之后立即使用它，然后等待 DOM 更新; 它跟全局方法 Vue.nextTick 一样，不同的是回调的 this 自动绑定到调用它的实例上。

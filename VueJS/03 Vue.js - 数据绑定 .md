@@ -159,27 +159,72 @@ v-bind 指令可以缩写为一个冒号：
 this.$emit('update:foo', newValue)
 ```
 
-### 动态添加数据
-只有 data 中的数据才是响应式的，动态添加进来的数据默认为非响应式。可以通过以下方式实现动态添加数据的响应式：
+## 数据更新
+### 响应式数据更新
+只有 data 中的数据才是响应式的，动态添加进来的数据默认为非响应式。如果是数组，则可以通过以下方式实现数据的响应式更新：push()、pop()、shift()、unshift()、splice()、sort()、reverse()，其他数组方法更新数据后，并不会触发试图更新，如：filter()、contat()、slice()。
 
-* Vue.set(object, key, value) - 适用于添加单个属性；
+``` js
+// 例子
+this.goods.push({  // push 方法,视图直接改变
+  name: '衣服'
+});
+
+// 直接用新数组替换旧数组
+this.goods = this.goods.concat([{  // concat 方法，需更新原数组
+  name: '衣服'
+}]);
+```
+
+由于 JavaScript 的限制， Vue 不能检测以下变动的数组：
+
+``` js
+// 直接利用索引更改数据 
+vm.items[index] = newValue;
+
+// 直接修改数组的长度 
+vm.items.length = newLength;
+```
+
+为了解决上述问题，可以通过以下方式实现动态添加数据并且出发视图更新：
+
+* 全局操作：Vue.set(object, key, newValue) - 适用于添加单个属性；
+
+* vm.$set(object, index, newValue);
+
 * Object.assign() - 适用于添加多个属性。
 
 ``` js
+// 例子
 var vm = new Vue({
   data: {
-    stu: {
-      name: 'jack',
-      age: 19
-    }
+    goods: [{
+      name: '衣服',
+      size: 'LL'
+    }]
   }
-})
+});
 
 /* Vue.set */
-Vue.set(vm.stu, 'gender', 'male')
+Vue.set(vm.goods, 0, {
+  name: '裤子',
+  price: 100
+});
+// 组件中使用
+Vue.set(this.goods,0, {
+  name: '裤子',
+  price: 100
+});
 
-/* Object.assign 将参数中的所有对象属性和值 合并到第一个参数 并返回合并后的对象*/
-vm.stu = Object.assign({}, vm.stu, { gender: 'female', height: 180 })
+// Object.assign 将参数中的所有对象属性和值合并到第一个参数 并返回合并后的对象
+vm.goods = Object.assign(
+  {}, 
+  vm.goods, 
+  { name: '裤子', color: 'red' }
+);
+
+// 使用实例：
+vm.$set(vm.goods, 'size', 'M');
+// this.$set(this.arr, index, val); 组件中
 ```
 
 ### 异步 DOM 更新
