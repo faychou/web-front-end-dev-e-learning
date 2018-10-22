@@ -740,3 +740,32 @@ body {
   min-height: 1000px;
 }
 ```
+
+## 吸底 效果
+当内容区的内容较少时，页脚区不是随着内容区排布，而是始终显示在屏幕的最下方；当内容区的内容较多时，页脚能随着内容区的增高而撑开，始终显示在页面的最底部。
+
+### 方案一
+``` html
+<header></header> 
+<main></main> 
+<footer></footer>
+```
+``` css
+main { 
+  min-height: calc(100vh - 2.5em - 7em); 
+  box-sizing: border-box; 
+}
+```
+
+缺点是：每次都要计算容器的 min-height。
+
+### 方案二
+``` css
+body { 
+  display: flex; 
+  flex-flow: column; 
+  min-height: 100vh; 
+} 
+main { flex: 1; }
+```
+
