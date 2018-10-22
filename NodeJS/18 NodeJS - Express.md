@@ -727,6 +727,7 @@ app.use(function(req, res, next) {
 });
 ```
 
+# 第三方中间件
 ## body-parser
 body-parser 对 post 请求的请求体进行解析。
 
@@ -1108,4 +1109,36 @@ var newUser = new User({
   password: password,
   email: req.body.email
 });
+```
+
+## XML2js
+将 xml 与 json 相互转化的包。
+
+``` bash
+# 安装
+npm install --save xml2js
+```
+
+使用：
+
+``` js
+const xml2js = require('xml2js');
+//--> xml -> json
+// xml2js 默认会把子节点的值变为一个数组, 所以这里配置 explicitArray 值为 false
+const xmlParser = new xml2js.Parser({ explicitArray: false, ignoreAttrs: true });
+
+var xml = "<root>xml2js to json</root>";
+
+xmlParser.parseString(xml, (err, result) => {
+  console.log(result);
+});
+
+
+//--> json -> xml
+const jsonBuilder = new xml2js.Builder();
+
+var obj = {name: "fay", age: 18};
+
+var jsonxml = jsonBuilder.buildObject(obj);
+console.log(jsonxml);
 ```

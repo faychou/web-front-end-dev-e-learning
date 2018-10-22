@@ -10,7 +10,7 @@
 
 * SET NULL：置空模式,前提外键字段允许为 NULL,  父表操作后，子表对应的字段被置空。
 
-* SET DEFAULT：设默认值。
+* SET DEFAULT：表示设置为默认值(restrict)。
 
 * NO ACTION：无动作，如果子表中有匹配的记录,则不允许对父表对应候选键进行update/delete操作。
 

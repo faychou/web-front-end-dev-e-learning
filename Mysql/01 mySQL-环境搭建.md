@@ -8,18 +8,24 @@ MySQL 具有运行速度很快、容易使用、支持查询语言、多个用�
 第一步、由于 centos 的 yum 源中没有 mysql ，需要到 mysql 的官网下载 yum repo 配置文件：
 
 ``` bash
-wget http://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
+wget http://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
 ```
 
 第二步、安装 yum repo 文件：
 
 ``` bash
-rpm -ivh mysql57-community-release-el7-9.noarch.rpm
+yum -y install mysql57-community-release-el7-11.noarch.rpm
 ```
 
 执行完后会在 `/etc/yum.repos.d/` 目录下生成 `mysql-community.repo` 和 `mysql-community-source.repo` 两个文件。
 
-第三步、更新 yum 缓存：
+查看一下安装效果：
+
+``` bash
+yum repolist enabled | grep mysql.*
+```
+
+第三步、更新 yum 缓存（可以省略）：
 
 ``` bash
 yum clear all
@@ -29,22 +35,26 @@ yum makecache
 第四步、安装 mysql：
 
 ``` bash
-yum install mysql-community-client.x86_64 mysql-community-common.x86_64 mysql-community-devel.x86_64 mysql-community-libs.x86_64 mysql-community-server.x86_64
-
-# 或者
-rpm install mysql-server
+yum install mysql-community-server
 ```
 
 第五步、启动 mysql：
 
 ``` bash
-service mysqld start
+systemctl start mysqld.service
+# service mysqld start # centos7 之前
+```
+
+运行一下命令查看一下运行状态： 
+
+``` bash
+systemctl status mysqld.service
 ```
 
 第六步、查看初始密码：
 
 ``` bash
-grep 'temporary password' /var/log/mysqld.log
+grep "password" /var/log/mysqld.log
 ```
 
 得到类似以下内容：
@@ -64,8 +74,10 @@ mysql -u root -p
 第八步、更改初始密码：
 
 ``` bash
-alter user 'root'@'localhost' identifide by '新密码'
+ALTER USER 'root'@'localhost' IDENTIFIED BY '********';
 ```
+
+> 注意：mysql 默认安装了密码安全检查插件（validate_password），默认密码检查策略要求密码必须包含：大小写字母、数字和特殊符号，并且长度不能少于8位。否则会提示 ERROR 1819 (HY000): Your password does not satisfy the current policy requirements 错误。
 
 ## Windows 系统
 1、 直接官网下载 mysql.zip [下载地址](https://dev.mysql.com/downloads/mysql/)，注意 MySQL Community Server 表示的是个人免费版，其他版本都是要收费的；
@@ -272,7 +284,50 @@ update mysql.user set authentication_string=password('123456') where user='root'
 第六步：
 
 ``` bash
-flush privileges; 
+FLUSH PRIVILEGES;
 ```
 
 第七步：退出 mysql 后，重启服务即可。
+
+## 添加远程登录用户
+mysql 默认只允许 root 帐户在本地登录，如果要在其它机器上连接 mysql，必须修改 root 允许远程连接，或者添加一个允许远程连接的帐户，为了安全起见，我添加一个新的帐户：
+
+``` sql
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' IDENTIFIED BY 'User_123456' WITH GRANT OPTION;
+```
+
+输入后使修改生效还需要下面的语句：
+
+``` sql
+# 刷新
+FLUSH PRIVILEGES;
+
+# 退出 mysql
+quit
+
+# 重启
+systemctl restart mysqld.service
+# service mysqld restart
+```
+
+接着还需要在阿里云 ECS 配置安全组规则，放开 22，3306 端口。[详情](https://help.aliyun.com/document_detail/25471.html?spm=5176.100241.0.0.IneJPl)
+
+最后，使用本地 mysql 客户端（navicat，sequel pro）通过 SSH 方式连接数据库，注意这时需要同时填写 mysql 设置的账号 和 阿里云服务器的登陆账号，mysql 的连接地址直接填 127.0.0.1 ，阿里云的连接地址是公网 ip。
+
+## 配置默认编码为 utf8
+修改/etc/my.cnf配置文件，在[mysqld]下添加编码配置，如下所示：
+
+```
+[mysqld]
+character_set_server=utf8
+init_connect='SET NAMES utf8'
+```
+
+重新启动 mysql 服务。
+
+## 设置自动启动
+``` bash
+systemctl enable mysqld
+
+systemctl daemon-reload
+```

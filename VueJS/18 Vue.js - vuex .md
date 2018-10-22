@@ -441,13 +441,13 @@ Actions 支持同样的载荷方式和对象方式进行触发：
 
 ``` js
 // 以载荷形式触发
-store.dispatch('incrementAsync', {
+store.dispatch('incrementActions', {
   amount: 10
 })
 
 // 以对象形式触发
 store.dispatch({
-  type: 'incrementAsync',
+  type: 'incrementActions',
   amount: 10
 })
 ```
