@@ -43,10 +43,10 @@ nginx 依赖以下模块:
 1、使用以下几个命令安装必备的几个库：
 
 ``` bash
-# 所有操作的基础路径在/usr/local/src ，请先进入该目录
+# 所有操作的基础路径在 /usr/local/src ，请先进入该目录
 yum -y install make zlib zlib-devel gcc gcc-c++ libtool openssl openssl-devel
 
-# 紧接着安装PCRE，这家伙提供了Rewrite功能：
+# 紧接着安装 PCRE，这家伙提供了 Rewrite 功能：
 ## 先下载二进制包
 wget http://downloads.sourceforge.net/project/pcre/pcre/8.41/pcre-8.41.tar.gz
 ## 解压
@@ -342,7 +342,7 @@ WantedBy=multi-user.target
 systemctl daemon-reload
 ```
 
-6、 配置nginx.conf
+6、 配置 nginx.conf
 
 ``` bash
 # nginx.conf 是 nginx 配置文件，一般放置在 /usr/local/nginx/conf，/etc/nginx，或者 /usr/local/etc/nginx；Windows下路径就是你安装Nginx目录下；Mac系统配置文件路径在: /usr/local/etc/nginx/nginx.conf
@@ -429,187 +429,207 @@ nginx -c /usr/local/nginx/conf.d/nginx.conf
 ```
 
 #### 详细配置文件指南：
-nginx是由模块组成的，这些模块在配置文件中又有指定的指令。 指令被分成简单指令和块指令。简单指令包括名称和用空格分割的参数以及用来结尾的分号(;)。 一个块指令和简单指令有相同的结构，但是它使用大括号({and})来包围一系列说明来替代使用分号作为结尾。
+nginx 是由模块组成的，这些模块在配置文件中又有指定的指令。 指令被分成简单指令和块指令。简单指令包括名称和用空格分割的参数以及用来结尾的分号(;)。 一个块指令和简单指令有相同的结构，但是它使用大括号({and})来包围一系列说明来替代使用分号作为结尾。
 
 ``` bash
 ### 每个指令必须有分号结束。###
 
-#表明 Nginx 服务是由哪个用户哪个群组来负责维护进程的，默认是 nobody
+# 表明 Nginx 服务是由哪个用户哪个群组来负责维护进程的，默认是 nobody
 # user nobody; 
 
-#工作的子进程数量（通常等于CPU数量或者2倍于CPU），默认1
+# 工作的子进程数量（通常等于CPU数量或者2倍于CPU），默认1
 worker_processes  2; 
 
-#错误日志存放路径，级别
-#级别：debug/info/notice/warn/error/crit；从左到右记录的信息从最详细到最少
+# 错误日志存放路径，级别
+# 级别：debug/info/notice/warn/error/crit；从左到右记录的信息从最详细到最少
 # error_log  logs/error.log;
 error_log  logs/error.log  info;
 
-#指定nginx进程运行文件存放地址,默认配置文件是注释了
-#如果上面worker_processes的数量大于1那Nginx就会启动多个进程
-#而发信号的时候需要知道要向哪个进程发信息，不同进程有不同的pid，所以写进文件发信号比较简单
+# 指定 nginx 进程运行文件存放地址,默认配置文件是注释了
+# 如果上面 worker_processes 的数量大于 1 那 Nginx 就会启动多个进程
+# 而发信号的时候需要知道要向哪个进程发信息，不同进程有不同的 pid，所以写进文件发信号比较简单
 # pid logs/nginx.pid;
 
-#简化调试 此指令不得用于生产环境
+# 简化调试 此指令不得用于生产环境
 # master_process  off;
 
-#简化调试 此指令可以用到生产环境
+# 简化调试 此指令可以用到生产环境
 # daemon off;
 
-#最大文件描述符
+# 最大文件描述符
 worker_rlimit_nofile 51200;
 
-#配置影响nginx服务器或与用户的网络连接
+# 配置影响 nginx 服务器或与用户的网络连接
 events {
-  #设置网路连接序列化，防止惊群现象发生，默认为on
+  # 设置网路连接序列化，防止惊群现象发生，默认为 on
   # accept_mutex on;
   
-  #设置一个进程是否同时接受多个网络连接，默认为off
+  # 设置一个进程是否同时接受多个网络连接，默认为 off
   # multi_accept on;
   
-  #事件驱动模型，使用网络IO模型linux建议epoll，FreeBSD建议采用kqueue，window下不指定
+  # 事件驱动模型，使用网络 IO 模型 linux 建议 epoll，FreeBSD 建议采用 kqueue，window 下不指定
+  # epoll 是多路复用 IO(I/O Multiplexing) 中的一种方式
   # use epoll;
   
-  #每一个worker进程能并发处理的最大连接数
+  # 每一个 worker 进程能并发处理的最大连接数
   worker_connections  2048;
+  
+  # 并发总数是 worker_processes 和 worker_connections 的乘积
+  # 即 max_clients = worker_processes * worker_connections
+  # 在设置了反向代理的情况下，max_clients = worker_processes * worker_connections / 4  为什么
+  # 为什么上面反向代理要除以4，应该说是一个经验值
+  # 根据以上条件，正常情况下的Nginx Server可以应付的最大连接数为：4 * 8000 = 32000
+  # worker_connections 值的设置跟物理内存大小有关
+  # 因为并发受IO约束，max_clients的值须小于系统可以打开的最大文件数
+  # 而系统可以打开的最大文件数和内存大小成正比，一般1GB内存的机器上可以打开的文件数大约是10万左右
+  # 我们来看看360M内存的VPS可以打开的文件句柄数是多少：
+  # $ cat /proc/sys/fs/file-max
+  # 输出 34336
+  # 32000 < 34336，即并发连接总数小于系统可以打开的文件句柄总数，这样就在操作系统可以承受的范围之内
+  # 所以，worker_connections 的值需根据 worker_processes 进程数目和系统可以打开的最大文件总数进行适当地进行设置
+  # 使得并发总数小于操作系统可以打开的最大文件数目
+  # 其实质也就是根据主机的物理CPU和内存进行配置
+  # 当然，理论上的并发总数可能会和实际有所偏差，因为主机还有其他的工作进程需要消耗系统资源。
+  # ulimit -SHn 65535
 }
 
 http {
-  #关闭错误页面的nginx版本数字，提高安全性
+  # 关闭错误页面的 nginx 版本数字，提高安全性
   server_tokens off;
     
-  #设定mime类型,类型由mime.type文件定义
+  # 设定 mime 类型,类型由 mime.type 文件定义
   include mime.types;
   
-  #加载以下文件到当前的配置里，如将server部分分离出去，配置反向代理
+  # 加载以下文件到当前的配置里，如将 server 部分分离出去，配置反向代理
   # include    proxy.conf;
   # include    gzip.conf;
   
-  #文件类型，默认为 text/plain
+  # 文件类型，默认为 text/plain
   default_type  application/octet-stream;
   
-  #定义日志记录格式，如果 access_log 设置为 off 可以注释掉这段
+  # 关闭 access_log 可以让读取磁盘 IO 操作更快
+  # 当然如果你在学习的过程中可以打开方便查看 Nginx 的访问日志
+  # access_log logs/access.log main;
+  
+  # 定义日志记录格式，如果 access_log 设置为 off 可以注释掉这段
   # log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                     # '$status $body_bytes_sent "$http_referer" '
                     # '"$http_user_agent" "$http_x_forwarded_for"';
-  
-  #关闭access_log可以让读取磁盘IO操作更快
-  #当然如果你在学习的过程中可以打开方便查看Nginx的访问日志
-  # access_log logs/access.log main;
   
   client_header_timeout  3m;  
   client_body_timeout    3m;  
   send_timeout           3m;
 
-  #设定请求缓冲
+  # 设定请求缓冲
   client_header_buffer_size    128k;  
   large_client_header_buffers  4 128k; 
   
-  #允许客户端请求的最大单文件字节数
+  # 允许客户端请求的最大单文件字节数
   client_max_body_size 10m; 
 
-  #缓冲区代理缓冲用户端请求的最大字节数，
+  # 缓冲区代理缓冲用户端请求的最大字节数，
   client_body_buffer_size 128k;
   
   client_body_in_single_buffer on;
   
-  #允许sendfile方式传输文件，对于普通应用，必须设为 on,如果用来进行下载等应用磁盘IO重负载应用，可设置为 off
+  # 允许 sendfile 方式传输文件，对于普通应用，必须设为 on,如果用来进行下载等应用磁盘 IO 重负载应用，可设置为 off
   sendfile on;
   
-  #每个进程每次调用传输数量不能大于设定的值，默认为0，即不设上限
+  # 每个进程每次调用传输数量不能大于设定的值，默认为 0，即不设上限
   # sendfile_max_chunk 100k;  
   
-  #在一个数据包里发送所有头文件，而不是一个接一个的发送
+  # 在一个数据包里发送所有头文件，而不是一个接一个的发送
   # tcp_nopush     on;
   
-  #不要缓存
+  # 不要缓存
   # tcp_nodelay     on; 
   
-  #连接超时时间，默认为75s
+  # 连接超时时间，默认为 75s
   keepalive_timeout  65;
   
-  #开启gzip压缩
+  # 开启 gzip 压缩
   # gzip on;
   # gzip_disable "MSIE [1-6].";
   
-  upstream crossover_main { # 负载均衡配置，可以配置多个
-    #ip_hash; # 设置负载均衡策略为 ip_hash，会根据请求来源ip做hash，同一个C类地址网段hash值相同
+  # 负载均衡配置，可以配置多个
+  upstream crossover_main {
+    # ip_hash; # 设置负载均衡策略为 ip_hash，会根据请求来源 ip 做 hash，同一个 C 类地址网段 hash 值相同
     server 127.0.0.1:8080; # 反向代理到后台应用服务器节点上
   }
   
-  #配置虚拟主机的相关参数，一个http中可以有多个server
+  # 配置虚拟主机的相关参数，一个 http 中可以有多个 server
   server {
-    #单连接请求上限次数
+    # 单连接请求上限次数
     # keepalive_requests 120; 
     
-    #监听端口
+    # 监听端口
     listen 80;
     
-    #服务器地址，默认为localhost，也可以写成faychou.com
+    # 服务器地址，默认为 localhost
     # server_name www.faychou.com faychou.com;
     server_name localhost;
     
-    #代码放置的根目录
+    # 代码放置的根目录
     root /usr/www/;
     
-    #编码
+    # 编码
     charset utf-8; #koi8-r;
     
-    #设定本虚拟主机的访问日志
+    # 设定本虚拟主机的访问日志
     # access_log  logs/host.access.log  main;
     
-    #如果访问时没有加www，则跳转至www.domain.com
-    if ($host !~* www.domain.com) { 
-      rewrite ^(.*)$ http://www.domain.com/$1 permanent;
+    # 如果访问时没有加 www，则跳转至 www.faychou.com
+    if ($host !~* www.faychou.com) { 
+      rewrite ^(.*)$ http://www.faychou.com/$1 permanent;
     }
 
-    #配置请求的路由，以及各种页面的处理情况
+    # 配置默认请求的路由，以及各种页面的处理情况
     location / {
-      #自动索引
+      # 自动索引
       autoindex  on;
       
-      #显示文件大概大小
+      # 显示文件大概大小
       # autoindex_exact_size  off;
       
-      #显示的文件时间为文件的服务器时间，off则为GMT时间
+      # 显示的文件时间为文件的服务器时间，off 则为 GMT 时间
       # autoindex_localtime on;
       
-      #10m之后下载速度为10k
+      # 10m之后下载速度为 10k
       # limit_rate_after 10m; 
       # limit_rate 10k;
       
-      #该'/'请求映射到本地文件系统 /data/www 目录
+      # 该'/'请求映射到本地文件系统 /data/www 目录
       #root /data/www;
       
-      #默认页及先后顺序
+      # 默认页及先后顺序
       index  index.html index.htm;
     }
     
     location /proxy {
-      #配置所有请求都会分发到这个负载均衡器上
+      # 配置所有请求都会分发到这个负载均衡器上
       proxy_pass http://upstream_test;
       
       proxy_set_header Host $http_host;
       proxy_set_header X-Forwarded-For $remote_addr;
     }
     
-    #静态文件
+    # 静态文件
     location ~* ^/static/.*\.(jpg|jpeg|gif|png|html|htm|js|css|swf)$ {
       root /data/static/;
       access_log  off;
       
-      #过期30天，静态文件不怎么更新，过期可以设大一点，
-      #如果频繁更新，则可以设置得小一点。
+      # 过期30天，静态文件不怎么更新，过期可以设大一点，
+      # 如果频繁更新，则可以设置得小一点。
       expires  30d;
     }
 
-    # 404页面跳转到404.html，相对于上面的root目录
+    # 404 页面跳转到 404.html，相对于上面的 root 目录
     # error_page 404 /404.html;
     
-    # 403页面跳转到403.html，相对于上面的root目录
+    # 403 页面跳转到 403.html，相对于上面的 root 目录
     # error_page  403 /403.html;
     
-    # 50x页面跳转到50x.html
+    # 50x 页面跳转到 50x.html
     # error_page 500 502 503 504 /50x.html;
     
     # redirect server error pages to the static page /50x.html
@@ -622,6 +642,14 @@ http {
       access_log off;
       allow 127.0.0.1;#设置为可访问该状态信息的ip
       deny all;
+    }
+    
+    # PHP 脚本请求全部转发到 FastCGI 处理. 使用 FastCGI 默认配置.
+    location ~ .php$ {
+      fastcgi_pass 127.0.0.1:9000;
+      fastcgi_index index.php;
+      fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+      include fastcgi_params;
     }
     
     #禁止访问 .htxxx 文件
@@ -865,7 +893,7 @@ ip_hash 它的作用是如果第一次访问该服务器后就记录，之后再
 
 通过反向代理，同时也能解决跨域的问题，而解决跨域问题的方式有很多，比如有 window.name、iframe、JSONP、CORS 等等，就不详细展开了，涉及到 协议、端口 不一样的跨域请求方式是采用代理。
 
-一份简单的 nginx 的配置文件：
+Nginx 反向代理的配置：
 
 ``` js
 server {
@@ -897,19 +925,32 @@ server {
     //显形/隐形 URI，上游发生重定向时，Nginx 是否同步更改 uri
     proxy_redirect on | off;
   }
-
-  //location ~ /api/ {
-    //proxy_pass  http://172.30.1.123:8081;
-  //}
 }
 ```
 
 > 上面的配置的可以理解为：
 
 > 监听8080端口（Nginx默认启动了80端口），将 http://127.0.0.1 的所有请求服务转发到 127.0.0.1 端口为 3000；
+
+``` js
+// 最简单的配置
+location ~ /api/ {
+  proxy_pass  http://172.30.1.123:8081;
+}
+```
+
 将 http://127.0.0.1/api/ 或者 http://127.0.0.1/api/getList 请求转发到 http://172.30.1.123:8081 。然后就可以通过 http://127.0.0.1 访问我们的WEB应用。
 
-当我们需要获取真实IP的业务时，还需要添加关于真实IP的配置：
+``` js
+// 请求跨域，这里约定代理请求 url path 是以 /api/ 开头
+location ^~/api/ {
+  // 重写请求，将正则匹配中的第一个()中 $1 的 path，拼接到真正的请求后面，并用 break 停止后续匹配
+  rewrite ^/api/(.*)$ /$1 break;
+  proxy_pass https://www.kaola.com/;
+}
+```
+
+当我们需要获取真实 IP 的业务时，还需要添加关于真实 IP 的配置：
 
 ``` js
 server {
@@ -947,34 +988,33 @@ server {
 
 ## Start www.faychou.cn ##
 server {
-    listen 80;
-    server_name  www.faychou.cn;
+  listen 80;
+  server_name  www.faychou.cn;
 
-    access_log  logs/faychou.access.log  main;
-    error_log  logs/faychou.error.log;
-    root   html;
-    index  index.html index.htm;
+  access_log  logs/faychou.access.log  main;
+  error_log  logs/faychou.error.log;
+  root   html;
+  index  index.html index.htm;
 
-    location / {
-        proxy_pass  http://127.0.0.1:3000;
+  location / {
+    proxy_pass  http://127.0.0.1:3000;
 
-        #Proxy Settings
-        proxy_redirect     off;
-        proxy_set_header   Host             $host;
-        proxy_set_header   X-Real-IP        $remote_addr;
-        proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
-        proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
-        proxy_max_temp_file_size 0;
-        proxy_connect_timeout      90;
-        proxy_send_timeout         90;
-        proxy_read_timeout         90;
-        proxy_buffer_size          4k;
-        proxy_buffers              4 32k;
-        proxy_busy_buffers_size    64k;
-        proxy_temp_file_write_size 64k;
-   }
+    #Proxy Settings
+    proxy_redirect     off;
+    proxy_set_header   Host             $host;
+    proxy_set_header   X-Real-IP        $remote_addr;
+    proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for;
+    proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
+    proxy_max_temp_file_size 0;
+    proxy_connect_timeout      90;
+    proxy_send_timeout         90;
+    proxy_read_timeout         90;
+    proxy_buffer_size          4k;
+    proxy_buffers              4 32k;
+    proxy_busy_buffers_size    64k;
+    proxy_temp_file_write_size 64k;
+  }
 }
-
 ```
 
 #### 例如:
@@ -1018,57 +1058,83 @@ location /o2blog_wx/ {
 ```
 
 ### 配置限制访问
-在一台服务器上的资源不全部都是对外开放的，这个时候就需要通过Nginx配置一个限制访问，比如查看本服务器的PHP信息，我们就可以通过下面配置来实现限制访问：
+如在一台服务器上的资源不全是对外开放的，这个时候就需要通过 Nginx 配置一个限制访问，比如查看本服务器的 PHP 信息，我们就可以通过下面配置来实现限制访问：
 
 ``` js
-// 当匹配到/info的时候只允许10.7.101.224访问，其它的全部限制
-// 同时改写为/info.php
+// 当匹配到 /info 的时候只允许 10.7.101.224 访问，其它的机器都会 403 拒绝访问
+// 同时重写请求为 /info.php
 location = /info {
-    allow 10.7.101.224;
-    deny all;
-    rewrite (.*) /info.php
+  allow 10.7.101.224;
+  deny all;
+  rewrite (.*) /info.php
 }
 ```
-
-这个时候只有IP为10.7.101.224的机器才可以访问：http://faychou.com/info，其它机器都会`403`拒绝访问！
 
 又如：
 
 ``` js
 location / {
-        deny  192.168.1.100;
-        allow 192.168.1.10/200;
-        allow 10.110.50.16;
-        deny  all;
-    }
+  deny  192.168.1.11;
+  allow 192.168.1.10/200;
+  allow 10.110.50.16;
+  deny  all;
+}
 ```
 
-首先禁止192.168.1.100访问，然后允许192.168.1.10-200 ip段内的访问（排除192.168.1.100），同时允许10.110.50.16这个单独ip的访问，剩下未匹配到的全部禁止访问。
+首先禁止 192.168.1.11 访问，然后允许 192.168.1.10-200 IP 段内的访问（排除192.168.1.11），同时允许 10.110.50.16 这个单独 IP 的访问，剩下未匹配到的全部禁止访问。
 
-### 解决跨域
-``` js
-#请求跨域，这里约定代理请求url path是以/apis/开头
-    location ^~/apis/ {
-        # 这里重写了请求，将正则匹配中的第一个()中$1的path，拼接到真正的请求后面，并用break停止后续匹配
-        rewrite ^/apis/(.*)$ /$1 break;
-        proxy_pass https://www.kaola.com/;
-    }
-```
-
-### 适配PC与移动环境
-Nginx可以通过内置变量 `$http_user_agent`，获取到请求客户端的userAgent，从而知道用户处于移动端还是PC，进而控制重定向到H5站还是PC站。
+### 适配 PC 与移动环境
+Nginx 可以通过内置变量 `$http_user_agent`，获取到请求客户端的 userAgent，从而知道用户处于移动端还是 PC，进而控制重定向到 H5 站还是 PC 站。
 
 ``` js
 location / {
-        # 移动、pc设备适配
-        if ($http_user_agent ~* '(Android|webOS|iPhone|iPod|BlackBerry)') {
-            set $mobile_request '1';
-        }
-        if ($mobile_request = '1') {
-            rewrite ^.+ http://mysite-base-H5.com;
-        }
-    } 
+  // 移动、PC 设备适配
+  if ($http_user_agent ~* '(Android|webOS|iPhone|iPod|BlackBerry)') {
+    set $mobile_request '1';
+  }
+  if ($mobile_request = '1') {
+    rewrite ^.+ https://m.faychou.com;
+  }
+} 
 ```
+
+### 合并请求
+前端性能优化中重要一点就是尽量减少 http 资源请求的数量。通过 nginx-http-concat 模块（淘宝开发的第三方模块，需要单独安装）用一种特殊的请求 url 规则（例子：example.com/??a.js,b.js,c.js ），前端可以将多个资源的请求合并成一个请求，后台 Nginx 会获取各个资源并拼接成一个结果进行返回。例如上面的例子通过一个请求将 a.js,b.js,c.js 三个 js 资源合并成一个请求，减少了浏览器开销。
+
+``` js
+// js 资源 http-concat
+location /static/js/ {
+  concat on;  // 是否打开资源合并开关
+  concat_types application/javascript;  // 允许合并的资源类型
+  concat_unique off;  // 是否允许合并不同类型的资源
+  concat_max_files 5;  // 允许合并的最大资源数目
+}
+```
+
+### 图片处理
+在前端开发中，经常需要不同尺寸的图片。现在的云储存基本对图片都提供有处理服务（一般是通过在图片链接上加参数）。其实用 Nginx，可以通过几十行配置，搭建出一个属于自己的本地图片处理服务，完全能够满足日常对图片的裁剪/缩放/旋转/图片品质等处理需求。需要用到 ngx_http_image_filter_module 模块，需要安装。
+
+``` js
+// 图片缩放处理
+// 这里约定的图片处理 url 格式：以 faychou.cn/img/ 路径访问
+location ~* /img/(.+)$ {
+  alias /Users/cc/Desktop/server/static/image/$1;  // 图片服务端储存地址
+  set $width -;  // 图片宽度默认值
+  set $height -;  // 图片高度默认值
+  if ($arg_width != "") {
+    set $width $arg_width;
+  }
+  if ($arg_height != "") {
+    set $height $arg_height;
+  }
+  image_filter resize $width $height;  // 设置图片宽高
+  image_filter_buffer 10M;   // 设置 Nginx 读取图片的最大 buffer
+  image_filter_interlace on;  // 是否开启图片图像隔行扫描
+  error_page 415 = 415.png;  // 图片处理错误提示图，例如缩放参数不是数字
+}
+```
+
+通过 proxy_cache 配置 Nginx 缓存，避免每次请求都重新处理图片，减少 Nginx 服务器处理压力。
 
 ### 解决前端使用 HTML5 History 模式
 现在的路由一般分为两种：
@@ -1088,6 +1154,65 @@ location / {
 ``` js
 location / {
   try_files $uri /index.html;
+}
+```
+
+### 页面内容修改
+Nginx 可以通过向页面底部或者顶部插入额外的 css 和 js 文件，从而实现修改页面内容。这个功能需要额外模块的支持，例如：nginx_http_footer_filter 或者 ngx_http_addition_module (都需要安装)。
+工作中，经常需要切换各种测试环境，而通过 switchhosts 等工具切换后，有时还需要清理浏览器 dns 缓存。可以通过页面内容修改 +Nginx 反向代理来实现轻松快捷的环境切换。
+这里首先在本地编写一段 js 代码（switchhost.js），里面的逻辑是：在页面插入 hosts 切换菜单以及点击具体某个环境时，将该 host 的 ip 和 hostname 储存在 cookie 中，最后刷新页面；接着编写一段 css 代码（switchhost.css）用来设置该 hosts 切换菜单的样式。
+
+``` js
+server {
+  listen 80;
+  listen  443 ssl;
+  expires -1;
+  // 想要代理的域名
+  server_name faychou.cn;
+  set $root /Users/cc/Desktop/server;
+  charset utf-8;
+  ssl_certificate /usr/local/etc/nginx/faychou.cn.crt;
+  ssl_certificate_key /usr/local/etc/nginx/faychou.cn.key;
+
+  // 设置默认 $switch_host，一般默认为线上 host，这里的 1.1.1.1 随便写的
+  set $switch_host '1.1.1.1';
+  // 设置默认 $switch_hostname，一般默认为线上 'online'
+  set $switch_hostname '';
+  // 从 cookie 中获取环境 ip
+  if ($http_cookie ~* "switch_host=(.+?)(?=;|$)") {
+    set $switch_host $1;
+  }
+        
+  // 从 cookie 中获取环境名
+  if ($http_cookie ~* "switch_hostname=(.+?)(?=;|$)") {
+    set $switch_hostname $1;
+  }
+        
+  location / {
+    expires -1;
+    index index.html;
+    proxy_set_header Host $host;
+    // 把 html 页面的 gzip 压缩去掉，不然 sub_filter 无法替换内容
+    proxy_set_header Accept-Encoding '';
+    // 反向代理到实际服务器 ip
+    proxy_pass  http://$switch_host:80;
+    // 全部替换
+    sub_filter_once off;
+    // ngx_http_addition_module 模块替换内容。
+    // 这里在头部插入一段 css，内容是 hosts 切换菜单的 css 样式
+    sub_filter '</head>' '</head><link rel="stylesheet" type="text/css" media="screen" href="/local/switchhost.css" />';
+    // 将页面中的'飞舟实验室'文字后面加上环境名，便于开发识别目前环境
+    sub_filter '飞舟实验室' '飞舟实验室:${switch_hostname}';
+    // 这里用了另一个模块 nginx_http_footer_filter，其实上面的模块就行，只是为了展示用法
+    // 最后插入一段 js，内容是 hosts 切换菜单的 js 逻辑
+    set $injected '<script language="javascript" src="/local/switchhost.js"></script>';
+    footer '${injected}';
+  }
+  // 对于 /local/ 请求，优先匹配本地文件
+  // 所以上面的 /local/switchhost.css，/local/switchhost.js 会从本地获取
+  location ^~ /local/ {
+    root $root;
+  }
 }
 ```
 
