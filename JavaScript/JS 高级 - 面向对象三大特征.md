@@ -3,9 +3,175 @@
 
 ## 封装
 
+
 ## 继承
+### 类式继承
+``` js
+//声明父类
+function SupperClass(value){
+  this.value = value;
+  this.fn = function(){
+    console.log(this.value);
+  }
+}
+SupperClass.prototype.otherValue = 'other value';
+
+// 声明子类，并使得子类继承自 SupperClass
+function SubClass(value){
+  this.subValue = value;
+}
+SubClass.prototype = new SupperClass("I'm supper value");
+
+// 使用
+var Instance = new SubClass("I'm sub value");
+console.log(Instance.value);
+console.log(Instance.otherValue);
+console.log(Instance.subValue);
+Instance.fn();
+```
+但是这种方式存在着一些问题：
+
+* 子类继承自父类的实例，而实例化父类的过程在声明阶段，因此在实际使用过程中无法根据实际情况向父类穿参。
+
+* 子类的 Instance.constructor = SupperClass，因为 SubClass 并没有 constructor 属性，所以最终会从 SupperClass.prototype 处继承得到该属性。
+
+### 构造函数继承
+``` js
+function SupperClass(value1){
+  this.xx = value1;
+}
+function SubClass(value1,value2){
+  SupperClass.call(this,value1);
+  this.xx = value2;
+}
+
+// 使用
+var Instance = new SubClass('value1','value2');
+```
+
+虽然构造函数继承解决了类式继承的不能实时向父类传参的问题，但是由于其没有一条完整的原型链，因此 子类不能继承父类的原型属性与原型方法，并非真正的继承。
+
 ### 组合继承
+``` js
+// 声明父类
+function SupperClass(value) {
+  this.value = value;
+  this.fn = function() {
+    console.log(this.value);
+  }
+}
+SupperClass.prototype.otherValue = 'other value';
+
+// 声明子类，并使得子类继承自SupperClass
+function SubClass(value1,value2) {
+  SupperClass.call(this,value1)
+  this.subValue = value2;
+}
+SubClass.prototype = new SupperClass("I'm supper value");
+
+// 使用
+var Instance = new SubClass("I'm supper value","I'm sub value");
+```
+
+组合式继承集合了以上两种继承方式的优点，从而实现了继承所有属性并能动态传参的功能。但是这种方式仍然不能补齐子类的家庭成员关系，因为 SubClass.prototype 仍然是父类的实例。
 
 ### 原型继承
+``` js
+var supperObj = {
+  key1: 'value',
+  func: function() {
+    console.log(this.key1);
+  }
+}
+
+function Factory(obj) {
+  function F() {}
+  F.prototype = obj;
+  return new F()
+}
+
+// 使用
+// var Instance = new Factory(supperObj);
+var Instance = Factory(supperObj);
+```
+
+### 寄生式继承--原型式继承的二次封装
+``` js
+var supperObj = {
+  key1: 'value',
+  func: function() {
+    console.log(this.key1);
+  }
+}
+
+function inheritPrototype(obj,value) {
+  // var subObj = Factory(obj);
+  var subObj = Object.create(obj);
+  subObj.name = value;
+  subObj.say = function() {
+    console.log(this.name);
+  }
+  return subObj;
+}
+
+var Instance = inheritPrototype(supperObj,'sub');
+Instance.func();
+Instance.say();
+```
+
+### 将类式继承与寄生式继承结合
+``` js
+function inheritPrototype(sub,sup) {
+  var obj = Object.create(sup.prototype);
+  sub.prototype = obj;
+  obj.constructor = sub;
+  Object.defineProperty(obj,'constructor',{enumerable: false});
+  // 将 constructor 属性变为不可遍历，避免多继承时出现问题
+}
+
+// 声明父类
+function SupperClass(value1) {
+  this.supperValue = value1;
+  this.func1 = function() {
+    console.log(1);
+  }
+}
+SupperClass.prototype.func2 = function() {
+  console.log(this.supperValue);
+}
+
+// 声明子类
+function SubClass(value2) {
+  this.subValue = value2;
+  this.func3 = function() {
+    console.log(this.subValue);
+  }
+}
+
+inheritPrototype(SubClass,SupperClass);
+var Instance = new SubClass('sub');
+console.log(Instance.supperValue);  //undefined
+console.log(Instance.subValue); //sub
+Instance.func1();   //Error
+Instance.func2();   //undefined
+Instance.func3();   //sub
+```
+
+也有一个致命的缺陷----由于obj对象不是SupperClass的实例，所以在实例化子类的时候父类构造函数从未被调用过，因此 子类只能继承到父类原型属性与方法，无法继承到父类自有方法。
+
+### 寄生组合继承
+``` js
+function SubClass(value1,value2) {
+  SupperClass.call(this,value1);
+  this.subValue = value2;
+  this.func3 = function() {
+    console.log(this.subValue);
+  }
+}
+
+var Instance = new SubClass('sup','sub');
+```
+
+寄生组合继承就是将经过改良之后的寄生继承与构造函数继承方式组合，从而弥补寄生继承无法继承父类自有属性与方法的缺陷。
 
 ## 多态

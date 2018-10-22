@@ -221,6 +221,13 @@ array.every(function(currentValue, index, arr), thisArg)
 ``` js
 [12, 5, 8, 130, 44].every(x => x >= 10); // false
 [12, 54, 18, 130, 44].every(x => x >= 10); // true
+
+function allCheckedHandle() {
+  // 条件：（简短形式）所有的选框都必须选中
+  const isAllChecked = checkboxes.every(f => f.checked === true);
+
+  console.log(isAllChecked);
+}
 ```
 
 ### some()
@@ -234,6 +241,15 @@ array.some(function(currentValue, index, arr), thisArg)
 * index 可选, 当前元素的索引值；
 * arr 可选,数组对象本身；
 * thisArg 可选，当执行回调函数时 this 绑定对象的值，默认值为 undefined。
+
+``` js
+function anyCheckedHandle() {
+  // 条件：（简短形式）至少有一个选框没选中
+  const isAnyChecked = checkboxes.some(f => f.checked === true);
+
+  console.log(isAnyChecked);
+}
+```
 
 ### Array.of()
 返回由所有参数值组成的数组，如果没有参数，就返回一个空数组。详见下面的代码：
@@ -281,6 +297,22 @@ let newArray = arr.filter(function(currentValue, index, arr), thisArg)
 let arr = [12, 5, 8, 130, 44];
 let filtered = arr.filter(n => n >= 10);
 console.log(filtered); // [12, 130, 44]
+```
+
+``` js
+// 使用 Array filter 来找到对应颜色的水果
+const fruits = [
+  { name: 'apple', color: 'red' }, 
+  { name: 'strawberry', color: 'red' }, 
+  { name: 'banana', color: 'yellow' }, 
+  { name: 'pineapple', color: 'yellow' }, 
+  { name: 'grape', color: 'purple' }, 
+  { name: 'plum', color: 'purple' }
+];
+
+function test(color) {
+  return fruits.filter(f => f.color == color);
+}
 ```
 
 #### 案例1:数组对象的键名/键值的搜索
@@ -396,6 +428,26 @@ let flattened = [[0, 1], [2, 3], [4, 5]].reduce(
   []
 );
  // [0, 1, 2, 3, 4, 5]
+```
+
+### Array.includes
+``` js
+// 条件语句
+function test(fruit) {
+  if (fruit == 'apple' || fruit == 'strawberry') {
+    console.log('red');
+  }
+}
+
+// 改造
+function test(fruit) {
+  // 把条件提取到数组中
+  const redFruits = ['apple', 'strawberry', 'cherry', 'cranberries'];
+
+  if (redFruits.includes(fruit)) {
+    console.log('red');
+  }
+}
 ```
 
 ## 数组应用
