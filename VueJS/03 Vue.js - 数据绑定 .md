@@ -124,14 +124,16 @@ v-bind 指令可以缩写为一个冒号：
 
 ``` html
 <div id="app">
-    <p>{{ message }}</p>
-    <input type="text" v-model="message"/>
+  <p>{{ message }}</p>
+  <input type="text" v-model="message"/>
 </div>
 ```
 
 打开控制台输入以下内容回车，我们会发现，视图也会立即更新：
 
-	app.message='haha'
+``` js
+app.message='haha';
+```
 	
 #### 修饰符
 ``` html
@@ -161,7 +163,14 @@ this.$emit('update:foo', newValue)
 
 ## 数据更新
 ### 响应式数据更新
-只有 data 中的数据才是响应式的，动态添加进来的数据默认为非响应式。如果是数组，则可以通过以下方式实现数据的响应式更新：push()、pop()、shift()、unshift()、splice()、sort()、reverse()，其他数组方法更新数据后，并不会触发试图更新，如：filter()、contat()、slice()。
+只有 data 中的数据才是响应式的，动态添加进来的数据默认为非响应式。如果 data 中的数据是 String 、Number 等，则可以直接修改，就能实现数据的响应式更新：
+
+``` js
+this.StringMsg = 'abc';
+this.NumberMsg = 123;
+```
+
+如果是数组，则可以通过以下方式实现数据的响应式更新：push()、pop()、shift()、unshift()、splice()、sort()、reverse()，其他数组方法更新数据后，并不会触发试图更新，如：filter()、contat()、slice()。
 
 ``` js
 // 例子

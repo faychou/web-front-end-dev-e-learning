@@ -2,6 +2,18 @@
 首先数组也是对象。
 
 ## 数组方法
+### - 会改变原数组 -
+### push()
+向数组的末尾添加一个或多个元素，并返回新的长度。
+
+``` js
+let  a =  [1,2,3];
+let item = a.push(4);  // 4
+console.log(a); // [1,2,3,4]
+a.push(5,6,7);
+console.log(a); // [1,2,3,4,5,6,7]
+```
+
 ### pop()
 删除一个数组中的最后的一个元素，并且返回这个元素。
 
@@ -20,17 +32,6 @@ let item = a.shift();  // 1
 console.log(a); // [2,3]
 ```
 
-### push()
-向数组的末尾添加一个或多个元素，并返回新的长度。
-
-``` js
-let  a =  [1,2,3];
-let item = a.push(4);  // 4
-console.log(a); // [1,2,3,4]
-a.push(5,6,7);
-console.log(a); // [1,2,3,4,5,6,7]
-```
-
 ### unshift()
 向数组的开头添加一个或更多元素，并返回新的长度。
 
@@ -41,7 +42,7 @@ console.log(a); // ['a',1,2,3]
 ```
 
 ### reverse()
-用于颠倒数组中元素的顺序。
+用于颠倒数组中元素的顺序，返回的是颠倒后的数组。
 
 ``` js
 let  a =  [1,2,3];
@@ -66,6 +67,10 @@ let a = [1, 2, 3, 4, 5, 6, 7];
 let item = a.splice(0, 3); // [1,2,3]
 console.log(a); // [4,5,6,7]
 
+// 插入
+item = a.splice(2,0,1,2);
+console.log(a); // [4,5,1,2,6,7]
+
 // 删除并添加
 let b = [1, 2, 3, 4, 5, 6, 7];
 let item = b.splice(1,3,'a','b'); // [2,3,4]
@@ -81,7 +86,7 @@ console.log(b); // [1,'a','b',5,6,7]
 var a = ["Banana", "Orange", "Apple", "Mango"];
 a.sort(); // ["Apple","Banana","Mango","Orange"]
 
-// 数字排序的时候 因为转换成 Unicode 字符串
+// 数字排序的时候 因为会转换成 Unicode 字符串，所以会出现"10"在"3"的前面
 var    a = [10, 1, 3, 20,25,8];
 console.log(a.sort()) // [1,10,20,25,3,8];
 ```
@@ -134,6 +139,42 @@ array.sort(function(a,b){
 // [{"name":"Koro1"},{"name":"Koro1"},{"name":"Koro1"},{"name":"OB"},{"name":"OB"},{"name":"OB"}] 
 ```
 
+### fill() 
+``` js
+array.fill(value, start, end);
+```
+
+用于将一个固定值替换数组的元素，返回新的被替换的数组。
+
+* value	必需。填充的值。
+* start	可选。开始填充位置。
+* end	可选。停止填充位置(不包含) (默认为 array.length)
+
+``` js
+var values = [0, 1, 5, 10, 15];
+values.fill(2);
+console.log(values);  // [ 2, 2, 2, 2, 2 ]
+
+values = [0, 1, 5, 10, 15];
+values.fill(2,3,4);
+console.log(values);  // [ 0, 1, 5, 2, 15 ]
+```
+
+### copyWithin() 
+``` js
+array.copyWithin(target, start, end)
+```
+
+选择数组的某个下标，从该位置开始复制数组元素，默认从0开始复制。也可以指定要复制的元素范围，返回新复制的数组。
+
+``` js
+var fruits = [1,2,3,4,5,6];
+fruits.copyWithin(1);  // [ 1, 1, 2, 3, 4, 5 ]   从下标为1的元素开始，复制数组
+
+fruits.copyWithin(3, 0, 3);  // [ 1, 2, 3, 1, 2, 3 ]  从下标为3的元素开始，复制数组坐标为0到2的数组
+```
+
+### - 不会改变原属组 -
 ### cancat()
 用于合并两个或多个数组，返回一个新数组。
 
@@ -161,6 +202,20 @@ let b= [{name:'OBKoro1',age:'23'},'test'];
 let str2 = b.join(); // [object Object],test
 ```
 
+### slice()
+``` js
+array.slice(start, end);
+```
+
+返回一个新的数组，包含从 start 位置到 end （不包括该元素）位置的元素。如果只有一个参数，返回从该参数指定位置到当前数组末尾的所有项；如果参数为负数，规定从数组尾部开始算起的位置。也就是说，-1 指最后一个元素，-2 指倒数第二个元素，以此类推。
+
+``` js
+var arr1 = [1,2,3,4,5,6];
+var arr2 = arr1.slice(1); // [ 2, 3, 4, 5, 6 ]
+var arr3 = arr1.slice(2,4); // [ 3, 4 ]
+var arr4 = arr1.slice(-4,-2);  // [ 3, 4 ] 
+```
+
 ### indexOf() 
 返回在数组中可以找到一个给定元素的第一个索引，如果不存在，则返回-1。
 
@@ -170,8 +225,10 @@ console.log(a.indexOf('a'));  // 0
 console.log(a.indexOf('c'));  // -1 
 ```
 
+lastIndexOf() 方法从数组末尾开始向前查找。
+
 ### forEach()
-遍历数组中的每个元素。
+遍历数组中的每个元素。这个方法没有返回值，本质上与使用 for 循环迭代数组一样。
 
 ``` js
 array.forEach(function(currentValue, index, arr), thisArg)
@@ -182,8 +239,19 @@ array.forEach(function(currentValue, index, arr), thisArg)
 * arr 可选,数组对象本身；
 * thisArg 可选，当执行回调函数时 this 绑定对象的值，默认值为 undefined。
 
-
 > 注意：无法中途退出循环，只能用 return 退出本次回调，进行下一次回调。
+
+``` js
+var items = [1, 2, 4, 7, 3];
+var copy = [];
+
+items.forEach(function(item,index){
+  copy.push(item*index);
+})
+
+console.log(items);  // [ 1, 2, 4, 7, 3 ]
+console.log(copy);  // [ 0, 2, 8, 21, 12 ]
+```
 
 ### map()
 遍历数组中的每个元素并进行处理，然后返回新的数组。
@@ -265,7 +333,11 @@ let a = Array.of(3); // [3]
 
 主要用来解决上述构造器因参数个数不同，导致的行为有差异的问题。
 
-### Arrar.from() 
+### from() 
+``` js
+Array.from(object, mapFunction, thisValue);
+```
+
 用于将两类对象转为真正的数组（不改变原对象，返回新的数组）。
 
 * 参数一(必需):要转化为真正数组的对象。
@@ -277,8 +349,11 @@ let a = Array.of(3); // [3]
 ``` js
 let obj = {0: 'a', 1: 'b', 2:'c', length: 3};
 let arr = Array.from(obj); // ['a','b','c'];
+
 let arr = Array.from('hello'); // ['h','e','l','l']
-let arr = Array.from(new Set(['a','b'])); // ['a','b']
+
+// 还可以结合 new Set() 进行数组的去重
+let arr = Array.from(new Set(['a','b','a'])); // ['a','b']
 ```
 
 ### filter()
@@ -294,12 +369,11 @@ let newArray = arr.filter(function(currentValue, index, arr), thisArg)
 * thisArg 可选，当执行回调函数时 this 绑定对象的值，默认值为 undefined。
 
 ``` js
+// demo
 let arr = [12, 5, 8, 130, 44];
 let filtered = arr.filter(n => n >= 10);
 console.log(filtered); // [12, 130, 44]
-```
 
-``` js
 // 使用 Array filter 来找到对应颜色的水果
 const fruits = [
   { name: 'apple', color: 'red' }, 
@@ -382,7 +456,7 @@ console.log(forArr) // [{name: 'john'}, {name: 'jerry'}]
 ```
 
 ### find()
-用于找出第一个符合条件的数组成员，并返回该成员，如果没有符合条件的成员，则返回 undefined。
+用于找出第一个符合条件的数组成员，找到后停止搜索并返回该成员，如果没有符合条件的成员，则返回 undefined。
 
 ``` js
 let newArray = arr.find(function(currentValue, index, arr), thisArg)
@@ -395,8 +469,14 @@ let newArray = arr.find(function(currentValue, index, arr), thisArg)
 
 ``` js
 let a = [1, 4, -5, 10].find((n) => n < 0); // 返回元素-5
-let b = [1, 4, -5, 10,NaN].find((n) => Object.is(NaN, n));  // 返回元素NaN
+let b = [1, 4, -5, 10,NaN].find((n) => Object.is(NaN, n));  // 返回元素 NaN
 ```
+
+filter() 和 find() 方法的区别：
+
+* filter() 方法是对数组的每一项都进行检查，最后返回结果为 true 的数组；而 find() 方法当找到符合的元素时，立刻返回该元素，之后的元素不再进行检查；
+
+* filter() 方法如果没有找到符合的元素返回空的数组；而 find() 方法没有找到符合的元素则返回 undefined。
 
 ### reduce()
 为数组提供累加器，合并为一个值。
@@ -420,15 +500,43 @@ array.reduce(function(total, currentValue, currentIndex, arr), initialValue)
 // 数组求和 
 let sum = [0, 1, 2, 3].reduce(function (a, b) {
   return a + b;
+}, 0); // 6
+
+// 求该同学的总成绩
+var result = [
+    {
+        subject: 'math',
+        score: 88
+    },
+    {
+        subject: 'chinese',
+        score: 95
+    },
+    {
+        subject: 'english',
+        score: 80
+    }
+];
+var sum = result.reduce(function(prev, cur) {
+    return cur.score + prev;
 }, 0);
-// 6
+
 // 将二维数组转化为一维 将数组元素展开
 let flattened = [[0, 1], [2, 3], [4, 5]].reduce(
   (a, b) => a.concat(b),
   []
-);
- // [0, 1, 2, 3, 4, 5]
+); // [0, 1, 2, 3, 4, 5]
+ 
+// 判断一串字符串中每个字母出现的次数
+var arrString = 'abcdaabc';
+
+arrString.split('').reduce(function(res, cur) {
+  res[cur] ? res[cur] ++ : res[cur] = 1
+  return res;
+}, {})；  // 通过第二参数设置叠加结果的类型初始值
 ```
+
+reduceRight() 则从数组的最后一项开始，向前遍历到第一项。
 
 ### Array.includes
 ``` js
@@ -523,6 +631,15 @@ function isArray(obj){
 }
 ```
 
+### 伪数组转换为标准数据
+``` js
+// 方法一
+Array.prototype.slice.call(arguments);
+
+// 方法二
+Array.from(arguments);
+```
+
 ### 合并两个 Array 并去掉重复项
 ``` js
 Array.prototype.unique = function() {
@@ -582,6 +699,9 @@ console.log(arrayIntersection([1,2,3],[2,3,4,5,6]));//[2,3]
 
 ### 数组扁平化
 ``` js
+// 使用展开运算符扁平二维数组
+[].concat(...arr);
+
 function flattenDepth(array, depth=1) {
   let result = [];
   array.forEach (item => {
@@ -597,6 +717,13 @@ function flattenDepth(array, depth=1) {
 console.log(flattenDepth([1,[2,[3,[4]],5]]))
 console.log(flattenDepth([1,[2,[3,[4]],5]],2))
 console.log(flattenDepth([1,[2,[3,[4]],5]],3))
+
+// or
+function flattenArray(arr) {
+  const flattened = [].concat(...arr);
+  return flattened.some(item => Array.isArray(item)) ? 
+    flattenArray(flattened) : flattened;
+}
 ```
 
 ### 把 arguments 转换为 Array

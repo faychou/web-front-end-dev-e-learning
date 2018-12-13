@@ -1,6 +1,6 @@
 # Vue 表单
 
-### v-model 
+## v-model 
 是 vue.js 提供的语法糖，根据不同的表单控件监听不同的事件。
 
 ``` html
@@ -22,7 +22,7 @@
 
 > 当 v-bind 和 v-model 同时出现在一个 input 上时，这个 v-bind 会失效。
 
-### 复选框
+## 复选框
 ``` html
 <input type="checkbox" v-model="checked">
 ```
@@ -65,7 +65,7 @@
 
 在 HTML 中，通过相同的一个 name 值来确定这组 checkbox 是一个组的，而在这里，则是通过 `v-model` 的值是同一个值来确定是一个组的。这个时候就可以使用 `:value` 来动态绑定 value 值了，这和单个复选框不一样。
 
-### 单选按钮
+## 单选按钮
 ``` html
 <input type="radio" id="one" value="One" v-model="picked">
 <input type="radio" id="two" value="Two" v-model="picked">
@@ -84,8 +84,17 @@
 
 单选框组跟多个 checkbox 复选框组是一样的。包括 `:value` 绑定。唯一不同的是 picked 是一个单选值，所以是一个值，而不是数组。
 
-### 列表
-#### 单选列表
+结合事件对象：
+
+``` html
+<input type="checkbox" :checked="status" @change="status = $event.target.checked" />
+ 
+<input type="radio" :checked="status" @change="status = $event.target.checked" />
+
+```
+
+## 列表
+### 单选列表
 ``` html
 <select id="example-5" v-model="selected">
   <option>A</option>
@@ -105,7 +114,7 @@
 </script>
 ```
 
-#### 多选列表（绑定到一个数组）
+### 多选列表（绑定到一个数组）
 ``` html
 <select id="example-6" v-model="selected" multiple style="width: 50px">
   <option>A</option>
@@ -127,7 +136,7 @@
 
 因为 multiple 要选择的值是一组，因此 selected 是一个数组。
 
-#### 动态渲染：
+### 动态渲染：
 ``` html
 <select v-model="selected">
   <option v-for="option in options" v-bind:value="option.value">
@@ -152,8 +161,8 @@ new Vue({
 </script>
 ```
 
-### 修饰符
-#### .lazy
+## 修饰符
+### .lazy
 在默认情况下， v-model 在 input 事件中同步输入框的值与数据 (除了 上述 IME 部分)，但你可以添加一个修饰符 lazy ，从而转变为在 change 事件中同步：
 
 ``` html
@@ -161,7 +170,7 @@ new Vue({
 <input v-model.lazy="msg" >
 ```
 
-#### .number
+### .number
 如果想自动将用户的输入值转为 Number 类型（如果原值的转换结果为 NaN 则返回原值），可以添加一个修饰符 number 给 `v-model` 来处理输入值：
 
 ``` html
@@ -170,7 +179,7 @@ new Vue({
 
 因为在 `type="number"` 时 HTML 中输入的值也总是会返回字符串类型。
 
-#### .trim
+### .trim
 如果要自动过滤用户输入的首尾空格，可以添加 trim 修饰符到 `v-model` 上过滤输入：
 
 ``` html

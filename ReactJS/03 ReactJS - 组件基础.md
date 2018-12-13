@@ -209,99 +209,9 @@ const PureComponent = (props) => (
 )
 ```
 
-## 组件生命周期
-### componentWillMount
-该方法在整个组件生命周期只会被调用一次，所以可以利用该方法做一些组件内部的初始化工作。
+> 函数声明组件存在一些问题:
 
-许多开发者为了避免第一次渲染时页面因为没有获取到异步数据导致的白屏，而将数据请求部分的代码放在了 componentWillMount 中，希望可以避免白屏并提早异步请求的发送时间。但事实上在 componentWillMount 执行后，第一次渲染就已经开始了，所以如果在 componentWillMount 执行时还没有获取到异步数据的话，页面首次渲染时也仍然会处于没有异步数据的状态。
+* 没有this
+* 没有状态，state无法进行动态更改
+* 没有生命周期
 
-而关于提早发送数据请求，官方也鼓励将数据请求部分的代码放在组件的 constructor 中，而不是 componentWillMount。
-
-另一个注意的是 componentWillMount 在服务端渲染时是不会被调用的。
-### componentDidMount
-这个阶段表示组件对应的 DOM 已经存在，我们可以在这个时候做一些依赖 DOM 的操作（如：动画的启动，输入框自动聚焦）、请求数据或者和第三方库整合的操作。如果嵌套了子组件，子组件会比父组件优先渲染，所以这个时候可以获取子组件对应的 DOM。可以通过 `this.getDOMNode()` 获取和操作 dom 节点，只调用一次。
-### componentWillReceiveProps(newProps)
-当组件获取新 props 时调用，可以根据新的属性来修改组件状态，注意首次渲染组件时不会调用。
-
-### getDerivedStateFromProps(nextProps, prevState)
-如果组件自身的某个 state 跟其 props 密切相关的话，在 componentWillReceiveProps 中判断前后两个 props 是否相同，如果不同再将新的 props 更新到相应的 state 上去。这样做一来会破坏 state 数据的单一数据源，导致组件状态变得不可预测，另一方面也会增加组件的重绘次数。
-
-``` js
-// before
-componentWillReceiveProps(nextProps) {	
-  if (nextProps.translateX !== this.props.translateX) {
-    this.setState({	
-      translateX: nextProps.translateX,	
-    });	
-  }	
-}
-
-// after
-static getDerivedStateFromProps(nextProps, prevState) {
-  if (nextProps.translateX !== prevState.translateX) {
-    return {
-      translateX: nextProps.translateX,
-    };
-  }
-  return null;
-}
-```
-### shouldComponentUpdate(nextProps, nextState)
-接收到新 props 或者新 state 的时候在 render 前会被调用，该方法让我们决定是否重渲染组件，默认返回 true，也就是每次更新都会重新渲染。如果返回 false，那么不会重渲染组件，是 React 性能优化非常重要的手段。我们可以设置在此对比前后两个 props 和 state 是否相同，如果相同则返回 false 阻止更新，因为相同的属性状态一定会生成相同的 dom 树，这样就不需要创造新的 dom 树和旧的 dom 树进行 diff 算法对比，节省大量性能，尤其是在 dom 结构复杂的时候。不过调用 `this.forceUpdate` 会跳过此步骤。
-
-``` js
-shouldComponentUpdate() {
-  return false;
-}
-```
-### componentWillUpdate(nextProps, nextState)
-当组件确定要更新，在 render 之前调用。
-### componentDidUpdate(prevProps,prevState)
-更新被应用到 DOM 之后，可以执行组件更新过后的操作，如可以获取 dom 节点。
-
-### getSnapshotBeforeUpdate(prevProps, prevState)
-getSnapshotBeforeUpdate 会在最终的 render 之前被调用，也就是说在 getSnapshotBeforeUpdate 中读取到的 DOM 元素状态是可以保证与 componentDidUpdate 中一致的。
-
-``` js
-class ScrollingList extends React.Component {
-  listRef = null;
-
-  getSnapshotBeforeUpdate(prevProps, prevState) {
-    // Are we adding new items to the list?
-    // Capture the scroll position so we can adjust scroll later.
-    if (prevProps.list.length < this.props.list.length) {
-      return (
-        this.listRef.scrollHeight - this.listRef.scrollTop
-      );
-    }
-    return null;
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    // If we have a snapshot value, we've just added new items.
-    // Adjust scroll so these new items don't push the old ones out of view.
-    // (snapshot here is the value returned from getSnapshotBeforeUpdate)
-    if (snapshot !== null) {
-      this.listRef.scrollTop =
-        this.listRef.scrollHeight - snapshot;
-    }
-  }
-
-  render() {
-    return (
-      <div ref={this.setListRef}>
-        {/* ...contents... */}
-      </div>
-    );
-  }
-
-  setListRef = ref => {
-    this.listRef = ref;
-  };
-}
-```
-
-### componentWillUnmount
-组件将要卸载时调用，一些事件监听和定时器需要解除。
-
-> 注意：以下生命周期方法都不能调用 setState：shouldComponentUpdate、componentWillUpdate 和 render 中调用 setState，组件本次的更新还没有执行完成，又会进入新一轮的更新，导致不断循环更新，进入死循环。componentWillUnmount 调用时，组件即将被卸载，setState 是为了更新组件，在一个即将卸载的组件上更新 state 显然是无意义的。

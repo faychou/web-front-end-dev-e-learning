@@ -90,6 +90,31 @@ fs.stat('ceshi.txt', function (err,stats) {
 });
 ```
 
+### fs.read(fd, buffer, offset, length, position, callback)
+相比  fs.readFile 提供了更底层的接口。从 fd 指定的文件中读取数据。buffer 是数据将被写入到的 buffer。offset 是 buffer 中开始写入的偏移量。length 是一个整数，指定要读取的字节数。position 指定从文件中开始读取的位置。如果 position 为 null，则数据从当前文件读取位置开始读取，且文件读取位置会被更新。如果 position 为一个整数，则文件读取位置保持不变。回调有三个参数 (err, bytesRead, buffer)。
+
+``` js
+var fs = require('fs');
+fs.open('content.txt', 'r', function(err, fd) {
+if (err) {
+console.error(err);
+return;
+}
+var buf = new Buffer(8);
+fs.read(fd, buf, 0, 8, null, function(err, bytesRead, buffer) {
+if (err) {
+console.error(err);
+return;
+}
+console.log('bytesRead: ' + bytesRead);
+console.log(buffer);
+})
+});
+
+// bytesRead: 8
+// <Buffer 54 65 78 74 20 e6 96 87>
+```
+
 ### fs.readFile(pathname,[options], callback (err, data))
 异步模式读取文件。第一个必选参数 pathname，表示要读取的文件名。第二个参数 options 是可选的，表示文件的字符编码。callback 是回调函数，用于接收文件的内容。如果不指定 options，则 callback 就是第二个参数。如果指定了 options， data 是一个解析后的字符串，否则 data 将会是以 Buffer 形式表示的二进制数据。
 
@@ -139,8 +164,16 @@ try {
 }
 ```
 
-### fs.writeFile
-将数据异步写入文件。
+### fs.writeFile(filename, data, [options], callback)
+异步的将数据写入一个文件,如果文件不存在则新建, 如果文件原先存在，会被替换。
+
+* filename : 文件路径，
+* data : data 可以是一个string，也可以是一个原生buffer。
+* options : 选项
+  * encoding :文件编码default = ‘utf8’
+  * mode : default = 438 (aka 0666 in Octal)
+  * flag : default = ‘a’
+* callback : 回调函数
 
 ``` js
 var fs = require('fs');
@@ -155,7 +188,7 @@ fs.writeFile('output.txt',data,function (err) {
 });
 ```
 
-### fs.writeFileSync
+### fs.writeFileSync(filename, data, [options])
 将数据同步写入文件
 
 ``` js
@@ -164,30 +197,28 @@ var data = 'Hello, Node.js';
 fs.writeFileSync('output.txt',data);
 ```
 
-### fs.read(fd, buffer, offset, length, position, callback)
-相比  fs.readFile 提供了更底层的接口。从 fd 指定的文件中读取数据。buffer 是数据将被写入到的 buffer。offset 是 buffer 中开始写入的偏移量。length 是一个整数，指定要读取的字节数。position 指定从文件中开始读取的位置。如果 position 为 null，则数据从当前文件读取位置开始读取，且文件读取位置会被更新。如果 position 为一个整数，则文件读取位置保持不变。回调有三个参数 (err, bytesRead, buffer)。
+### fs.appendFile(filename, data, [options], callback)
+异步的将数据添加到一个文件的尾部，如果文件不存在，会创建一个新的文件。
 
-``` js
-var fs = require('fs');
-fs.open('content.txt', 'r', function(err, fd) {
-if (err) {
-console.error(err);
-return;
-}
-var buf = new Buffer(8);
-fs.read(fd, buf, 0, 8, null, function(err, bytesRead, buffer) {
-if (err) {
-console.error(err);
-return;
-}
-console.log('bytesRead: ' + bytesRead);
-console.log(buffer);
-})
-});
+* filename : 文件路径，
+* data : data 可以是一个string，也可以是一个原生buffer。
+* options : 选项
+  * encoding :文件编码default = ‘utf8’
+  * mode : default = 438 (aka 0666 in Octal)
+  * flag : default = ‘a’
+* callback : 回调函数
 
-// bytesRead: 8
-// <Buffer 54 65 78 74 20 e6 96 87>
-```
+### fs.appendFileSync(filename, data, [options])
+fs.appendFile 的同步版本。
+
+### fs.exists(path, callback)
+检查指定路径的文件或者目录是否存在。
+
+* path:路径
+* callback: callback 传入的参数指明存在 (true) 或者不存在 (false).
+
+### fs.existsSync(path)
+fs.exists 函数的同步版。
 
 ### fs.close()
 
@@ -195,7 +226,11 @@ console.log(buffer);
 
 ### fs.unlink()
 
-### fs.mkdir()
+### fs.mkdir(path, [mode], callback)
+创建文件夹，回调函数只接受一个参数：可能出现的异常信息。
+
+### fs.mkdirSync(path, [mode])
+同步版。
 
 ### fs.readdir()
 

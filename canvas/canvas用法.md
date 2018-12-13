@@ -1,16 +1,16 @@
 # canvas教程
-`<canvas>`是一个可以使用脚本(通常为JavaScript)在其中绘制图形的 HTML 元素。
+canvas 是一个可以使用脚本(通常为 JavaScript )在其中绘制图形的 HTML 元素。
 Internet Explorer 9+ 支持。
 
 ## 基本结构
 ``` html
 <canvas id="mycanvas" width="200" height="300">
-   您的浏览器不支持canvas
+  您的浏览器不支持canvas
 </canvas>
 
 <script>
-    var cc=document.getElementById("mycanvas");
-    var cxt=cc.getContext("2d");
+  var mycanvas = document.getElementById("mycanvas");
+  var cxt = mycanvas.getContext("2d");
 </script>
 
 <!-- 检测 -->

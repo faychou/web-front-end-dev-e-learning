@@ -29,6 +29,12 @@ v-on 指令用于给监听 DOM 事件，来触发一些 JavaScript 代码。
 <button v-on:click="say('hi')">Say hi</button>
 ```
 
+直接修改数据：
+
+``` html
+<button @click='message = "new vue"'>按钮</button>
+```
+
 v-on 指令可以缩写为 @ 符号：
 
 ``` html
@@ -116,6 +122,40 @@ methods: {
   }
 }
 </script>
+
+<!-- or -->
+<input v-on:input="something = $event.target.value">
+```
+
+### 事件委托
+``` html
+<template>
+  <ul class="hello" @click="ff">
+    <li :first="firstMsg" :data-second="secondMsg"></li>
+    <li :first="firstMsg" :data-second="secondMsg"></li>
+    <li :first="firstMsg" :data-second="secondMsg"></li>
+    <li :first="firstMsg" :data-second="secondMsg"></li>
+  </ul>
+</template>
+
+<script>
+  export default {
+    name: 'hello',
+    data () {
+      return {
+        firstMsg: 'first props',
+        secondMsg: 'secondMsg'
+      }
+    },
+    methods: {
+      ff (e) {
+        if(e.target.dataset.second == 'secondMsg') {
+          console.log('通过事件委托拿到了自定义属性')
+        }
+      }
+    }
+  }
+</script>
 ```
 
 ## 变异方法
@@ -130,14 +170,45 @@ Vue 包含一组观察数组的变异方法，所以它们也将会触发视图�
 * reverse()
 
 ## 自定义事件
-* 使用 `$on(eventName)` 监听事件
-* 使用 `$emit(eventName)` 触发事件
+* 使用 `$on(eventName, callback)` 监听事件
+* 使用 `$emit(eventName, […args])` 触发事件
 
 ``` html
-<div id="counter-event-example">
+<template>
+  <div>
+    <p @click='emit'>{{msg}}</p>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'demo',
+  data () {
+    return {
+      msg : '派发事件'
+    }
+  },
+  created () {
+    this.$on('wash_Goods',(arg)=> {
+      console.log(arg)
+    })
+  },
+  methods : {
+    emit () {
+      this.$emit('wash_Goods',['fish',true,{name:'vue'}])
+    }
+  }
+}
+</script>
+```
+
+父组件可以在使用子组件的引入模板直接用 v-on 来监听子组件触发的事件:
+
+``` html
+<div id="counter">
   <p>{{ total }}</p>
-  <button-counter v-on:increment="incrementTotal"></button-counter>
-  <button-counter v-on:increment="incrementTotal"></button-counter>
+  <button-counter v-on:increment="incrementTotal"> </button-counter>
+  <button-counter v-on:increment="incrementTotal"> </button-counter>
 </div>
 
 <script>
@@ -156,7 +227,7 @@ Vue.component('button-counter', {
   },
 })
 new Vue({
-  el: '#counter-event-example',
+  el: '#counter',
   data: {
     total: 0
   },
@@ -166,6 +237,119 @@ new Vue({
     }
   }
 })
+</script>
+```
+
+父组件执行异步的事件：
+
+``` html
+<!-- 子组件 -->
+<template>
+  <div>
+    <p @click='emit'>{{msg}}</p>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'demo',
+  data () {
+    return {
+      msg : '点击后改变数据',
+    }
+  },
+  methods : {
+    emit () {
+      this.$emit('fromDemo')
+    },
+  }
+}
+</script>
+
+<!-- 父组件 -->
+<template>
+  <div class="hello">
+    <p>hello {{msg}}</p>
+    <demo v-on:fromDemo='Fdemo'></demo>
+  </div>
+</template>
+<script>
+import Demo from './Demo.vue'
+export default {
+  name: 'hello',
+  data () {
+    return {
+      msg: '数据将在一秒后改变'
+    }
+    
+  },
+  methods: {
+    waitTime() {
+      return new Promise(resolve=>{
+        setTimeout(()=> {
+          this.msg = '数据一秒后改变了'
+          resolve(1)
+        },1000)
+      })
+    },
+    async Fdemo () {
+      let a = await this.waitTime();
+      console.log(a)
+    }
+  },
+  components : {
+     Demo
+  }
+}
+</script>
+```
+
+父子组件在事件中传递数据：
+
+``` html
+<!-- 子组件 -->
+<template>
+  <div>
+    <p @click='emit'>{{msg}}</p>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'demo',
+  props: [ 'msg' ],
+  methods : {
+    emit () {
+      this.$emit('fromDemo','数据改变了')
+    },
+  }
+}
+</script>
+
+<!-- 父组件 -->
+<template>
+  <div class="hello">
+    <demo v-on:fromDemo='Fdemo' :msg='msg'></demo>
+  </div>
+</template>
+<script>
+import Demo from './Demo.vue'
+export default {
+  name: 'hello',
+  data () {
+    return {
+      msg: '数据没有改变'
+    }
+  },
+  methods: {
+    Fdemo (arg) {
+      this.msg = arg 
+    }
+  },
+  components : {
+    Demo
+  }
+}
 </script>
 ```
 

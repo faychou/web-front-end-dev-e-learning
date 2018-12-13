@@ -32,33 +32,53 @@ export default {
 
 > 注意：data 的书写方式不同。在 .vue 组件中, data 必须是一个函数，它 return 一个对象。
 
-### 导入其他组件
+### 父子组件
+在子组件中需要通过 props 显示定义需要从父组件中接收的数据。该数据可以是各种数据类型，同样也可以传递一个函数。
+
 ``` html
+<!-- 父组件 -->
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <other-component></other-component>
+    <child-component :msg='msgData' :fn = 'handlerFn'></child-component>
   </div>
 </template>
-<style>
-  .hello {
-    color:#ff0;
-  }
-</style>
+
 <script>
-  import OtherComponent from './other-component.vue'
+  import ChildComponent from './child-component.vue'
   export default {
     data () {
       return {
-        msg: 'Hello World!'
+        msg: 'Hello World!',
+        msgData: '父组件传递的数据'
       }
     },
-    components:{ OtherComponent }
+    components:{ ChildComponent },
+    methods: {
+      handlerFn () {
+        console.log('vue');
+      }
+    }
   }
 </script>
 ```
 
-> 注意：{ OtherComponent } 是 { OtherComponent: OtherComponent } 的简写，然后就可以在 template 中使用 `<component-a>`。
+``` html
+<!-- 子组件 -->
+<template>
+  <div>
+    <p>{{msg}}</p>
+    <button @click='fn'>按钮</button>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'ChildComponent',
+  props: [ 'msg','fn' ]
+}
+</script>
+```
 
 ### 使用 HTML 模版
 ``` html

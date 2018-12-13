@@ -100,6 +100,14 @@
 <li v-for="(todo,index) in todos">{{index}}</li>
 ```
 
+为了让 Vue 跟踪每个节点的身份，从而重用和重新排序现有元素，需要为每项提供一个唯一 key 属性。
+
+``` html
+<div v-for="(item, index) in items" :key="index">
+  <!-- 内容 -->
+</div>
+```
+
 如果想循环渲染一部分标签，要用 `<template>` 包裹，`v-for` 作用在 template 标签上。
 
 ``` html
@@ -135,14 +143,6 @@
   v-bind:item="item"
   v-bind:index="index">
 </my-component>
-```
-
-为了给 Vue 一个提示，以便它能跟踪每个节点的身份，从而重用和重新排序现有元素，你需要为每项提供一个唯一 key 属性。建议尽可能使用 `v-for` 来提供 key 。
-
-``` html
-<div v-for="item in items" :key="item.id">
-  <!-- 内容 -->
-</div>
 ```
 
 ### v-cloak

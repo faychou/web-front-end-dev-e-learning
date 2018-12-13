@@ -254,7 +254,7 @@ export function requstAync() {
 
 
 ### redux-thunk
-redux-thunk 支持 dispatch function，并且可以异步调用它。
+redux 的一个中间件。可以使 action creator 返回一个 function（而不仅仅是 object），并且使得 dispatch 方法可以接收一个 function 作为参数，通过这种改造使得 action 支持异步（或延迟）操作。
 
 #### redux-persist
 要实现 redux 的持久化，包括 redux store 的本地持久化存储及恢复启动两个过程，如果完全自己编写实现，代码量比较复杂，可以使用开源库 redux-persist，它提供 persistStore 和 autoRehydrate 方法分别持久化本地存储 store 及恢复启动 store，另外还支持自定义传入持久化及恢复 store 时对 store state 的转换拓展。

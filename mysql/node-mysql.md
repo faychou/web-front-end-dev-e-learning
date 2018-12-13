@@ -559,6 +559,9 @@ connection.query('INSERT INTO users SET ?',post,function(err, results,fields) {
 });
 
 connection.end();
+
+// 同时添加多条记录
+`INSERT INTO users(name, age) VALUES ?`;
 ```
 
 ### 删除数据
@@ -568,6 +571,9 @@ connection.query('DELETE FROM users WHERE id=?',[1],function(err, results,fields
   if(err) throw err;
   console.log(results);
 });
+
+// or
+`DELETE FROM users WHERE id='${id}'`
 ```
 
 ### 修改数据

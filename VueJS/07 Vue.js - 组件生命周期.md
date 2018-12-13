@@ -11,11 +11,11 @@ var vm = new Vue({
     a: 1
   },
   beforeCreate:function(){}, // 组件实例化之前，无法获取 data 中的数据、methods 中的方法
-  created: function () { // 实例创建后调用，可以改变 data 中的数据，常在这个阶段发起请求
+  created: function () { // 实例创建后调用，可以改变 data 中的数据，常在这个阶段发起请求和页面初始化
     // `this` 指向 vm 实例
     console.log('a is: ' + this.a)
   },
-  beforeMount:function(){}, // 开始执行挂载，但是组件还写入 dom
+  beforeMount:function(){}, // 开始执行挂载，但是组件还未写入 dom
   mounted:function(){ // 实例已经挂载到页面，可以进行 DOM 操作，只执行一次
     console.log(this.$children);
     console.log(this.$refs);

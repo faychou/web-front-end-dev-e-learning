@@ -97,6 +97,18 @@ export default class MyComponent extends Component {
 
 > 注意：propTypes 和 defaultProps 都是组件的静态属性。在组件的代码中，这两个属性的设定位置越高越好。因为这样方便其他阅读代码者或者开发者自己 review，一眼就能看到这些信息。这些信息就如同组件文档一样，对于理解或熟悉当前组件非常重要。
 
+### super 中传递的 props
+``` js
+class Component {
+  constructor(props) {
+    super(props)
+    //...
+  }
+}
+```
+
+这里把 props 传进 super 是必要的，这使得基类 React.Component 可以初始化 this.props。然而，即便在调用 super() 时没有传入 props 参数，你依然能够在 render 和其它方法中访问 this.props。
+
 ### prop-types
 可能大家在使用 propTypes 设置属性类型时会发现控制台有以下警告信息：
 

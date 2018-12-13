@@ -137,7 +137,7 @@ class App extends Component {
 }
 ```
 
-## 为 类(Class) 组件添加 Ref
+## 为类(Class) 组件添加 Ref
 当 ref 属性用于类(class)声明的自定义组件时，ref 回调函数收到的参数是装载(mounted)的组件实例。
 
 

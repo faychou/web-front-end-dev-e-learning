@@ -20,19 +20,50 @@ if (false) {
 console.log(value); // Uncaught ReferenceError: value is not defined
 ```
 
+### 不允许重复声明
+let 、const 不允许在相同作用域内，重复声明同一个变量。
+
+``` js
+// 报错
+function func() {
+  let a = 10;
+  var a = 1;
+}
+
+// 报错
+function func() {
+  let a = 10;
+  let a = 1;
+}
+
+function func(arg) {
+  let arg; // 报错
+}
+
+function func(arg) {
+  {
+    let arg; // 不报错
+  }
+}
+```
+
 ### let 和 const 的区别
-const 用于声明常量，其值一旦被设定不能再被修改，否则会报错。但是需要注意 const 声明是不允许修改绑定，但允许修改值。
+const 用于声明常量，其值一旦被设定不能再被修改，否则会报错。所以 const 一旦声明变量，就必须立即初始化，不能留到以后赋值。
+
+但是需要注意 const 声明是不允许修改绑定，也就是变量指向的那个内存地址所保存的数据不得改动，对于简单类型的数据（数值、字符串、布尔值），值就保存在变量指向的那个内存地址，因此等同于常量。但对于复合类型的数据（主要是对象和数组），变量指向的内存地址，保存的只是一个指向实际数据的指针，const 只能保证这个指针是固定的，至于它指向的数据结构是可以改变的。
 
 ``` js
 const data = {
-    value: 1
+  value: 1
 }
 
-// 没有问题
+// 改变属性值，没有问题
 data.value = 2;
+
+// 添加一个属性，可以成功
 data.num = 3;
 
-// 报错
+// 指向另一个对象，就会报错
 data = {}; // Uncaught TypeError: Assignment to constant variable.
 ```
 
@@ -42,6 +73,10 @@ ES6 中允许使用反引号 \` 来创建字符串，此种方法创建的字符
 ``` js
 let str = 'hello world'
 console.log(`that message is ${str}`);
+
+// 大括号内部可以放入任意的 JavaScript 表达式
+`${x} + ${y} = ${x + y}`
+`${obj.x + obj.y}`
 ```
 
 ## 展开符
@@ -132,6 +167,14 @@ const [first, second] = arr;
 console.log(first, second);   // 1,2 
 ```
 
+解构不仅可以用于数组，还可以用于对象：
+
+``` js
+let { foo, bar } = { foo: "aaa", bar: "bbb" };
+foo // "aaa"
+bar // "bbb"
+```
+
 函数的参数如果是对象的成员，优先使用解构赋值：
 
 ``` js
@@ -160,6 +203,17 @@ function processInput(input) {
 }
 
 const { left, right } = processInput(input);
+```
+
+字符串也可以解构赋值：
+
+``` js
+const [a, b, c, d, e] = 'hello';
+a // "h"
+b // "e"
+c // "l"
+d // "l"
+e // "o"
 ```
 
 ## 数组扩展

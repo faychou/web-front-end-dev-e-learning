@@ -13,6 +13,17 @@ var promise = new Promise(function(resolve, reject) {
 
 创建Promise实例时传入的函数，同时还接受两个参数，它们分别对应Promise内部实现的两个方法。
 
+``` js
+const setDelay = (time) => {
+  return new Promise((resolve, reject)=>{
+    if (typeof time != 'number') reject(new Error('参数必须是number类型'));
+    setTimeout(()=> {
+      resolve(`我延迟了${time}毫秒后输出的`)
+    }, time)
+  });
+}
+```
+
 ## Promise 的原理分析
 Promise 本质是一个状态机。每个 promise 只能是 3 种状态中的一种：
 
