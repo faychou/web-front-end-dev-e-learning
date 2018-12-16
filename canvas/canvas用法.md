@@ -4,42 +4,235 @@ Internet Explorer 9+ 支持。
 
 ## 基本结构
 ``` html
+<!-- index.html -->
 <canvas id="mycanvas" width="200" height="300">
   您的浏览器不支持canvas
 </canvas>
+```
+``` js
+// index.js
+var mycanvas = document.getElementById("mycanvas");
+var cxt = mycanvas.getContext("2d");
 
-<script>
-  var mycanvas = document.getElementById("mycanvas");
-  var cxt = mycanvas.getContext("2d");
-</script>
-
-<!-- 检测 -->
-var canvas = document.getElementById('mycanvas');
-if (canvas.getContext) {
-  var ctx = canvas.getContext('2d'); // 支持
+// 检测当前浏览器是否支持
+var mycanvas = document.getElementById('mycanvas');
+if (mycanvas.getContext) {
+  var ctx = mycanvas.getContext('2d'); // 支持
 } else { 
   //不支持 
 }
 ```
 
-* getContext()：这个方法是用来获得渲染上下文和它的绘画功能。
+### getContext('2d')
+这个方法是用来获得 2d 渲染上下文和它的绘画功能。
 
-canvas是一个二维网格，以左上角坐标为(0,0)。
+canvas 是一个二维网格，以左上角坐标为(0,0)。
 
-canvas 的默认大小为300像素×150像素（宽×高，像素的单位是px），但是我们也可以设置 width 和 height 来自定义尺寸。
+canvas 的默认大小为 300像素 × 150像素（宽 × 高），也可以设置 width 和 height 来自定义尺寸，默认画布是透明的，是不可见的。
 
-canvas元素有两套尺寸：一个是元素本身的大小(通过CSS设置)，另一个是元素绘图表面的大小(通过canvas自身的width和height属性设置)。
+### 尺寸
+canvas 元素有两套尺寸：一个是元素本身的大小(通过 CSS 设置)，另一个是元素绘图表面的大小(通过 canvas 自身的 width 和 height 属性设置)。
 
-通过CSS修改width和height，只是改变了元素本身大小，对元素绘图表面的大小并无影响;而通过修改属性width和height，则会同时改变元素本身大小和绘图表面大小。
+通过 CSS 修改 width 和 height，只是改变了元素本身大小，对元素绘图表面的大小并无影响;而通过修改属性 width 和 height，则会同时改变元素本身大小和绘图表面大小。
 
-## 基础绘制
-### 绘制样式与颜色
-ctx.fill()
+# 基础绘制
+## 画笔设置
+### 线宽
+设置画笔(线条)的粗细，单位为像素。
 
-ctx.stroke()
+``` js
+ctx.lineWidth = 5;
+```
 
-### 矩形
-#### 1、绘制一个填充的矩形
+### 线条样式
+设置画笔(线条)的颜色和样式。
+
+``` js
+ctx.strokeStyle = "#AA394C";
+```
+
+### 填充样式
+设置填充颜色和样式。
+
+``` js
+ctx.fillStyle = "yellow";
+```
+
+### lineCap 属性
+定义线条的端点样式：
+
+* butt：默认值，端点是垂直于线段边缘的平直边缘。
+* round：端点是在线段边缘处以线宽为直径的半圆。
+* square：端点是在选段边缘处以线宽为长、以一半线宽为宽的矩形
+
+![lineCap](mdImgs/lineCap.jpg)
+
+### lineJoin 属性
+定义两条线相交产生的拐角，也称为连接。
+
+* miter：默认值，在连接处边缘延长相接。miterLimit 是角长和线宽所允许的最大比例(默认是 10)。
+* bevel：连接处是一个对角线斜角。
+* round：连接处是一个圆。
+
+![lineJoin](MDIMGS/lineJoin.JPG)
+
+### 线性渐变
+``` js
+// 第一步：添加渐变线
+var linear = ctx.createLinearGradient(xstart,ystart,xend,yend);
+
+// 第二步：为渐变添加颜色断点
+linear.addColorStop(stop,color);
+// stop 值介于 0 ~ 1 之间，代表占整个渐变色长度的比例。
+
+// 第三步：应用渐变
+ctx.fillStyle = linear;
+ctx.strokeStyle = linear;
+```
+
+案例：
+
+``` js
+//添加渐变线
+var linear = ctx.createLinearGradient(100,300,700,300);
+
+//添加颜色断点
+linear.addColorStop(0,"olive");
+linear.addColorStop(0.25,"maroon");
+linear.addColorStop(0.5,"aqua");
+linear.addColorStop(0.75,"fuchsia");
+linear.addColorStop(0.25,"teal");
+
+//应用渐变
+ctx.fillStyle = grd;
+ctx.strokeStyle = grd;
+
+ctx.strokeRect(200,50,300,50);
+```
+
+### 径向渐变
+径向渐变是基于两个圆定义的。
+
+``` js
+// 第一步：添加渐变圆：
+var radial = ctx.createRadialGradient(x0,y0,r0,x1,y1,r1);
+
+// 第二步：为渐变线添加颜色断点
+radial.addColorStop(stop,color);
+
+// 第三步：应用渐变：
+ctx.fillStyle = radial;
+ctx.strokeStyle = radial;
+```
+
+案例：
+
+``` js
+//添加渐变线
+var radial = context.createRadialGradient(400,300,100,400,300,200);
+
+//添加颜色断点
+radial.addColorStop(0,"olive");
+radial.addColorStop(0.25,"maroon");
+radial.addColorStop(0.5,"aqua");
+radial.addColorStop(0.75,"fuchsia");
+radial.addColorStop(1,"teal");
+
+//应用渐变
+ctx.fillStyle = radial;
+
+ctx.fillRect(100,100,600,400);
+```
+
+## 绘画方式
+ctx.fill() ：填充
+
+ctx.stroke() ：描边
+
+Canvas 是基于路径的绘制，只有调用了 stroke() 和 fill() 才确定绘制。
+
+## 路径
+### moveTo()
+ctx.moveTo(100,100) 是 移动画笔至(100,100)这个点（单位是px）。这里是以 canvas 画布的左上角为笛卡尔坐标系的原点，且 y 轴的正方向向下，x 轴的正方向向右。
+
+### lineTo()
+ctx.lineTo(600,600) 是从 上一点 绘制到(600,600)这里。
+
+``` js
+// 画一条线
+ctx.moveTo(100,100);
+ctx.lineTo(600,600);
+ctx.lineWidth = 5;
+ctx.strokeStyle = "#AA394C";
+ctx.stroke();
+
+// 画折线
+ctx.moveTo(100,100);
+ctx.lineTo(300,300);
+ctx.lineTo(100,500);
+ctx.lineWidth = 5;
+ctx.strokeStyle = "#AA394C";
+ctx.stroke();
+```
+
+### beginPath()
+路径开始绘画，为了绘制不同样式的线条，可以在每次绘制之前加上 beginPath()，代表下次绘制的起始之处。
+
+``` js
+// 多条不同样式的线条
+ctx.beginPath();
+ctx.moveTo(100,100);
+ctx.lineTo(300,300);
+ctx.lineTo(100,500);
+ctx.lineWidth = 5;
+ctx.strokeStyle = "red";
+ctx.stroke();
+
+ctx.beginPath();
+ctx.moveTo(300,100);
+ctx.lineTo(500,300);
+ctx.lineTo(300,500);
+ctx.lineWidth = 5;
+ctx.strokeStyle = "blue";
+ctx.stroke();
+
+ctx.beginPath();
+ctx.moveTo(500,100);
+ctx.lineTo(700,300);
+ctx.lineTo(500,500);
+ctx.lineWidth = 5;
+ctx.strokeStyle = "black";
+ctx.stroke();
+```
+
+### closePath()
+结束路径绘画。与 beginPath() 对应。
+
+> 注意：如果绘画的路径没有闭合，调用该方法后，会导致路径闭合，形成一个封闭的空间，所以绘画路径时，一般调用 beginPath()，而不一定调用 closePath()，除非需要封闭的图形。
+
+> 同时可以使用 closePath() 来解决线条接头处的缺口。
+
+## 矩形
+Canvas 提供了一些封装好的绘制图形的方法。
+
+### 1、绘制矩形路径：
+``` js
+rect(x, y, width, height)
+```
+
+案例：
+
+``` js
+var myCanvas = document.getElementById('myCanvas');
+var ctx = myCanvas.getContext('2d');
+ctx.rect(10, 10, 80, 80); // 只是一个路径
+ctx.fill(); // 填充
+ctx.stroke(); //描边
+```
+
+### 2、绘制一个填充的矩形
+可以直接绘制一个带有填充颜色的矩形。
+
 ``` js
 fillRect( x ,y ,width, height)
 ```
@@ -52,11 +245,11 @@ fillRect( x ,y ,width, height)
 案例：
 
 ``` js
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
+var myCanvas = document.getElementById('myCanvas');
+var ctx = myCanvas.getContext('2d');
 ctx.fillRect(10, 10, 80, 80);
 ```
-#### 2、绘制一个矩形的边框
+### 3、绘制一个矩形的边框
 ``` js
 strokeRect( x ,y ,width, height)
 ```
@@ -69,24 +262,7 @@ var ctx = canvas.getContext('2d');
 ctx.strokeRect(10, 10, 80, 80);
 ```
 
-#### 3、绘制矩形路径：
-``` js
-rect(x, y, width, height)
-```
-
-案例：
-
-``` js
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-ctx.rect(10, 10, 80, 80);
-ctx.fill();
-
-ctx.rect(100, 100, 80, 80);
-ctx.stroke();
-```
-
-#### 4、清除指定矩形区域
+### 4、清除指定矩形区域
 ``` js
 clearRect( x ,y ,width, height)
 ```
