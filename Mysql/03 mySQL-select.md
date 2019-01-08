@@ -3,12 +3,12 @@
 
 ``` bash
 select selection_list  # 选择列名称
-from table_list  # 表名称 
-where primary_constraint  # 满足什么条件 
-group by grouping_columns # 怎样对结果分组 
-having secondary_constraint  # 满足的第二条件 
-order by sorting_columns # 怎样对结果排序 
-limit count  # 结果限定
+  from table_list  # 表名称 
+  where primary_constraint  # 满足什么条件 
+  group by grouping_columns # 怎样对结果分组 
+  having secondary_constraint  # 满足的第二条件 
+  order by sorting_columns # 怎样对结果排序 
+  limit count;  # 结果限定
 ```
 
 select 5种子句：
@@ -30,11 +30,17 @@ select 5种子句：
 # 查询 user 表中所有列的数据
 select * from user;
 
-# 查询 user 表里所有数据的 name 列和 age 列
+# 查询 user 表里所有 name 列
+select name from user;
+
+# 查询 user 表里所有 name 列和 age 列(多个列名之间使用逗号隔开)
 select name,age from user;
 
 # 表达式求值而不查询任何表
 select (2+3*4.5)/2.5;
+
+# 如果检索数据时候不想要出现重复的结果，可以使用 distinct 关键字
+select distinct name from user;
 ```
 
 ## 条件查询
@@ -169,10 +175,25 @@ select name,sum(score < 60) as gk,avg(score) as pj from student group by name ha
 
 ``` bash
 # 按照 age 升序输出
-select * from user order by age asc;
+select * from user order by age;
+
+# 按照 age 降序输出
+select * from user order by age desc;
+
+# 在相同的 name 时候才 age 字段进行排序
+select * from user order by name desc, age;
 ```
 
 * asc 表示升序，为默认值;
 * desc 为降序。
 
 ## 限制查询
+使用 limit 关键字限制查询的数量。limit 后面可以跟两个值, 第一个为起始位置, 第二个是要查询的长度。
+
+``` bash
+# 限制查询5条记录
+select * from user limit 5;
+
+# 查询第5条后向后的5条记录
+select * from user limit 5, 5;
+```

@@ -1,23 +1,6 @@
 # JS 技巧
-### JavaScript 事件监听兼容写法
-包括 IE 下 this 指向问题。
-
-``` js
-function addEventHandler(oTarget, sEventType, fnHandler) {
-  if(oTarget.addEventListener) {
-    oTarget.addEventListener(sEventType,fnHandler,false);
-  } else if(oTarget.attachEvent) {
-    oTarget.attachEvent("on"+sEventType,function() {
-      return fnHandler.call(oTarget,window.event);
-    });
-  } else{
-    oTarget["on"+sEventType]=fnHandler;
-  }
-}
-```
-
 ### 使用!!操作符转换布尔值
-有时候我们需要对一个变量查检其是否存在或者检查值是否有一个有效值，如果存在就返回 true 值。为了做这样的验证，我们可以使用 `!!` 操作符来实现是非常的方便与简单。对于变量可以使用 `!!variable` 做检测，只要变量的值为:0、null、" "、undefined 或者 NaN 都将返回的是 false，反之返回的是 true。这种做法也就是强制转任何值为布尔值。
+有时候我们需要对一个变量查检其是否存在或者检查值是否有一个有效值，如果存在就返回 true 值。为了做这样的验证，我们可以使用 `!!` 操作符来实现是非常的方便与简单。对于变量可以使用 `!!variable` 做检测，只要变量的值为: false、0、null、""、undefined 或者 NaN 都将返回的是 false，反之返回的是 true。这种做法也就是强制转任何值为布尔值。
 
 ``` js
 console.log(!!10); //true
@@ -27,6 +10,38 @@ console.log(!!""); //false
 
 // 简单地说就是把右侧的值转为 bool 值
 ```
+
+### && 逻辑与
+只要 "&&" 前面是 false，无论 "&&" 后面是 true 还是 false，结果都将返 "&&" 前面的值;
+
+只要 "&&" 前面是 true，无论 "&&" 后面是 true 还是 false，结果都将返 "&&" 后面的值;
+
+``` js
+var c=a()&&b();
+// 如果执行 a() 后返回 true，则执行 b() 并返回 b 的值；如果执行 a() 后返回 false，则整个表达式返回 a() 的值，b() 不执行；
+
+// 如
+this.state && <p>显示</p>
+// 等同于
+this.state ? <p>显示</p> : null;
+```
+
+### JavaScript 事件监听兼容写法
+包括 IE 下 this 指向问题。
+
+``` js
+function addEventHandler(oTarget, sEventType, fnHandler) {
+  if(document.addEventListener) {
+    oTarget.addEventListener(sEventType,fnHandler,false);
+  } else if(document.attachEvent) {
+    oTarget.attachEvent("on"+sEventType,function() {
+      return fnHandler.call(oTarget,window.event);
+    });
+  } else{
+    oTarget["on"+sEventType]=fnHandler;
+  }
+}
+``` 
 
 ### 添加和删除 class
 ``` js
@@ -41,6 +56,33 @@ document.getElementById("MyElement").className = document.getElementById("MyElem
 ``` js
 if (strValue) {
   //do something
+}
+```
+
+### 判断一个对象是否为空对象
+``` js
+// 方法1: for in 遍历属性，为真则为“非空数组”；否则为“空数组”:
+function isEmptyObject(obj) {
+  for(var attr in obj) {
+    return '非空对象';
+  }
+  return '空对象';
+}
+
+// 方法2: 通过 JSON.stringify() 方法来判断：
+function isEmptyObject(obj) {
+  if(JSON.stringify(obj) == '{}') {
+    return '空对象';
+  }
+  return '非空对象';
+}
+
+// 方法3: ES6 新增的方法 Object.keys():
+function isEmptyObject(obj) {
+  if(Object.keys(obj).length == 0) {
+    return '空对象';
+  }
+  return '非空对象';
 }
 ```
 

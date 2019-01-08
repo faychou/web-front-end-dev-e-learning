@@ -23,6 +23,8 @@ e().then(v => console.log(v))
 .catch( e => console.log(e));
 ```
 
+如果 await 操作符后的表达式的值不是一个 Promise，则返回该值本身。
+
 ### await
 await 关键字接收一个 Promise，等待代码执行，直到 Promise 状态变为 resolved 或者 rejected，这种特性能让我们的异步代码阅读起来更像是同步代码。
 

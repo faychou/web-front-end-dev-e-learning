@@ -108,3 +108,46 @@ window.addEventListener('popstate', e => {
   })
 }, false)
 ```
+
+## 计时器
+### 案例
+#### 防止事件疯狂触发
+``` js
+function throttle(method, context) {
+  clearTimeout(method.tid);
+
+  method.tid = setTimeout(function() {
+    method.call(context);
+  }, 100);
+}
+
+function fnResize() {
+  console.log(111);
+}
+
+window.onresize = function() {
+  throttle(fnResize);
+}
+```
+
+#### 一个 gif 动画本身是单次播放的，要求页面加载时动画播放一次，然后用户只要hover一次，动画就重新播放一次
+``` js
+$logo.on('mouseenter', function() { // hover 时重新播放gif动画
+  var $logoImg = $(this).find('img');
+  $logoImg.attr('src', '');
+  setTimeout(function() { // IE下，不然不能重新播放动画
+    $logoImg.attr('src', _opt.logoImg);
+  }, 0);
+});
+```
+
+#### 监控 input 或者 textarea 中文本的变化，除了键盘输入，还有鼠标的粘贴和剪切操作，为了获取操作后的新文本内容，可以将对文本的获取和处理放在 setTimeout 中延时执行：
+``` js
+// 响应键盘输入，粘贴和剪切事件
+$('#input').on('keyup paste cut', function() {
+  var $this = $(this);
+  setTimeout(function(){ // 使鼠标粘贴和剪切时，输入框内内容为最新
+    console.log($this.val());
+  }, 0)
+});
+```

@@ -16,15 +16,22 @@ var p = new Point(1, 2);
 
 // ES6
 class Point {
+  // 构造函数，相当于之前的函数 Point
   constructor(x, y) {
     this.x = x;
     this.y = y;
   }
 
+  // 相当于挂载在原型链上的原型方法
   toString() {
     return '(' + this.x + ', ' + this.y + ')';
   }
 }
+
+// 生成对象实例
+let a = new Point(1, 2)
+// 调用原型方法
+a.toString()	// 1,2
 ```
 
 上面的 constructor 方法，这就是构造方法，而 this 关键字则代表实例对象。类的所有方法都定义在类的 prototype 属性上面。
@@ -116,7 +123,7 @@ Bar.classMethod() // 'hello'
 ```
 
 ## 继承
-Class 可以通过extends关键字实现继承。
+Class 可以通过 extends 关键字实现继承。
 
 ``` js
 class Father {
@@ -143,3 +150,99 @@ class Child extends Father {
 super 指代父类的构造函数，只能用在子类的构造函数之中，用在其他地方就会报错。
 
 在你调用父类构造函数之前，你无法在构造函数中使用 this。
+
+## 实现 class 私有变量
+虽然 class 本身没有提供私有变量的功能，但是可以通过通过一些方式来实现类似于私有变量的功能。
+
+首先约定一种代表着私有变量的命名方式，一般是在私有变量的名称前加上一个下划线。
+
+``` js
+class Point {
+  constructor(x, y) {
+    // _x 是一个私有变量
+    this._x = x;
+    this.y = y;
+  }
+
+  showX() {
+    return this._x ;
+  }
+}
+
+let p = new Point(1, 2);
+
+// _x 依然可以被使用
+p._x		// 1
+p.showX()	// 1
+```
+
+通过 IIFE （立即执行函数表达式） 建立一个闭包，在其中建立一个变量以及 class ，通过 class 引用变量实现私有变量。
+
+``` js
+// 利用闭包生成 IIFE，返回类 Point
+const Point = (function() {
+  // 定义私有变量_x
+  let _x
+
+  class Point {
+    constructor (x, y) {
+      // 初始化私有变量_x
+      _x = x
+    }
+
+    showX () {
+      return _x
+    }
+  }
+
+  return Point
+})();
+
+let p = new Point(1, 2)
+
+// 无法访问
+p._x		// undefined
+// 可以访问
+p.showX()	// 1
+```
+
+另一种方案是利用 Symbol 的唯一性，来实现变量私有：
+
+``` js
+// 定义symbol
+const _x = Symbol('x')
+
+class Point {
+  constructor (x) {
+    // 利用symbol声明私有变量
+    this[_x] = x;
+  }
+  showX () {
+    return this[_x];
+  }
+}
+
+let p = new Point(1, 2);
+
+// 自行定义一个相同的 Symbol
+const x = Symbol('x');
+// 无法访问
+a[x];  // undefined
+// 可以访问
+p.showX();	// 1
+```
+
+### 私有属性提案
+以上两种方法都可以实现私有属性，但是毕竟不是正统的，所以有一个提案，在属性名之前加上 `#` ，用于表示私有属性。
+
+``` js
+class Point {
+  #x = 0
+  constructor (x) {
+    #x = x
+  }
+  showX () {
+    return this.#x
+  }
+}
+```

@@ -361,3 +361,26 @@ const Topic = ({ match }) => (
 
 export default BasicExample
 ```
+
+## 动态加载组件
+``` js
+const Sub1= React.lazy(() => import('./Sub1'))
+const Sub2 = React.lazy(() => import('./Sub2'))
+
+class App extends Component {
+    render () {
+      return (
+        <div>
+          <React.Suspense fallback={<div>Loading</div>}>
+            <Router>
+              <Switch>
+                <Route path='/sub1' component={Sub1} />
+                <Route path='/sub2' component={Sub2} />
+              </Switch>
+            </Router>
+          </React.Suspense>
+        </div>
+      )
+    }
+}
+```

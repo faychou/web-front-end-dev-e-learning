@@ -12,6 +12,11 @@ function sayHello(name) {
 function sayHello2(name = 'tom') {  // 如果没有传这个参数，才会有默认值，
   console.log(`Hello ${name}`);
 }
+
+// 可以给解构参数本身提供默认值
+function setCookie(name, value, { secure, path, domain, expires } = {}) {
+  // ...
+}
 ```
 
 ### 箭头函数

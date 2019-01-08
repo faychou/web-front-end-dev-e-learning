@@ -72,6 +72,8 @@ function foo() {
 ## 柯里化
 参数够了就执行，参数不够就返回一个函数，之前的参数存起来，直到够了为止。
 
+柯里化就是，把原来的函数 adder(3,5,6,7,8,9) ==> adder(3)(5)(6)(7)(8)(9);
+
 ``` js
 function curry(func) {
   var l = func.length;

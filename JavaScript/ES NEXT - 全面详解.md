@@ -216,6 +216,16 @@ d // "l"
 e // "o"
 ```
 
+数组克隆：
+
+``` js
+// 克隆
+let colors = [ "red", "green", "blue" ];
+let [ ...clonedColors ] = colors;
+
+console.log(clonedColors);      //"[red,green,blue]"
+```
+
 ## 数组扩展
 ### reduce
 ``` js

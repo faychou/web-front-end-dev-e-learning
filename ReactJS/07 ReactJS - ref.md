@@ -98,6 +98,7 @@ constructor(props) {
 componentDidMount() {
   // 获取 ref：this.input.current;
   // 获取 input 的 value：this.input.current.value;
+  // 自动获取焦点：this.input.current.focus()
   console.log(this.input);
 }
 // 在 render 函数中:

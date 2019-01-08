@@ -15,6 +15,9 @@ npm 是随同 NodeJS 一起安装的包管理工具。
 ### 全局安装
 ``` bash
 npm install -g <package-name>
+
+// 安装最新的 npm
+npm install npm@latest -g
 ```
 
 #### 在全局安装时可能会提醒你权限不够，解决方式：
@@ -61,9 +64,11 @@ npm install <package-name>@<version>
 
 # 下载安装包并添加到生产环境依赖，即将信息写入 package.json 的 dependencies 字段中
 npm install <package-name> --save
+# 简写 npm install <package-name> --P
 
 # 下载安装包并添加到开发环境依赖，即将信息写入 package.json 的 devdependencies 字段中
 npm install <package-name> --save-dev
+# 简写 npm install <package-name> --D
 
 # 强制安装（模块无论是否安装过，npm 都要强制重新安装，可以使用 -f 或 –force 参数）
 npm install <name> -f
@@ -174,8 +179,10 @@ cd 项目路径
 
 # 然后执行以下命令，生成 package.json 文件
 npm init
-
 # 接着按照命令提示填写信息即可
+
+# 如果觉得麻烦，可以自动填写默认的选项
+npm init --yes
 ```
 
 ### 以下是常见的 package.json 的字段
@@ -198,6 +205,8 @@ npm init
 * engines：可选项，依赖的 node 版本。
 
 * repository：可选项，源码托管地址，可以是 git 或 svn。
+
+* license：包的对开源协议名称
 
 * scripts：可选项，自定义在 cli 中输入 `npm <script>` 时实际执行的程序。npm 默认提供大量的 script 供我们调用。
 
@@ -292,6 +301,10 @@ npm adduser
 
 ``` bash
 npm login
+
+# npm author ls  查看当前项目的所有所属用户
+
+# npm who am i 查看当前登录的用户
 ```
 
 第三步：发布，发布过程会把整个目录发布,不想发布的内容模块, 可以通过 .gitignore 或 .npmignore 文件忽略。发布的时候，仓库要设置回 http://registry.npmjs.org；

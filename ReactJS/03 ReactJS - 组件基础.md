@@ -215,3 +215,36 @@ const PureComponent = (props) => (
 * 没有状态，state无法进行动态更改
 * 没有生命周期
 
+## 组件嵌套
+``` js
+// 子组件
+const TodoItem = ({text}) => <li>{ text }</li>
+
+// 父组件
+class App extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      bookList: [
+        { id: 0, text: 'javascript' },
+        { id: 1, text: 'html' },
+        { id: 2, text: 'css' }
+      ]
+    }
+  }
+
+  render() {
+    return (
+      <div id="app">
+        <ol>
+		{
+          this.state.bookList.map(({ id, text })=>
+            <TodoItem key={ id } text={ text }></TodoItem>
+          )
+        }
+		</ol>
+      </div>
+    )
+  }
+}
+```
