@@ -13,7 +13,7 @@
 
 ## 概念
 ### 工作区
-就是在你电脑上创建的项目目录。平时开发就是拷贝远程仓库中的一个分支，并基于该分支进行开发。
+就是在你电脑上创建的项目目录。平时开发就是拷贝远程仓库中的一个分支，并基于该分支进行开发，不包含 ".git" 目录 。
 
 ### 暂存区
 英文叫 stage, 或 index。一般存放在 ".git 目录下" 下的 index 文件（.git/index）中，所以我们把暂存区有时也叫作索引（index）。
@@ -114,7 +114,7 @@ git clone https://github.com/faychou
 ## 文件跟踪
 ### 提交到暂存区
 ``` bash
-git add < filename > < filename >
+git add <filename> <filename>
 
 # 添加指定类型文件到暂存区
 git add *.html
@@ -144,15 +144,54 @@ git add -p
 
 ``` bash
 git commit -m '本次提交的说明'
+
+# 提交暂存区的指定文件到仓库区
+git commit <filename1> <filename2> ... -m '本次提交的说明'
+
+# 提交时显示所有的 diff 信息
+git commit -v
+
+# 使用新的 commit 替代上一次提交，如果代码没有任何变化，则用来改写上一次 commit 的提交信息
+git commit --amend -m '需要更新的说明'
 ```
 
-#### 跳过使用暂存区
 Git 提供了一个跳过使用暂存区域的方式， 只要在提交的时候，给 `git commit` 加上 `-a` 选项，Git 就会自动把所有已经跟踪过的文件暂存起来一并提交，从而跳过 `git add` 步骤：
 
 ``` bash
 git commit -a -m '本次提交说明'
 ```
 
+### 移除文件
+要从 Git 中移除某个文件，就必须要从已跟踪文件清单中移除（确切地说，是从暂存区域移除），然后提交。
+
+首先从工作目录中手工删除文件，然后再运行 git rm 记录此次移除文件的操作：
+
+``` bash
+git rm <filename> <filename>
+```
+
+下一次提交时，该文件就不再纳入版本管理了。 如果删除之前修改过并且已经放到暂存区域的话，则必须要用强制删除选项 -f（译注：即 force 的首字母）。 
+
+另外一种情况是，你想让文件保留在磁盘，但是并不想让 Git 继续跟踪。 对于忘记添加到 .gitignore 文件，又不小心添加到暂存区时，这一做法尤其有用。 为达到这一目的，使用 --cached 选项：
+
+``` bash
+# 停止追踪指定文件
+git rm --cached <文件>
+```
+
+### 移动文件
+``` bash
+# 在移动的同时也重命名了文件
+git mv file-from file-to
+
+# 改名文件夹
+git mv -f <oldfolder> <newfolder>
+
+# 改名文件
+git mv <file-origin> <file-rename>
+```
+
+## 查看
 ### 检查当前文件状态
 ``` bash
 git status
@@ -161,60 +200,98 @@ git status
 `git status` 命令的输出十分详细，但其用语有些繁琐。 如果你使用 `git status -s` 命令或 `git status --short` 命令，你将得到一种更为紧凑的格式输出。
 
 ### 查看更改
-要查看尚未暂存的文件更新了哪些部分：
+显示暂存区和工作区的代码差异：
 
 ``` bash
 git diff
-```
 
-`git diff --staged` 或 `git diff --cached` 可查看已暂存文件和上次提交的区别
+# 显示暂存区和上一个 commit 的差异
+git diff --cached
 
-### 移除文件
-要从 Git 中移除某个文件，就必须要从已跟踪文件清单中移除（确切地说，是从暂存区域移除），然后提交。
+git diff --staged
 
-首先从工作目录中手工删除文件，然后再运行 git rm 记录此次移除文件的操作：
+# 显示两次提交之间的差异
+git diff <first-btanch>...<second-branch>
 
-``` bash
-git rm <被删除的文件>
-```
+# 显示某次提交的元素数据和内容变化
+git show <commit>
 
-下一次提交时，该文件就不再纳入版本管理了。 如果删除之前修改过并且已经放到暂存区域的话，则必须要用强制删除选项 -f（译注：即 force 的首字母）。 
+# 显示某次提交时，某个文件的内容
+git show <commit>:<filename>
 
-另外一种情况是，你想让文件保留在磁盘，但是并不想让 Git 继续跟踪。 对于忘记添加到 .gitignore 文件，又不小心添加到暂存区时，这一做法尤其有用。 为达到这一目的，使用 --cached 选项：
+# 显示当前分支的最近几次提交
+git reflog
 
-``` bash
-git rm --cached <文件>
-```
+# 从本地 master 拉取代码更新当前分支
+git rebase master
+``` 
 
-### 移动文件
-``` bash
-# 在移动的同时也重命名了文件
-git mv file-from file-to
-```
-
-## 查看提交历史记录的命令
-在提交了若干更新，又或者克隆了某个项目之后，你也许想回顾下提交历史。 完成这个任务最简单而又有效的命令是：
+### 历史记录
+查看该分支所有的版本历史记录：
 
 ``` bash
 git log
+
+# 显示某个 commit 历史，以及每次 commit 发生变更的文件
+git log <tag> HEAD --grep feature
+
+# 显示某个 commit 之后的所有变动，其“提交说明”必须符合搜索条件
+git log <tag> HEAD --grop feature
+
+# 显示某个文件的版本历史，包括文件改名
+git log --follow <file-name>
+git whatchanged <file-name>
+
+# 显示过去5次的提交
+git log -5 --pretty --oneline
+
+# 显示所有提交过的用户，按提交次数排序
+git shortlog -sn
+
+# 显示指定文件是什么人在什么时间修改过
+git blame <file-name>
 ```
 
-而 `git reflog` 的功能是查看本地操作记录，可以看到本地的commit, merge, rebase等操作记录，并带有版本号。
+> 返回的历史记录中，类似 fcef4ce4280229e2d4a9c914677f6e94e3539ede 就是每一次提交的 commit_id，使用的时候取前五位即可。
+
+查看本地操作记录，包括 commit, merge, rebase 等操作记录，并带有版本号：
+
+``` bash
+git reflog 
+```
 
 ## 版本回退
+### 撤销
 ``` bash
-# 重置暂存区与工作区，与上一次commit保持一致
+# 恢复暂存区的指定文件到工作区
+git checkout <commit> <file-name>
+
+# 恢复某个 commit 的指定文件到暂存区和工作区
+git chechout .
+
+# 重置暂存区的指定文件，与上一次 commit 保持一致，但工作区不变
+git reset <file-name>
+```
+
+### 回退
+``` bash
+# 重置暂存区与工作区，与上一次 commit 保持一致，也就是后退一步
 git reset --hard
 
 # 取消暂存文件，恢复到已修改未暂存状态
 git reset HEAD {filename}
 
-# 表示回退到 n 个提交之前
+# 表示回退到 n 个提交之前，HEAD
 git reset HEAD~{n}
 
-# 直接回退到指定版本，后面带版本号
-git reset {version}
+# 直接回退到指定版本 commit
+git reset <commit>
+
+# 重置当前HEAD为指定commit，但保持暂存区和工作区不变
+git reset --keep <commit>
 ```
+
+> 以下写法都代表当前分支：HEAD、HEAD ~0 或者 HEAD ^0
 
 如果发现刚刚的提交是正确的,又想回到之前版本，再输入下面这个命令，相当于你那个回退没有做：
 
@@ -224,30 +301,119 @@ git reset --hard [commitid]
 # commitid 使用 git log --stat 查看
 ```
 
-### 记录每一次命令
-``` bash
-git reflog 
-```
-
 ## 分支(branch)
 ``` bash
-# 查看分支,列出所有分支，当前分支前面会标一个*号：
+# 查看分支,列出所有分支，当前分支前面会标一个*号
 git branch
 
-# 创建分支：
-git branch <name>
+# 列出所有远程分支
+git branch -r
+
+# 列出所有本地分支和远程分支
+git branch -a
+
+# 创建分支
+git branch <branch-name>
 
 # 切换分支：
-git checkout <name>
+git checkout <branch-name>
 
-# 创建+切换分支：
-git checkout -b <name>
+# 新建一个分支，并切换到该分支
+git checkout -b <branch-name>
 
-# 合并某分支到当前分支：
-git merge <name>
+# 新建一个分支，指向指定的 commit
+git branch <branch-name> <commit>
 
-# 删除分支：
-git branch -d <name>
+# 新建一个分支，与指定远程分支建立追踪关系
+git branch --track <branch-name> <remote-branch>
+
+# 建立追踪关系，在现有分支和指定的远程分支之间
+git branch --set-up-tream <branch-name> <remote-branch>
+
+# 删除分支
+git branch -d <branch-name>
+
+# 删除远程分支
+git push origin --delete <branch-name>
+git branch -dr <remote/branch>
+```
+
+### 合并分支
+``` bash
+# 合并指定分支到当前分支
+git merge <branch-name>
+```
+
+> 注意：合并操作之前必须保证暂存区内没有待提交内容，否则 git 会阻止合并。
+
+有时候合并的两个分支不是同一个人的，就会有很大的概率遇到两人同时修改文件某一行的情况，这时就会发生冲突，那就需要开发者手动的解决冲突，才能让 git 继续合并。
+
+``` bash
+# 查看冲突
+git status
+
+# 也可以 git merge --abort 回到合并以前的状态
+
+# 解决完冲突之后，需要再提交
+git add .
+git commit -m "fix merge conflict"
+```
+
+## 标签
+``` bash
+# 列出所有 tag
+git tag
+
+# 在当前 commit 新建一个 tag
+git tag <tag>
+
+# 新建一个 tag 在指定 commit
+git tag <tag> <commit>
+
+# 删除本地 tag
+git tag -d <tag>
+
+# 删除远程 tag
+git push origin :refs/tags/<tag>
+
+# 查看 tag 信息
+git show <tag>
+
+# 提交指定 tag
+git push <remote> <tag>
+
+# 提交所有 tag
+git push <remote> --tages
+
+# 新建一个分支，指向某个 tag
+git checkout -b <branch> <tag>
+```
+
+## 远程分支
+``` bash
+# 更新远程仓储
+git remote update 
+
+# 显示所有远程仓库
+git remote -v
+
+# 显示某个远程仓库信息
+git remote show <remote>
+
+# 增加一个新的远程仓库，并命名
+git remote add <shortname> <url>
+
+# 取回远程仓库的变化，并与本地分支合并
+git push <remote> <branch-name>
+
+# 上传本地分支到远程仓库
+git push <remote> <branch-name>
+
+# 强行推送当前分支到远程仓库
+git push <remote> --force
+
+# 推送所有分支到远程仓库
+git push <remote> --all
 ```
 
 # GitHub
