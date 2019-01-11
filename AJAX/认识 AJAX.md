@@ -343,6 +343,16 @@ fetch(url, {
 npm install --save whatwg-fetch
 ```
 
+fetch 也有不少的问题：
+
+* 兼容性问题
+* 使用繁琐，详见参考文献之 [fetch 没有你想象的那么美](http://undefinedblog.com/window-fetch-is-not-as-good-as-you-imagined/)
+* 不支持 jsonp（虽然理论上不应该支持，但实际上日常还是需要使用的）
+* 只对网络请求报错，对400，500都当做成功的请求，需要二次封装
+* 默认不会带 cookie，需要添加配置项
+* 不支持 abort，不支持超时控制，使用 setTimeout 及 Promise.race 的实现* 的超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费
+* 没有办法原生监测请求的进度，而 XHR 可以
+
 ## axios 库
 ### GET 请求
 ``` js
@@ -378,6 +388,23 @@ axios.post('/foo', qs.stringify({ 'bar': 123 }))
 
 // 或者：
 axios.post('/foo', 'bar=123&age=19')
+```
+
+### all 请求
+可以通过 axios.all 发起多个并发请求，比如说一次性获取两条数据：
+
+``` js
+var axios = require('axios');
+ 
+axios.all([
+  axios.get('https://api.faychou.cn/1'),
+  axios.get('https://api.faychou.cn/2')
+]).then(axios.spread((response1, response2) => {
+  console.log(response1.data);
+  console.log(response2.data);
+})).catch(error => {
+  console.log(error);
+});
 ```
 
 ### 全局配置

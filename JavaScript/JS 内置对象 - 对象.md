@@ -68,7 +68,7 @@ Object.getOwnPropertyDescriptor(myObject, "a");
 ```
 
 ### Object.defineProperty(obj, key, {...})
-添加或修改属性。
+Object.defineProperty() 方法直接定义一个对象的属性，或者修改对象当中一个已经存在的属性，并返回这个对象。
 
 ``` js
 // Object.defineProperty(myObject, key, {...})

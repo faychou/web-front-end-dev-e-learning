@@ -5,6 +5,8 @@
 
 
 ## 继承
+继承是一种让一个对象可以获得另一个对象所有的属性和方法的机制。
+
 ### 类式继承
 ``` js
 //声明父类
@@ -77,22 +79,65 @@ var Instance = new SubClass("I'm supper value","I'm sub value");
 
 ### 原型继承
 ``` js
-var supperObj = {
-  key1: 'value',
-  func: function() {
-    console.log(this.key1);
-  }
+// Vehicle - 超类
+function Vehicle (name) {
+    this.name = name;
+}
+// 超类的方法
+Vehicle.prototype.start = function () {
+    return "engine of " + this.name + " starting...";
 }
 
-function Factory(obj) {
-  function F() {}
-  F.prototype = obj;
-  return new F()
+// Car - 子类
+function Car (name) {
+    Vehicle.call(this, name); //  调用超类的构造函数
+}
+// 子类扩展超类
+Car.prototype = Object.create(Vehicle.prototype);
+// 子类的方法
+Car.prototype.run = function () {
+    console.log("Hello " + this.start());
 }
 
-// 使用
-// var Instance = new Factory(supperObj);
-var Instance = Factory(supperObj);
+// 子类的实例
+var c1 = new Car("Fiesta");
+var c2 = new Car("Baleno");
+
+// 访问 内部访问了超类方法 的子类方法
+c1.run();   // "Hello engine of Fiesta starting..."
+c2.run();   // "Hello engine of Baleno starting..."
+```
+
+改造：
+
+``` js
+// 包含初始化方法的基础对象
+var Vehicle = {
+    init: function (name) {
+        this.name = name;
+    },
+    start: function () {
+        return "engine of " + this.name + "starting...";
+    }
+}
+
+// 在子对象和基础对象之间创建的委托链接
+var Car = Object.create(Vehicle);
+
+// 子对象的方法
+Car.run = function () {
+    console.log("Hello " + this.start());
+};
+
+// 具有委托链接的实例对象指向子对象
+var c1 = Object.create(Car);
+c1.init('Fiesta');
+
+var c2 = Object.create(Car);
+c2.init('Baleno');
+
+c1.run();   // "Hello engine of Fiesta starting..."
+c2.run();   // "Hello engine of Baleno starting..."
 ```
 
 ### 寄生式继承--原型式继承的二次封装

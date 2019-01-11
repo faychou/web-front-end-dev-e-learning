@@ -1,5 +1,5 @@
 # 内置模块 HTTP
-Node.js 标准库提供了http模块，其中封装了一个高效的 HTTP 服务器和一个简易的 HTTP 客户端。
+Node.js 标准库提供了 http 模块，其中封装了一个高效的 HTTP 服务器和一个简易的 HTTP 客户端。
 
 ## 搭建 web 服务器：
 1、新建一个文件夹，并在终端里进入该文件；
@@ -202,4 +202,76 @@ const server = createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(application is listening at the port ${PORT});
 });
+```
+
+## nodejs 端发起请求
+### 1、利用内置模块
+HTTP 和 HTTPS 协议分属两个模块，因此如果我们使用的 API 是通过 HTTPS 协议进行通信，则需要 HTTPS 模块。
+
+``` js
+const https = require('https');
+ 
+https.get('https://api.faychou.cn/', (res) => {
+  let data = '';
+ 
+  // 检测数据流
+  res.on('data', (chunk) => {
+    data += chunk;
+  });
+ 
+  // 数据传输完毕
+  res.on('end', () => {
+    console.log(JSON.parse(data).explanation);
+  });
+ 
+}).on("error", (err) => {
+  console.log("Error: " + err.message);
+});
+```
+
+由于返回的数据是以数据流的形式，所以需要对数据进行拼接。
+
+### 2、Request 模块
+Request 是一个简化的 http 客户端，比默认的 http 模块更好用。
+
+首先需要安装：
+
+``` bash
+npm install request
+```
+
+基本使用：
+
+``` js
+const request = require('request');
+ 
+request('https://api.faychou.cn/', { json: true }, (err, res, body) => {
+  if (err) return console.log(err);
+  console.log(body.url);
+  console.log(body.explanation);
+});
+```
+
+### 3、Axios 模块
+Axios 是一个基于 promise 的 HTTP 客户端，可以用于浏览器和 Node.js。
+
+第一步：安装
+
+``` bash
+npm install axios
+```
+
+简单实用：
+
+``` js
+const axios = require('axios');
+ 
+axios.get('https://api.faychou.cn/')
+  .then(response => {
+    console.log(response.data.url);
+    console.log(response.data.explanation);
+  })
+  .catch(error => {
+    console.log(error);
+  });
 ```

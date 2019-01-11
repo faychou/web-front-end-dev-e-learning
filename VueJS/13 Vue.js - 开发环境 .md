@@ -154,6 +154,8 @@ vue create <project-name>
 
 这里根据提示选择即可，注意新版本把插件以及模板等移植到命令行界面了。
 
+第一次选择的时候只有两个选项：default(默认配置)和 Manually select features(手动配置)。
+
 ### 启动项目
 ``` bash
 # 先进入项目，然后运行
@@ -162,10 +164,59 @@ yarn serve
 npm run serve
 ```
 
-### 区别
-大部分配置都集成到 vue.config.js 这里了，包括了配置 常用的输出路径名、跟目录、预处理、devServer 配置、pwa、dll、第三方插件等。
+然后打开 http://localhost:8080 预览。
 
-最大的优化在于实现了界面化创建和操作项目，使用 `vue ui` 可以启动脚手架页面。
+### 配置
+与 vue-cli2.0 的很大区别是根目录下的 webpack 配置的目录不见了，如果需要自定义配置，则需要在根目录下创建 vue.config.js 文件，包括了配置 常用的输出路径名、跟目录、预处理、devServer 配置、pwa、dll、第三方插件等。 [官网配置](https://cli.vuejs.org/zh/config/)
+
+``` js
+  // vue.config.js
+  module.exports = {
+    // 选项...
+  }
+```
+
+### 图形化界面
+3.0 还有一个最大的优化在于实现了图形界面化创建和操作项目。
+
+启动：
+
+``` bash
+vue ui
+```
+
+### 零配置启动一个 vue
+第一步安装模块：
+
+``` bash
+npm install -g @vue/cli-service-global
+```
+
+第二步：新建文件夹，并建立 app.vue：
+
+``` html
+<template>
+  <h1> {{msg}} </h1>
+</template>
+
+<script>
+  export default {
+    data: {
+      msg: 'hello world!'
+    }
+  }
+</script>
+```
+
+第三步，启动文件：
+
+``` bash
+vue serve App.vue # 启动服务
+
+vue build App.vue # 打包出生产环境的包并用来部署
+```
+
+通过这个功能，可以只用一个 vue 文件就能建立一个项目，不需要其他任意的配置，非常适合用于开发一个库、组件，做一些小 demo 等。
 
 ## 开发工具
 vue-devtools
