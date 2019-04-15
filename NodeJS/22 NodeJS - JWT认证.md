@@ -110,7 +110,7 @@ UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 客户端收到这个 Token 以后把它存储下来，下回向服务端发送请求的时候就带着这个 Token 。服务端收到这个 Token ，然后进行验证，通过以后就会返回给客户端想要的资源。
 
 ## 基于 Token 的身份验证方法
-流程：
+### 流程：
 
 * 客户端使用用户名跟密码请求登录
 * 服务端收到请求，去验证用户名与密码
@@ -121,11 +121,98 @@ UQmqAUhUrpDVV2ST7mZKyLTomVfg7sYkEjmdDI5XF8Q
 
 如果想自己生成 JWT 会有点复杂，所以可以直接利用第三方库来支持 JWT。如 ： jsonwebtoken。
 
+### jsonwebtoken 的使用
+``` bash
+# 安装
+npm install jsonwebtoken
+```
+
+jsonwebtoken 主要提供两个方法：
+
 * sign 用于生成 token
 
 * verify 用于检验 token
 
+#### sign
+``` js
+var jwt = require('jsonwebtoken');
+// 语法 
+jwt.sign(payload, secretOrPrivateKey, [options, callback])
+```
+
+* payload：必须是一个 object, buffer 或者 string。请注意， exp 只有当 payload 是 object 字面量时才可以设置。
+
+* secretOrPrivateKey：是包含 HMAC 算法的密钥或 RSA 和 ECDSA 的 PEM 编码私钥的 string 或 buffer。
+
+* options 为配置对象：
+  
+  * algorithm: 加密算法，默认值 HS256
+  * expiresIn：过期时间，如果值为数值，则默认为多少秒，如果值为字符串，请提供时间单位（"2 days", "10h", "7d"），否则默认为毫秒，如 "120" 等于“120ms”
+
+在 expiresIn，notBefore，audience，subject，issuer 没有默认值时。也可以直接在 payload 中用 exp，nbf，aud，sub 和 iss 分别表示，但是你不能在这两个地方同时设置。
+  
+#### verify
+验证 token 的合法性。
+
+``` js
+jwt.verify（token，secretOrPublicKey，[options，callback]）
+```
+
 但是 jsonwebtoken 提供的 verify 比较简单，如果想要实现更加复杂的验证，可以通过 express-jwt 来实现。
+
+### express-jwt
+验证指定 http 请求的 JsonWebTokens 的有效性。
+
+``` bash
+npm install express-jwt
+```
+
+``` js
+var jwt = require('express-jwt');
+
+app.use(jwt({ 
+  secret: 'secretOrPrivateKey' // 加密 token 的秘钥
+}).unless({ // 选择一些不受保护的路径
+  path: ['/token']
+}));
+```
+
+jsonwebtoken 是用来生成 token 给客户端的，express-jwt 是用来验证token的。
+
+#### 校验 token 失败时的处理
+``` js
+app.use(function (err, req, res, next) {
+  if (err.name === 'UnauthorizedError') {   
+      // 具体的 err 值 请看下面
+    res.status(401).send('invalid token...');
+  }
+});
+
+// token 过期时的 err 值：
+{
+    "name": "UnauthorizedError",
+    "message": "jwt expired",
+    "code": "invalid_token",
+    "status": 401,
+    "inner": {
+        "name": "TokenExpiredError",
+        "message": "jwt expired",
+        "expiredAt": "2017-08-03T10:08:44.000Z"
+    }
+}
+
+// token 无效时的 err 值：
+{
+    "name": "UnauthorizedError",
+    "message": "invalid signature",
+    "code": "invalid_token",
+    "status": 401,
+    "inner": {
+        "name": "JsonWebTokenError",
+        "message": "invalid signature"
+    }
+}
+```
 
 ### express 中使用
 

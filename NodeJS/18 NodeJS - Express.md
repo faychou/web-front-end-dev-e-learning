@@ -272,7 +272,7 @@ app.listen(app.get('port'),function(){
 #### req.body
 处理 post 请求，获取 post 请求体。
 
-如载入body-parser 中间件，请求体为 {"name": "fay"}，则 req.body 为 {name: 'fay'}
+需要载入body-parser 中间件，请求体为 {"name": "fay"}，则 req.body 为 {name: 'fay'}
 
 #### req.cookies
 需要cookieParser()中间件来解析，生成用户代理包含cookie的键值对，默认为{}。
@@ -580,9 +580,25 @@ module.exports = router;
 ##### 1. 表达式
 (1)、 <% message %> ：是不显示内容的,是用于执行js代码；
 
-(2)、 <%= %> ：是用于显示js变量文本(显示转义后的 HTML内容)；
+``` html
+<% if (user) { %>
+  <h2><%= user.name %></h2>
+<% } %>  
+```
 
-(3)、 <%- %> ：可以同时解析js变量和html字符串(显示原始 HTML 内容)。
+(2)、 <%= %> ：是用于显示js变量文本(显示转义后的 HTML内容，即显示标签)；；
+
+(3)、 <%- %> ：可以同时解析js变量和html字符串(显示解析后的 HTML 内容)。
+
+(4)、<%# %> ：注释
+
+``` html
+<ul>
+  <% users.forEach(function(user){ %>
+    <%- include('user/show', {user: user}) %>
+  <% }); %>
+</ul>
+```
 
 ``` html
 <!-- views/users.ejs -->
@@ -623,7 +639,7 @@ module.exports = router;
 </html>
 ```
 
-#### 修改渲染模版为html：
+#### 修改渲染模版为 html：
 
 ``` js
 /*
@@ -751,9 +767,9 @@ app.use(bodyParser.json());
 
 为了在无状态的 HTTP 协议之上实现会话，Cookie 诞生了。Cookie 是一些存储在客户端的信息，每次连接的时候由浏览器向服务器递交，服务器也向浏览器发起存储 Cookie 的请求，依靠这样的手段服务器可以识别客户端。我们通常意义上的 HTTP 会话功能就是这样实现的。具体来说，浏览器首次向服务器发起请求时，服务器生成一个唯一标识符并发送给客户端浏览器，浏览器将这个唯一标识符存储在 Cookie 中，以后每次再发起请求，客户端浏览器都会向服务器传送这个唯一标识符，服务器通过这个唯一标识符来识别用户。 对于开发者来说，我们无须关心浏览器端的存储，需要关注的仅仅是如何通过这个唯一标识符来识别用户。很多服务端脚本语言都有会话功能，如 PHP，把每个唯一标识符存储到文件中。
 
-express-session 是基于express框专门用于处理session的中间件。session的认证机制离不开cookie，所以需要同时使用cookieParser 中间件。
+express-session 是基于 express 框专门用于处理 session 的中间件。session 的认证机制离不开 cookie，所以需要同时使用 cookie-parser 中间件。
 
-注意：sesison数据仅仅保存在服务器端，cookie中只保存 sessionID。
+注意：sesison 数据仅仅保存在服务器端，cookie 中只保存 sessionID。
 
 	npm install express-session
 	npm install cookie-parser
@@ -884,6 +900,48 @@ app.use(favicon(__dirname + '/public/favicon.ico'));
 
 然后在 public 目录下面添加一个 facicon.ico 这个图标文件。
 
+## cors
+允许 cors 请求。
+
+``` js
+// 允许所有跨域请求
+var express = require('express')
+var cors = require('cors')
+var app = express()
+
+app.use(cors())
+
+// 允许某路由的跨域请求
+app.get('/products/:id', cors(), function (req, res, next) {
+  res.json({msg: 'This is CORS-enabled for a Single Route'})
+})
+
+// 允许某些域的请求
+var whitelist = ['http://example1.com', 'http://example2.com']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+
+app.get('/products/:id', cors(corsOptions), function (req, res, next) {
+  res.json({msg: 'This is CORS-enabled for a whitelisted domain.'})
+})
+
+// 允许 GET/POST 以外的请求
+app.options('/products/:id', cors()) // enable pre-flight request for DELETE request
+app.del('/products/:id', cors(), function (req, res, next) {
+  res.json({msg: 'This is CORS-enabled for all origins!'})
+})
+
+// 对所有路由允许
+app.options('*', cors()) // include before other routes
+```
+
 ## morgan
 日志。将程序请求过程的信息显示在Terminal中，以便于我们调试代码
 
@@ -896,7 +954,23 @@ npm install morgan --save
 var logger = require('morgan');
 ...
 // 命令行中显示程序运行日志,便于bug调试
-app.use(logger('dev'));
+app.use(logger('dev')); // 参数可选 combined tiny 或自定义输出日志格式
+```
+
+``` js
+// 导出日志文件
+var express = require('express')
+var fs = require('fs')
+var morgan = require('morgan')
+var path = require('path')
+
+var app = express()
+
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
+
+// setup the logger
+app.use(morgan('combined', {stream: accessLogStream}))
 ```
 
 ## http-proxy-middleware

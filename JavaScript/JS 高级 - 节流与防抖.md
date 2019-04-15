@@ -4,75 +4,145 @@
 ## 节流（throttle）
 不管你触发了多少次函数，在规定的时间内都只会执行一次。简单地说，就是限制函数在一定时间内调用的次数。
 
+有两种主流实现方式：
+
+* 使用时间戳
+* 设置定时器
+
 ``` js
-// 简易版本
-function throttle(fn, threshhold) {
-  var timeout;
-  var start = new Date;
-  var threshhold = threshhold || 160;
-  
-  return function () {
-    var context = this, args = arguments, curr = new Date() - 0;
- 
-    clearTimeout(timeout); // 总是干掉事件回调
-    if(curr - start >= threshhold) { 
-      console.log("now", curr, curr - start);
-      fn.apply(context, args); // 这些方法是在某个时间段内执行一次
-      start = curr;
-    } else {
-      // 让方法在脱离事件后也能执行一次
-      timeout = setTimeout(function() {
-        fn.apply(context, args);
-      }, threshhold);
+// 时间戳实现
+function throttle(fn, wait) {
+  var args;
+  // 前一次执行的时间戳
+  var previous = 0;
+  return function() {
+    // 将时间转为时间戳
+    var now = +new Date();
+    args = arguments;
+    // 时间间隔大于延迟时间才执行
+    if (now - previous > wait) {
+      fn.apply(this, args);
+      previous = now;
     }
-  }
+  };
 }
 ```
 
 ``` js
-// underscore 的 throttle 源码
-_.throttle = function(func, wait, options) {
-    var timeout, context, args, result;
-    var previous = 0;
-    if (!options) options = {};
+// 定时器实现
+function throttle(fn, wait) {
+  var timer, context, args;
+  return function() {
+    context = this;
+    args = arguments;
+    // 如果定时器存在，则不执行
+    if (!timer) {
+      timer = setTimeout(function() {
+        // 执行后释放定时器变量
+        timer = null;
+        fn.apply(context, args);
+      }, wait);
+    }
+  };
+}
+```
 
-    var later = function() {
-      previous = options.leading === false ? 0 : _.now();
-      timeout = null;
+将时间戳与定时器结合，可以实现兼并立刻执行和停止触发后依然执行一次的效果。
+
+``` js
+function throttle(fn, wait) {
+  var timer, context, args;
+  var previous = 0;
+  // 延时执行函数
+  var later = function() {
+    previous = +new Date();
+    // 执行后释放定时器变量
+    timer = null;
+    fn.apply(context, args);
+    if (!timeout) context = args = null;
+  };
+  var throttled = function() {
+    var now = +new Date();
+    // 距离下次执行 fn 的时间
+    // 如果人为修改系统时间，可能出现 now 小于 previous 情况
+    // 则剩余时间可能超过时间周期 wait
+    var remaining = wait - (now - previous);
+    context = this;
+    args = arguments;
+    // 没有剩余时间 || 修改系统时间导致时间异常，则会立即执行回调函数fn
+    // 初次调用时，previous为0，除非wait大于当前时间的时间戳，否则剩余时间一定小于0
+    if (remaining <= 0 || remaining > wait) {
+      // 如果存在延时执行定时器，将其取消掉
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      previous = now;
+      fn.apply(context, args);
+      if (!timeout) context = args = null;
+    } else if (!timer) {
+      // 设置延时执行
+      timer = setTimeout(later, remaining);
+    }
+  };
+  return throttled;
+}
+```
+
+优化完善：增加第三个参数，
+
+``` js
+// underscore 的 throttle 源码
+function throttle(func, wait, options) {
+  var context, args, result;
+  var timeout = null;
+  // 上次执行时间点
+  var previous = 0;
+  if (!options) options = {};
+  // 延迟执行函数
+  var later = function() {
+    // 若设定了开始边界不执行选项，上次执行时间始终为0
+    previous = options.leading === false ? 0 : new Date().getTime();
+    timeout = null;
+    // func 可能会修改 timeout 变量
+    result = func.apply(context, args);
+    // 定时器变量引用为空，表示最后一次执行，则要清除闭包引用的变量
+    if (!timeout) context = args = null;
+  };
+  var throttled = function() {
+    var now = new Date().getTime();
+    // 首次执行时，如果设定了开始边界不执行选项，将上次执行时间设定为当前时间。
+    if (!previous && options.leading === false) previous = now;
+    // 延迟执行时间间隔
+    var remaining = wait - (now - previous);
+    context = this;
+    args = arguments;
+    // 延迟时间间隔remaining小于等于0，表示上次执行至此所间隔时间已经超过一个时间窗口
+    // remaining 大于时间窗口 wait，表示客户端系统时间被调整过
+    if (remaining <= 0 || remaining > wait) {
+      if (timeout) {
+        clearTimeout(timeout);
+        timeout = null;
+      }
+      previous = now;
       result = func.apply(context, args);
       if (!timeout) context = args = null;
-    };
-
-    var throttled = function() {
-      var now = _.now();
-      if (!previous && options.leading === false) previous = now;
-      var remaining = wait - (now - previous); // 代表还有多少时间, 可以执行下一次函数
-      context = this;
-      args = arguments;
-
-      if (remaining <= 0 || remaining > wait) { //只有当没有设置options.leading = false和 非节流的情况第一次能进来这里. 
-        if (timeout) { // 虽然 remaining不可能超过wait, 这里没必要clearTimeout(timeout), 因为如果setTimeout能准确执行的话, 这里timeout肯定不存在
-          clearTimeout(timeout); //但是seTimeout 并不准确, 可能会延迟, 所以可能到了超过remaining的时间, 但setTimeout还没执行, 所以要移除掉
-          timeout = null;
-        }
-        previous = now;
-        result = func.apply(context, args);
-        if (!timeout) context = args = null;
-      } else if (!timeout && options.trailing !== false) {// 被节流的函数都要执行setimeout, 
-        timeout = setTimeout(later, remaining);
-      }
-      return result;
-    };
-
-    throttled.cancel = function() {
-      clearTimeout(timeout);
-      previous = 0;
-      timeout = context = args = null;
-    };
-
-    return throttled;
+    } else if (!timeout && options.trailing !== false) {
+      timeout = setTimeout(later, remaining);
+    }
+    // 返回回调函数执行后的返回值
+    return result;
   };
+  throttled.cancel = function() {
+    clearTimeout(timeout);
+    previous = 0;
+    timeout = context = args = null;
+  };
+  return throttled;
+}
 ```
+
+> 注意：leading: false 和 trailing: false 不能同时设置。
 
 ## 防抖（debounce）
 无论你触发了多少次函数，都只会执行最后一次函数。应用场景: 如 size 事件、表单提交等。
@@ -80,50 +150,93 @@ _.throttle = function(func, wait, options) {
 ``` js
 // 简易版本
 function debounce(func, delay) {
+  var timer;
+  return function() {
+    // 清除上一次调用时设置的定时器
+    clearTimeout(timer);
+    // 重新设置计时器
+    timer = setTimeout(func, delay);
+  };
+}
+```
+
+简易版本问题一：debounce 函数在定时器中调用回调函数 func，所以 func 执行的时候 this 是指向全局对象的，这时就需要使用 apply 进行显式绑定：
+
+``` js
+function debounce(func, delay) {
   var timeout;
   return function(e) {
-    console.log("清除",timeout,e.target.value)
     clearTimeout(timeout);
-    var context = this, args = arguments;
-    console.log("新的",timeout, e.target.value);
+    // 保存调用时的this
+    var context = this;
     timeout = setTimeout(function() {
-      console.log("----")
-      func.apply(context, args);
+      // 修正 this 的指向
+      func.apply(context);
     },delay)
   };
 }
 ```
 
+简易版本问题二：JavaScript 的事件处理函数中会提供事件对象 event，在闭包中调用时需要将这个事件对象传入：
+
 ``` js
-// underscore 的 debounce
-_.debounce = function(func, wait, immediate) {
-    var timeout, result;
-
-    var later = function(context, args) {
-      timeout = null;
-      if (args) result = func.apply(context, args); //只有immediate非true时 才会执行到这里
-    };
-
-    var debounced = restArgs(function(args) {
-      if (timeout) clearTimeout(timeout);
-      if (immediate) { //立即先执行一次 然后再进行反抖
-        var callNow = !timeout;
-        timeout = setTimeout(later, wait);
-        if (callNow) result = func.apply(this, args);
-      } else {
-        timeout = _.delay(later, wait, this, args);
-      }
-
-      return result;
-    });
-
-    debounced.cancel = function() {
-      clearTimeout(timeout);
-      timeout = null;
-    };
-
-    return debounced;
+// 优化版
+function debounce(func, delay) {
+  var timer;
+  return function() {
+    // 保存调用时的 this
+    var context = this;
+    // 保存参数
+    var args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+      // 修正 this，并传入参数
+      func.apply(context, args);
+    }, delay);
   };
+}
+```
+
+完善：增加第三个参数，来决定是先执行函数，然后再等待，还是先等待，然后再执行函数。
+
+``` js
+// 终极版：underscore 的 debounce
+function debounce(fn, delay, immediate) {
+  var timer, result;
+  var debounced = function() {
+    var context = this;
+    var args = arguments;
+    // 停止定时器
+    if (timer) clearTimeout(timer);
+    // 回调函数执行的时机
+    if (immediate) {
+      // 是否已经执行过
+      // 执行过，则 timer 指向定时器对象，callNow 为 false
+      // 未执行，则 timer 为 null，callNow 为 true
+      var callNow = !timer;
+      // 设置延时
+      timer = setTimeout(function() {
+        timer = null;
+      }, delay);
+      if (callNow) result = fn.apply(context, args);
+    } else {
+      // 停止调用后delay时间才执行回调函数
+      timer = setTimeout(function() {
+        fn.apply(context, args);
+      }, delay);
+    }
+    // 回调函数可能有返回值，此处返回回调函数的返回值
+    return result;
+  };
+
+  // 增加一个可以取消 debounce 操作，实现再次触发
+  debounced.cancel = function() {
+    clearTimeout(timer);
+    timer = null;
+  };
+
+  return debounced;
+}
 ```
 
 ### 应用：输入框
@@ -135,7 +248,7 @@ function debounce(func, wait, leading, trailing) {
   return function() {
     var context = this
     var args = arguments
-    var now = + new Date()
+    var now = Date.now()
     if (now - lastCall < wait) {
       flag = false
       lastCall = now

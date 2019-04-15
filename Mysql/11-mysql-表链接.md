@@ -1,4 +1,4 @@
-# join
+# 连接查询
 
 建立两张有外键关联的表：
 
@@ -21,8 +21,19 @@ CREATE TABLE `user_info`(
 ) ENGINE=INNODB CHARSET=utf8mb4;
 ```
 
-### 内连接
+## 内连接
 返回两张表共有的数据，相当于求交集：
+
+### 语法
+``` sql
+-- 方式一：
+select 列名 from 表1 [inner] join 表2 on 表1.列名 = 表2.列名
+
+-- 方式二：
+select 列名 from 表1,表2 where 表1.列名 = 表2.列名
+```
+
+### 案例：
 
 ``` sql
 select * from user inner join user_info on user.id=user_info.user_id;
@@ -36,10 +47,36 @@ SELECT * FROM user,user_info WHERE user.id=user_info.user_id;
 SELECT user.id,user.username,user_info.email,user_info.phone FROM user,user_info WHERE user.id=user_info.user_id;
 ```
 
-### 左连接
-返回两个表的交集然后再外加左表剩下的数据：
+> 注意：INNER JOIN 查询语法：
+
+> 1. 先确定主表，仍然使用FROM <表1>的语法；
+> 2. 再确定需要连接的表，使用INNER JOIN <表2>的语法；
+> 3. 然后确定连接条件，使用ON <条件...>，这里的条件是s.class_id = c.id，表示students表的class_id列与classes表的id列相同的行需要连接；
+> 4. 可选：加上WHERE子句、ORDER BY等子句。
+
+### 多张表的连接
+``` sql
+-- 需求：列出学生每门课程对应的成绩
+select * from students,scores,courses,teachers
+where students.studentsId=scores.studentsId
+and scores.coursesId=courses.coursesId
+and courses.teachersId=teachers.teachersId
+
+-- 或者
+select * from students join scores on students.studentsId=scores.studentsId
+join courses on scores.coursesId=courses.coursesId
+join teachers on courses.teachersId=teachers.teachersId
+```
+
+## 外连接
+### 左外连接
+将左表的信息全部显示，右边的表与之匹配，如果没有匹配的则相应的显示为 null:
 
 ``` sql
+-- 语法
+select * from 表1 left [outer] join 表2 on 表1.列名=表2.列名;
+
+-- 例子
 select * from user a left join user_info b on a.id=b.user_id;
 ```
 
@@ -49,11 +86,15 @@ select * from user a left join user_info b on a.id=b.user_id;
 select * from user a left join user_info b on a.id=b.user_id where b.user_id is null;
 ```
 
-### 右连接
-返回两个表的交集然后再外加右表剩下的数据：
+### 右外连接
+以显示完所有右表的信息为核心,如果左表没有符合的信息，直接为空(NULL)：
 
 ``` sql
-select * from user a right join user_info b on a.id=b.user_id;
+-- 语法
+select * from 表1 right [outer] join 表2 on 表1.列名=表2.列名;
+
+-- 例子
+select * from user a right [outer] join user_info b on a.id=b.user_id;
 ```
 
 扩展：返回右表独有数据：
@@ -62,8 +103,8 @@ select * from user a right join user_info b on a.id=b.user_id;
 select * from user a right join user_info b on a.id=b.user_id where a.id is null;
 ```
 
-### 全连接
-返回两张表所有的数据，也就是两个集合的并集：
+### 全外连接
+全连接为 full outer join ，返回两张表所有的数据，也就是两个集合的并集，但是 mysql 不支持，需要用到 union 来实现全连接：
 
 ``` sql
 select * from user a right join user_info b on a.id=b.user_id 

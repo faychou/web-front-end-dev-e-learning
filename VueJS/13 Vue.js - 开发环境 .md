@@ -173,6 +173,20 @@ npm run serve
   // vue.config.js
   module.exports = {
     // 选项...
+    // 如果你的应用被部署在 https://www.my-app.com/my-app/，则设置 publicPath 为 /my-app/
+    publicPath: '/', // 部署应用包时的基本 URL，Default: '/'
+    outputDir: 'dist', // 生产环境构建文件的目录，Default: 'dist'
+    assetsDir: '', // 放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录，默认 ''
+    devServer: {
+      // proxy: 'http://localhost:4000' // 将请求代理到该地址
+      proxy: {
+        '/api': '/api': 'http://localhost:3000' // 将 api/users 请求代理到 http://localhost:3000/api/users
+        // '/api': { // 请求中不带 api
+	       // target: 'http://localhost:3000',
+	       // pathRewrite: {'^/api' : ''}
+	     // }
+      }
+    }
   }
 ```
 

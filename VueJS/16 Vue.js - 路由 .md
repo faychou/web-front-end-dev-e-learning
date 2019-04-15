@@ -836,6 +836,18 @@ deactivated () {
 }
 ```
 
+## 路由滚动行为
+有时候当我们从 List 页面跳转到 Detail 页面时，由于 List 页面的滚动条并不是在顶部，当跳转到 Detail 页面后，当前页面的内容也并不是在顶部，为了让每次路由切换进入到下一个页面的时候滚动在顶部显示，就需要在路由配置项中加上以下代码：
+
+``` js
+const router = new VueRouter({
+  routes, // （缩写）相当于 routes: routes
+  scrollBehavior(to, from, savedPosition) {
+    return {x: 0, y: 0}
+  }
+});
+```
+
 ## 路由组件按需加载
 在 Vue 项目中，一般使用 vue-cli 构建项目后，在 `npm run build` 的时候会打包成一个整个的 js 文件，如果页面一多，会导致这个文件非常大，加载缓慢，为了解决这个问题，需要将他分成多个小文件，而且还要实现异步按需加载，即用到了再加载。
 

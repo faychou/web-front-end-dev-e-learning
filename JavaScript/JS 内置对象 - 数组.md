@@ -405,11 +405,59 @@ console.log(filtered)   // => [{user: "fred", age: 40, active: false}，{user: "
 
 #### 案例2:数组去重
 ``` js
-let arr = [12, 5, 8, 8, 130, 44,130]
-let filtered = arr.filter((item, idx, arr) => {
-  return arr.indexOf(item) === idx;
-})
-console.log(filtered)
+//方法1
+function uniqueArr(arr) {
+  var newArr = [];
+  for(var i = 0; i < arr.length; i++) {
+    if(newArr.indexOf(arr[i]) === -1) {
+      newArr.push(arr[i]);
+    }
+  }
+  return newArr;
+}
+
+// 方法2
+function uniqueArr(arr) {
+  var newArr = [];
+  for (var i = 0; i < arr.length; i++) {
+    for (var j = i+1; j < arr.length; j++) {
+      if(arr[i] === arr[j]) {
+        ++i;
+      }
+    }
+    newArr.push(arr[i]);
+  }
+  return newArr;
+}
+
+// 方法3：es5简化版
+Array.prototype. uniqueArr = function() {
+  return this.filter((v, i) => this.indexOf(v) === i)
+}
+// es6简化版
+Array.prototype. uniqueArr = function() {
+  return Array.from(new Set(this));
+}
+// 或
+Array.prototype. uniqueArr = function() {
+  return [...new Set(this)];
+}
+
+// 方法4：对象存放，哈希算法(映射)判断（最优）
+Array.prototype. uniqueArr = function() {
+  // n为hash表，r为临时数组
+  var n = {}, r = [];
+  for (var i = 0; i < this.length; i++) {
+    // 如果hash表中没有当前项
+    if (!n[this[i]]) {
+      // 存入hash表
+      n[this[i]] = true;
+      // 把当前数组的当前项push到临时数组里面
+      r.push(this[i]); 
+    }
+  }
+  return r;
+}
 ```
 
 #### 案例3:数组中的空字符串删掉
@@ -579,11 +627,11 @@ alert(Math.min.apply(null,ta)); //最小值
 扩展为数组的原型方法：
 
 ``` js
-Array.prototype.max = function() {
+Array.prototype.max = Array.prototype.max || function() {
   return Math.max.apply({},this)
 };
 
-Array.prototype.min = function() {
+Array.prototype.min = Array.prototype.min || function() {
   return Math.min.apply({},this)
 };
 
@@ -640,61 +688,97 @@ Array.prototype.slice.call(arguments);
 Array.from(arguments);
 ```
 
-### 合并两个 Array 并去掉重复项
+### 数组去重复
 ``` js
-Array.prototype.unique = function() {
-  var a = this.concat();
-  for(var i=0; i<a.length; ++i) {
-    for(var j=i+1; j<a.length; ++j) {
-      if(a[i] === a[j])
-        a.splice(j, 1);
+// 方法一：双重遍历
+Array.prototype.unique = Array.prototype.unique || function(arr) {
+  for(var i = 0; i < this.length; ++i) {
+    for(var j = i + 1; j < this.length; ++j) {
+      if(this[i] === this[j]) {
+        this.splice(j, 1);
       }
     }
   }
-  return a;
+  return this;
 };
 
-//Demo
-var array1 = ["a","b"];
-var array2 = ["b", "c"];
-var array3 = array1.concat(array2).unique();
-// ["a","b","c"]
+// 方法二：相邻元素去重
+function unique(arr) {
+  let Arr = arr.sort();
+  let b = [];
+  for(let i = 0; i < Arr.length; i++) {
+    if(Arr[i] !== Arr[i+1]) {
+      b.push(Arr[i]);
+    }
+  }
+  return b;
+}
+
+// 方法三：存在唯一性
+function unique(arr) {
+  let b = [];
+  let hash = {};
+  for(let i = 0; i < arr.length; i++) {
+    if(!hash[JSON.stringify(arr[i])]) {
+      hash[JSON.stringify(arr[i])] = true;
+      b.push(arr[i]);
+    }
+  }
+  return b;
+}
+
+// 方法四：
+function unique(arr) {
+  let b = [];
+  for(let i = 0; i < arr.length; i++) {
+    if(b.indexOf(arr[i]) == -1) {
+      b.push(arr[i]);
+    }
+  }
+  return b;
+}
+
+// 方法五：
+function unique(arr) {
+  let b=[];
+  arr.forEach(res => {
+    if(b.indexOf(res) == -1) {
+      b.push(res);
+    }
+  });
+  return b
+}
+
+// 方法六：
+function unique(arr) {
+  let b = new Set(arr);
+  let c = Array.from(b);
+  return c;
+}
 ```
 
 ### 取两个数组交集
 ``` js
-/* finds the intersection of 
- * two arrays in a simple fashion.  
- *
- * PARAMS
- *  a - first array, must already be sorted
- *  b - second array, must already be sorted
- *
- * NOTES
- *
- *  Should have O(n) operations, where n is 
- *    n = MIN(a.length(), b.length())
- */
-function arrayIntersection(a, b) {
-  var ai=0, bi=0;
-  var result = new Array();
-
-  while( ai < a.length && bi < b.length ) {
-    if(a[ai] < b[bi] ) { 
-      ai++; 
-    } else if (a[ai] > b[bi] ) { 
-      bi++; 
-    } else { /* they're equal */
-      result.push(a[ai]);
-      ai++;
-      bi++;
+function getArrIntersection(arr1, arr2) {
+  let newArr = [];
+  for (let i = 0; i < arr2.length; i++) {
+    for (let j = 0; j < arr1.length; j++) {
+      if(arr1[j] === arr2[i]){
+        newArr.push(arr1[j]);
+      }
     }
   }
-
-  return result;
+  return newArr;
 }
+```
 
-console.log(arrayIntersection([1,2,3],[2,3,4,5,6]));//[2,3]
+### 取出两个数组的不同元素
+``` js
+function getArrDiff(arr1, arr2) {
+  return arr1.concat(arr2).filter(function(v, i, arr) {
+    return arr.indexOf(v) === arr.lastIndexOf(v);
+  });
+}
 ```
 
 ### 数组扁平化
@@ -726,9 +810,42 @@ function flattenArray(arr) {
 }
 ```
 
-### 把 arguments 转换为 Array
+### 条件语句的优化
 ``` js
-var args = Array.prototype.slice.call(arguments, 0);
+// bad
+function test(color) {
+  switch (color) {
+    case 'red':
+      return ['apple', 'strawberry'];
+    case 'yellow':
+      return ['banana', 'pineapple'];
+    case 'purple':
+      return ['grape', 'plum'];
+    default:
+      return [];
+  }
+}
+
+// good
+const fruitColor = {
+  red: ['apple', 'strawberry'],
+  yellow: ['banana', 'pineapple'],
+  purple: ['grape', 'plum']
+};
+
+function test(color) {
+  return fruitColor[color] || [];
+}
+
+// better
+const fruitColor = new Map()
+  .set('red', ['apple', 'strawberry'])
+  .set('yellow', ['banana', 'pineapple'])
+  .set('purple', ['grape', 'plum']);
+
+function test(color) {
+  return fruitColor.get(color) || [];
+}
 ```
 
 ### 日期格式化

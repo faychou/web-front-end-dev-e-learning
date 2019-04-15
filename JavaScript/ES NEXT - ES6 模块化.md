@@ -35,7 +35,7 @@ CommonJS 是运行时加载，ES6 模块是编译时加载。
 
 ``` js
 // 导出变量
-export var person = 'fay'
+export let person = 'fay'
 
 // 导出函数
 export function run() {  
@@ -57,9 +57,9 @@ var age = 18
 如果有很多对象需要导出的时候，可以在最后统一导出为一组对象：
 
 ``` js
-export var p1 = 'fay'
+let p1 = 'fay'
 
-export function run() {  
+function run() {  
   console.log('runing')
 }
 
@@ -68,7 +68,47 @@ var age = 18
 export { p1,run,age }
 ```
 
-### default
+可以使用as重命名函数的对外接口：
+
+``` js
+function f1 (){ ... }
+function f2 (){ ... }
+export {
+  a1 as f1,
+  a2 as f2
+}
+```
+
+> 特别注意：export 暴露的必须是接口，不能是值。
+
+``` js
+// 错误
+export 1; // 报错
+
+let a = 1;
+export a; // 报错
+
+// 正确
+export let a = 1; // 正确
+
+let a = 1;
+export {a};       // 正确
+
+let a = 1;
+export { a as b}; // 正确
+
+// 错误
+function f(){...};
+export f;
+
+// 正确
+export function f () {...};
+
+function f(){...};
+export {f};
+```
+
+### export default
 注意使用 export 导出的函数和类都需要一个名称，所以当我们需要导出匿名的函数或者类时，使用关键字 default。default 关键字在每一个模块中只能使用一次。
 
 ``` js
@@ -95,6 +135,17 @@ export default {
   run,
   age
 }
+```
+
+使用export default命令，为模块指定默认输出，引用的时候直接指定任意名称即可。
+
+``` js
+// a.js
+export default function(){console.log('leo')};
+
+// b.js
+import leo from './a.js';
+leo(); // 'leo'
 ```
 
 ## import

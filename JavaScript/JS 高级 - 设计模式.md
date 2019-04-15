@@ -33,24 +33,21 @@ console.log(typeof p2);  // object
 console.log(p1 instanceof Object); // true
 ```
 
-## 发布者,订阅者模式
-在异步编程中帮助我们实现更深的解耦。
+## 发布者,订阅者模式（观察者）
+这种模式的实质就是你可以对程序中的某个对象的状态进行观察，并且在其发生改变时能够得到通知。
 
 ``` js
 var Site = {};
-Site.userList = [];
-Site.subscribe = function( fn ) {
+Site.userList = []; // 订阅者列表
+Site.subscribe = function( fn ) { // 增加订阅者
   this.userList.push( fn );
 };
 
-Site.publish = function() {
+Site.publish = function() { // 发布消息
   for( var i = 0, len = this.userList.length; i < len; i++ ) {
     this.userList[i].apply( this, arguments );
   } 
 }
-Site.subscribe( function( type ) {
-  console.log( "网站发布了" + type + "内容" );
-});
 Site.subscribe( function( type ) {
   console.log( "网站发布了" + type + "内容" );
 });
@@ -96,7 +93,7 @@ ev.emit('click', 1)  // 发布函数
 ```
 
 ## 单例模式
-一个类只能构造出唯一实例，并且可以全局访问。
+一个类只能构造出唯一实例，并且可以全局访问。保证一个类只有一个实例，实现方法是先判断实例存在与否，如果存在直接返回，如果不存在就创建了再返回，确保一个类只有一个实例对象。
 
 ``` js
 const singleton = function(name) {
@@ -118,7 +115,7 @@ singleton.getInstance = function(name) {
 // test
 const a = singleton.getInstance('a') // 通过 getInstance 来获取实例
 const b = singleton.getInstance('b')
-console.log(a === b)
+console.log(a === b); // true
 ```
 
 ### 适用场景
@@ -148,11 +145,27 @@ document.getElementById('loginBtn').onclick = function() {
 }
 ```
 
+又如：
+
+``` js
+var singleton = function(fn) {
+  var result; 
+  return function() {
+    return result || ( result = fn .apply(this, arguments));
+  }
+}
+```
+
 ## 装饰者模式	
-动态地给函数赋能。
+为对象添加新功能，不改变原有的结构和功能, 优点是把类（函数）的核心职责和装饰功能区分开了。
+
+## 适配器模式
+是将一个类（对象）的接口（方法或属性）转化成客户希望的另外一个接口（方法或属性），适配器模式使得原本由于接口不兼容而不能一起工作的那些类（对象）可以一些工作。
+
+适配器模式的作用很像一个转接口. 本来iphone的充电器是不能直接插在电脑机箱上的, 而通过一个usb转接口就可以了。
 
 ## 代理模式	
-代理对象和本体对象具有一致的接口。
+使用者无权访问目标对象, 为其他对象提供一种代理以控制对这个对象的访问, 接口不变。
 
 运用代理模式来实现图片预加载，可以看到通过代理模式巧妙地将创建图片与预加载逻辑分离，并且在未来如果不需要预加载，只要改成请求本体代替请求代理对象就行。
 
@@ -207,3 +220,7 @@ calculateBonus('A', 10000) // 30000
 ```
 
 优点：能减少大量的 if 语句，复用性好。
+
+## 命令模式
+用于将一个请求封装成一个对象，从而使你可用不同的请求对客户进行参数化；对请求排队或者记录请求日志，以及执行可撤销的操作。也就是说改模式旨在将函数的调用、请求和操作封装成一个单一的对象，然后对这个对象进行一系列的处理。此外，可以通过调用实现具体函数的对象来解耦命令对象与接收对象。
+

@@ -16,7 +16,7 @@ var http = require('http');
 http.createServer(function(request, response) {
   response.writeHead(200, {'Content-Type': 'text/html'});
   response.write('<h1>Node.js</h1>');
-  response.end('<p>Hello World</p>'); 
+  response.end('<p>Hello World</p>');  // 结束响应
 }).listen(3000);
 
 console.log("HTTP server is listening at port 3000.");
@@ -72,8 +72,8 @@ http.createServer(function(req, res) {
   // 获得 HTTP 请求的 method 和 url:
   console.log(req.method + ': ' + req.url);
   
-  // 将 HTTP 响应 200 写入 response, 同时设置 Content-Type: text/html:
-  res.writeHead(200, { 'Content-Type': 'text/html' });
+  // 设置 HTTP 头部，状态码是 200，文件类型是 html，字符集是 utf8
+  res.writeHead(200, { 'Content-Type': 'text/html;charset=UTF-8' });
   res.end(new Date() + '\n');
 }).listen(port);
 

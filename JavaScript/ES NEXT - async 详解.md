@@ -102,6 +102,28 @@ correct().then(v => console.log(a)); // 1
 
 如果有多个 await 则可以将其都放在 try/catch 中。
 
+## "async 地狱"
+``` js
+// bad
+(async () => {
+  const getList = await getList();
+  const getAnotherList = await getAnotherList();
+})();
+
+// good
+(async () => {
+  const listPromise = getList();
+  const anotherListPromise = getAnotherList();
+  await listPromise;
+  await anotherListPromise;
+})();
+
+// good
+(async () => {
+  Promise.all([getList(), getAnotherList()]).then(...);
+})();
+```
+
 ## Async 与其他异步操作的对比
 ``` js
 function fetchUser() { 

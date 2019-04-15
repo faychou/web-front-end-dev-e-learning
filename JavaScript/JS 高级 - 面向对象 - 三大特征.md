@@ -81,22 +81,24 @@ var Instance = new SubClass("I'm supper value","I'm sub value");
 ``` js
 // Vehicle - 超类
 function Vehicle (name) {
-    this.name = name;
+  this.name = name;
 }
 // 超类的方法
 Vehicle.prototype.start = function () {
-    return "engine of " + this.name + " starting...";
+  return "engine of " + this.name + " starting...";
 }
 
 // Car - 子类
 function Car (name) {
-    Vehicle.call(this, name); //  调用超类的构造函数
+  Vehicle.call(this, name); //  调用超类的构造函数
 }
+
 // 子类扩展超类
 Car.prototype = Object.create(Vehicle.prototype);
+
 // 子类的方法
 Car.prototype.run = function () {
-    console.log("Hello " + this.start());
+  console.log("Hello " + this.start());
 }
 
 // 子类的实例
@@ -218,5 +220,64 @@ var Instance = new SubClass('sup','sub');
 ```
 
 寄生组合继承就是将经过改良之后的寄生继承与构造函数继承方式组合，从而弥补寄生继承无法继承父类自有属性与方法的缺陷。
+
+## 分割线 =======================
+### 绑定构造函数
+``` js
+function Animal(){
+  this.species = "动物";
+}
+
+function Cat(){
+  Animal.apply(this, arguments); // 父对象的构造函数绑定到子节点上
+}
+
+var cat = new Cat()
+console.log(cat.species) // 输出：动物
+```
+
+优点：可以实现多继承
+
+缺点：不能继承父类原型方法/属性
+
+### 原型链继承
+``` js
+function Animal(){
+  this.species = "动物";
+}
+Animal.prototype.func = function(){
+  console.log("heel")
+}
+
+function Cat(){}
+Cat.prototype = new Animal()
+Cat.prototype.constructor = Cat
+
+var cat = new Cat()
+console.log(cat.func, cat.species)
+```
+
+优点：能够继承父类原型和实例方法/属性，并且可以捕获父类的原型链改动
+
+缺点：无法实现多继承，会浪费一些内存
+
+### 组合式
+``` js
+function Animal(){
+  this.species = "动物";
+}
+Animal.prototype.func = function(){
+  console.log("heel")
+}
+
+function Cat(){
+  Animal.apply(this, arguments)
+}
+Cat.prototype = new Animal()
+Cat.prototype.constructor = Cat;
+
+var cat = new Cat()
+console.log(cat.func, cat.species)
+```
 
 ## 多态

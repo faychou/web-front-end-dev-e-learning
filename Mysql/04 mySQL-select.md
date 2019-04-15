@@ -1,7 +1,7 @@
 # select
 基本语法：
 
-``` bash
+``` sql
 select selection_list  # 选择列名称
   from table_list  # 表名称 
   where primary_constraint  # 满足什么条件 
@@ -11,7 +11,7 @@ select selection_list  # 选择列名称
   limit count;  # 结果限定
 ```
 
-select 5种子句：
+select 5种查询条件子句：
 
 * where 条件查询
 
@@ -26,7 +26,7 @@ select 5种子句：
 > 注意：所有使用的关键词必须精确地以上面的顺序给出。例如，`having` 必须跟在 `group by` 之后和 `order by` 之前。
 
 ## 普通查询
-``` bash
+``` sql
 # 查询 user 表中所有列的数据
 select * from user;
 
@@ -41,6 +41,9 @@ select (2+3*4.5)/2.5;
 
 # 如果检索数据时候不想要出现重复的结果，可以使用 distinct 关键字
 select distinct name from user;
+
+# 给查询的列取别名：SELECT 列1 别名1, 列2 别名2 FROM ...
+SELECT id, tel telphone, name FROM students;
 ```
 
 ## 条件查询
@@ -92,8 +95,26 @@ select * from user where name like "王%";
 select * from user where name like "王__";
 ```
 
+要组合三个或者更多的条件，就需要用小括号()表示如何进行条件运算：
+
+``` sql
+SELECT * FROM students WHERE (score < 80 OR score > 90) AND gender = 'M';
+```
+
+如果不加括号，条件运算按照 NOT、AND、OR 的优先级进行，即 NOT 优先级最高，其次是 AND，最后是 OR。
+
 ### 多表查询
-``` bash
+SELECT查询不但可以从一张表查询数据，还可以从多张表同时查询数据。
+
+``` sql
+SELECT * FROM students, classes;
+```
+
+这种一次查询两个表的数据，查询的结果也是一个二维表，它是students表和classes表的“乘积”，即students表的每一行与classes表的每一行都两两拼在一起返回。结果集的列数是students表和classes表的列数之和，行数是students表和classes表的行数之积。又称笛卡尔查询
+
+设置别名:
+
+``` sql
 select t1.name as t1name,t1.age as t1age,t2.name as t2name,t2.age as t2age
  from test01_01 as t1,test01_03 as t2 where t1.name=t2.name;
 ```
@@ -103,25 +124,25 @@ select t1.name as t1name,t1.age as t1age,t2.name as t2name,t2.age as t2age
 ## 分组查询
 group by 从句根据所给的列名返回分组的查询结果，可用于查询具有相同值的列。
 
-``` bash
+``` sql
 # 按 name 分组，并且统计数量
 select name,count(*) from user group by name;
 ```
 
 ### 聚合函数
-* max : 求最大
+* max : 计算某一列的最大值；
 
-* min : 求最小
+* min : 计算某一列的最小值；
 
-* sum : 求总和
+* sum : 计算某一列的合计值，该列必须为数值类型；
 
-* avg : 求平均
+* avg : 计算某一列的平均值，该列必须为数值类型；
 
-* count : 求总行数
+* count : 求总行数。
 
 ``` sql
 # 查出最贵的商品的价格
-elect max(shop_price) from goods;
+select max(shop_price) from goods;
 
 # 查出最大（最新）的商品
 select max(goods_id) from goods;
@@ -138,10 +159,16 @@ select sum(goods_number) from goods;
 # 查询所有商品的平均价格
 select avg(shop_price) from goods;
 
+# 查询所有手机的平均价格
+select avg(shop_price) from goods where goods_type = "mobile";
+
 # 查询一共有多少种商品。
 select count(*) from goods;
 
-# 按 cat_id 分组并返回该组价格最贵的
+# 查询男生有多少人数
+SELECT COUNT(*) FROM students WHERE gender = 'M';
+
+# 按 cat_id 分组并返回该组价格最贵的，注意返回的 cat_id 必须是分组名，因为只有这个是一样的
 select cat_id,max(shop_price) from goods group by cat_id;
 
 # 按 cat_id 分组并返回该组价格最低的
@@ -153,9 +180,17 @@ select cat_id,avg(shop_price) from goods group by cat_id;
 # 按 cat_id 分组并返回该组价格总和
 select cat_id,sum(goods_number) from goods group by cat_id;
 
-# 按 cat_id 分组并统计数量
+# 按 cat_id 分组并统计每个 cat_id 分组下的数量
 select cat_id,count(*) from goods group by cat_id;
 ```
+
+给聚合函数设置别名：
+
+``` sql
+SELECT COUNT(*) num FROM students;
+```
+
+> 注意：COUNT(*)和COUNT(id)实际上是一样的效果。
 
 ## 筛选查询
 having 与 where 异同点:
@@ -173,7 +208,7 @@ select name,sum(score < 60) as gk,avg(score) as pj from student group by name ha
 ## 排序查询
 使用 order by 子句对查询返回的结果按一列或多列排序。
 
-``` bash
+``` sql
 # 按照 age 升序输出
 select * from user order by age;
 
@@ -190,10 +225,13 @@ select * from user order by name desc, age;
 ## 限制查询
 使用 limit 关键字限制查询的数量。limit 后面可以跟两个值, 第一个为起始位置, 第二个是要查询的长度。
 
-``` bash
+``` sql
 # 限制查询5条记录
 select * from user limit 5;
 
 # 查询第5条后向后的5条记录
 select * from user limit 5, 5;
+
+# 另一种写法，注意 SQL 记录集的索引从0开始。
+select * from user limit 5 OFFSET 5;
 ```

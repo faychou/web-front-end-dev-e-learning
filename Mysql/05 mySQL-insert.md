@@ -1,11 +1,11 @@
 # insert
 ``` bash
-insert into 表名 values(值1,值2,...);
+insert into 表名 (字段1,字段2,...) values(值1,值2,...);
 # or
 insert 表名 (字段1,字段2,...) values(值1,值2,...);
 ```
 
-使用 into 关键字，此时 values 里面的数据必须一一对应表中所有的字段，也就是说,表中有几个字段,那么 value s里面就必须有几个值；
+使用 into 关键字，此时 values 里面的数据必须一一对应表中所有的字段，也就是说,表中有几个字段,那么 values 里面就必须有几个值；
 
 第二种不使用 into 则不需要一一对应所有字段，只需要将第一个括号的字段名与第二个括号的值对应即可，
 
@@ -49,5 +49,12 @@ insert into user select * from user_other;
 
 # 取某个值添加
 insert into user(name) select name from user_other;
+```
+
+### 插入或更新
+插入一条新记录（INSERT），但如果记录已经存在，就更新该记录。
+
+``` sql
+INSERT INTO students (id, class_id, name, gender, score) VALUES (1, 1, '小明', 'F', 99) ON DUPLICATE KEY UPDATE name='小明', gender='F', score=99;
 ```
 

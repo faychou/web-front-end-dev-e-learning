@@ -1,5 +1,5 @@
 # class
-ES6 提供了更接近传统语言类的写法，引入了 Class 这个概念，作为对象的模板。
+ES6 的 class可以看作只是一个语法糖，提供了更接近传统语言类的写法，作为对象的模板。
 
 ``` js
 // ES5
@@ -36,6 +36,8 @@ a.toString()	// 1,2
 
 上面的 constructor 方法，这就是构造方法，而 this 关键字则代表实例对象。类的所有方法都定义在类的 prototype 属性上面。
 
+class不存在变量提升。
+
 ### constructor
 constructor 方法是类的默认方法，通过 new 命令生成对象实例时，自动调用该方法。
 
@@ -57,7 +59,8 @@ person1.showName
 > 注意：
 
 1. constructor 只做初始化；
-2. 这里的 showName 实际上就是放在原型上的方法，可以通过 `console.dir(Person)` 查看。
+2. 一个类必须有 constructor() 方法，否则一个空的 constructor() 会默认添加。
+3. 这里的 showName 实际上就是放在原型上的方法，可以通过 `console.dir(Person)` 查看。
 
 ### 类的实例化
 必须使用 new 命令实例化对象，否则将会报错。
@@ -67,12 +70,12 @@ class Person {
   // ...
 }
 
-// 正确
-var person = new Person();
+var person = Person(); // 报错
+var person = new Person(); // 正确
 ```
 
-### Class 的静态方法、属性
-所有在类中定义的方法，都会被实例继承。如果在一个方法前，加上 static 关键字，就表示该方法不会被实例继承，而是直接通过类来调用，这就称为“静态方法”。
+## class 的静态方法、属性
+所有在类中定义的方法，都会被实例继承。如果在一个方法前，加上 `static` 关键字，就表示该方法不会被实例继承，而是直接通过类来调用，这就称为“静态方法”。
 
 ``` js
 class Person {
@@ -89,7 +92,7 @@ person.run();
 // TypeError: person.run is not a function
 ```
 
-如果静态方法包含this关键字，这个this指的是类，而不是实例。
+如果静态方法包含 this 关键字，这个 this 指的是类，而不是实例。
 
 ``` js
 class Foo {
@@ -122,6 +125,15 @@ class Bar extends Foo {
 Bar.classMethod() // 'hello'
 ```
 
+类的静态属性只要在实例属性前面加上static关键字就可以。
+
+``` js
+class P {
+    static prop = 100;
+    constructor(){console.log(this.prop)}; // 100
+}
+```
+
 ## 继承
 Class 可以通过 extends 关键字实现继承。
 
@@ -151,10 +163,55 @@ super 指代父类的构造函数，只能用在子类的构造函数之中，�
 
 在你调用父类构造函数之前，你无法在构造函数中使用 this。
 
+super 当函数调用，代表父类的构造函数，但必须执行一次。
+
+``` js
+class P {... };
+class R extends P {
+    constructor(){
+        super();
+    }
+}
+```
+
+super 当对象调用，指向原型对象，在静态方法中指向父类。
+
+``` js
+class P {
+    f (){ return 2 };
+}
+class R extends P {
+    constructor (){
+        super();
+        console.log(super.f()); // 2
+    }
+}
+let a = new R()
+```
+
+## getter 和 setter
+使用 get 和 set 关键词对属性设置取值函数和存值函数，拦截属性的存取行为。
+
+``` js
+class P {
+    constructor (){ ... }
+    get f (){
+        return 'getter';
+    }
+    set f (val) {
+        console.log('setter: ' + val);
+    }
+}
+
+let a = new P();
+a.f = 100;   // setter : 100
+a.f;          // getter
+```
+
 ## 实现 class 私有变量
 虽然 class 本身没有提供私有变量的功能，但是可以通过通过一些方式来实现类似于私有变量的功能。
 
-首先约定一种代表着私有变量的命名方式，一般是在私有变量的名称前加上一个下划线。
+首先约定一种代表着私有变量的命名方式，一般是在私有变量的名称前加上一个下划线 `_`。
 
 ``` js
 class Point {

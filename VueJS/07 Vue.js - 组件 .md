@@ -210,6 +210,59 @@ slot 的作用就是占个位置。假定子组件 my-component 有下面模板�
 </div>
 ```
 
+* 插槽用 slot 标签来确定渲染的位置，里面放如果父组件没传内容时的后备内容
+
+* 具名插槽用 name 属性来表示插槽的名字，不传为默认插槽
+
+* 作用域插槽在作用域上绑定属性来将子组件的信息传给父组件使用，这些属性会被挂在父组件 slot-scope 接受的对象上。
+
+``` js
+// Child.vue
+<template>
+  <div>
+    <main>
+    <!-- 默认插槽 -->
+        <slot>
+          <!-- slot内为后备内容 -->
+          <h3>没传内容</h3>
+        </slot>
+    </main>
+
+    <!-- 具名插槽 -->
+    <header>
+        <slot name="header">
+          <h3>没传header插槽</h3>
+        </slot>
+    </header>
+
+    <!-- 作用域插槽 -->
+    <footer>
+        <slot name="footer" testProps="子组件的值">
+          <h3>没传footer插槽</h3>
+        </slot>
+    <footer>
+  </div>
+</template>
+
+<style scoped>
+div{
+ border: 1px solid #000;  
+}
+</style>
+
+// Parent.vue
+<child>
+  <!-- 默认插槽 -->
+  <div>默认插槽</div>  
+  <!-- 具名插槽 -->
+  <div slot="header">具名插槽header</div>
+  <!-- 作用域插槽 -->
+  <div slot="footer" slot-scope="slotProps">
+    {{slotProps.testProps}}
+  </div>
+</child>
+```
+
 ## 动态组件
 ### component
 通过使用 vue 内置的 `<component>` 组件，动态地绑定到它的 is 特性，我们让多个组件可以使用同一个挂载点，并动态切换，如点击 button，随机生成 a、b、c 组件中的一个：
@@ -296,9 +349,23 @@ export default {
 </keep-alive>
 ```
 
-> 当引入keep-alive 的时候，页面第一次进入，钩子的触发顺序created-> mounted-> activated，退出时触发deactivated。当再次进入（前进或者后退）时，只触发activated。
-> 
-> 因为再次进入就不在重新解析，而是读取内存中的数据，。只有当数据变化时，才使用VirtualDOM进行diff更新。因而页面进入的数据获取应该在activated中也放一份。数据下载完毕手动操作DOM的部分也应该在activated中执行才会生效，或者不要created部分，直接将created中的代码转移到activated中。
+> 当引入 keep-alive 的时候，页面第一次进入，钩子的触发顺序 created-> mounted-> activated，退出时触发 deactivated。当再次进入（前进或者后退）时，只触发 activated。
+
+> 因为再次进入就不在重新解析，而是读取内存中的数据，。只有当数据变化时，才使用 VirtualDOM 进行 diff 更新。因而页面进入的数据获取应该在 activated 中也放一份。数据下载完毕手动操作 DOM 的部分也应该在 activated 中执行才会生效，或者不要 created 部分，直接将 created 中的代码转移到 activated 中。
+
+比如说：每次我们从 Home 组件页面跳转到 List 组件页面或反之的时候都要发送 ajax 请求数据，这样子就重复请求数据了，因为每次路由切换到一个组件的时候，都要重新执行该组件钩子函数，这样性能不好，此时就可以用 vue 内置的 keep-alive 标签来优化。
+
+``` html
+<div>
+  <keep-live>
+    <router-view />
+  </keep-live>
+</div>
+```
+
+> 路由的内容被加载过一次之后，我的路由中的内容就都放到内存之中，下一次再进这个路由的内容的时候，就只需要从内存里把以前的内容拿出来就可以了。
+
+使用了 keep-alive 组件后，导致有了新的生命周期函数 activated（keep-alive 组件激活时调用）、deactivated（keep-alive 组件停用时调用）。
 
 ### activate（钩子）
 在切换组件时，在切入前可能需要进行一些异步操作。

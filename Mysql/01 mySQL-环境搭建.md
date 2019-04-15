@@ -118,7 +118,7 @@ default-storage-engine=INNODB
 
 5、 在 环境变量 的 Path 变量中添加 `;%MYSQL_HOME%\bin;`；
 
-6、以管理员身份运行 cmd ，输入命令并回车： 
+6、(没有设置第4、5步的)以管理员身份运行 cmd ，输入命令并回车： 
 
 ```
 cd C:\Program Files\mysql-8.0.11\bin
@@ -184,6 +184,7 @@ mysql -h 主机名 -u 用户名 -p
   2、接着重启 MySQL 即可。
   
 ### 修改用户密码
+#### 方法一
 打开终端, 直接执行以下命令: 
 
 ``` bash
@@ -192,7 +193,64 @@ mysqladmin -u root -p password 新密码
 
 执行后提示输入旧密码完成密码修改, 当旧密码为空时直接按回车键确认即可。
 
+#### 方法二
+``` bash
+SET PASSWORD FOR "username"=PASSWORD("new password");
+```
+
+#### 方法三
+``` bash
+UPDATE mysql.user SET authentication_string=PASSWORD("new password") WHERE user="username";
+```
+
 ## 重置密码
+### window 下重置密码
+第一步：切换 MySQL 安装的 bin 目录：
+
+``` bash
+cd C:\Program Files\MySQL\bin
+```
+
+第二步：停止 MySQL 服务：
+
+``` bash
+net stop mysql
+```
+
+第三步：以安全模式启动 MySQL：
+
+``` bash
+mysqld --skip-grant-tables
+```
+
+第四步：新打开一个 cmd 窗口，登陆 MySQL 服务：
+
+``` bash
+mysql -u root -p
+```
+
+提示输入密码时直接回车即可。
+
+第五步：修改密码：
+
+``` bash
+# 切换数据库
+use mysql;
+
+# 修改密码
+update user set Password=password('123456') where User='root';
+
+# 刷新
+flush privileges;
+```
+
+第六步：启动 MySQL：
+
+``` bash
+net startysql
+```
+
+第七步：使用新密码登录。
 
 ### mac 下重置密码
 比较靠谱的重置密码方法：
@@ -281,7 +339,7 @@ update mysql.user set password='' where user='root';
 update mysql.user set authentication_string=password('123456') where user='root';
 ```
 
-第六步：
+第六步：刷新权限表
 
 ``` bash
 FLUSH PRIVILEGES;
@@ -331,3 +389,22 @@ systemctl enable mysqld
 
 systemctl daemon-reload
 ```
+
+## 卸载 MySQL
+1. 查看服务中有没有 mysql,如果有将该服务停掉。
+
+2. 在控制面板中运行添加删除程序，将 mysql 卸载。
+
+3. 删除MySQL安装目录. 
+
+4. 删除目录 C:\Documents and Settings\All Users\Application Data\MySQL
+
+5. 检查C:\WINDOWS目录下是否有my.ini文件,将其删除 
+
+6. 卸载后打开注册表（在开始---运行,输入 regedit），
+
+查看 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services 下的键值，如果有相关 mysql 键值(mysql、mysqladmin)则删掉，即可。
+
+7. 重启，将 mysql 的安装残余目录删掉 (查看服务，此时服务中已没有 mysql)。
+
+8. 重新安装 mysql.安装后先不要运行 Server Instance Configuration wizard，重启后在开始菜单中运行该向导，即可。

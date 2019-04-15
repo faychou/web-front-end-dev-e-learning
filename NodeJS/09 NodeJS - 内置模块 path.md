@@ -10,7 +10,7 @@ path.normalize('/foo/bar//baz/asdf/quux/..')
 > 标准化之后的路径里的斜杠在Windows系统下是\，而在Linux系统下是/。如果想保证任何系统下都使用/作为路径分隔符的话，需要用.replace(/\\/g, '/')再替换一下标准路径。
 
 ### path.join(path1, path2,...)
-将传入的多个路径拼接为标准路径。
+将传入的多个路径拼接为标准路径，路径最后不会带目录分隔符。
 
 ``` js
 path.join('/foo', 'bar', 'baz/asdf', 'quux', '..')

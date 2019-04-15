@@ -226,6 +226,98 @@ let [ ...clonedColors ] = colors;
 console.log(clonedColors);      //"[red,green,blue]"
 ```
 
+## symbol
+symbol 作为一种新的原始数据类型，表示独一无二的值，主要是为了防止属性名冲突。
+
+``` js
+var isMoving = Symbol("isMoving");
+typeof isMoving; // "symbol" 
+```
+
+> 注意：
+
+> 1、Symbol 函数不能使用 new 调用；
+
+> 2、Symbol都是不相等的，即使参数相同；
+
+> 3、Symbol不能与其他类型的值计算，会报错；
+
+> 4、Symbol可以转换为布尔值，但不能转为数值。
+
+
+``` js
+// 没有参数
+let a1 = Symbol();
+let a2 = Symbol();
+a1 === a2; // false 
+
+// 有参数
+let b1 = Symbol('abc');
+let b2 = Symbol('abc');
+b1 === b2; // false 
+
+// 不能计算
+let c = Symbol('hello');
+c + " world!";  // 报错
+`${c} world!`;  // 报错
+
+// 转换
+let aa = Symbol();
+Boolean(aa); // true
+```
+
+Symbol 的好处：防止同名属性，还有防止键被改写或覆盖。
+
+``` js
+let a = Symbol();
+let b = {};
+b[a] = 'hello'; // 不能用点运算符
+
+// ------------------
+
+const TYPE_AUDIO = Symbol()
+const TYPE_VIDEO = Symbol()
+const TYPE_IMAGE = Symbol()
+
+function handleFileResource(resource) {
+  switch(resource.type) {
+    case TYPE_AUDIO:
+      playAudio(resource)
+      break
+    case TYPE_VIDEO:
+      playVideo(resource)
+      break
+    case TYPE_IMAGE:
+      previewImage(resource)
+      break
+    default:
+      throw new Error('Unknown type of resource')
+  }
+}
+
+// -------------------
+
+// 用于私有变量的实现
+const Example = (function() {
+    var _private = Symbol('private');
+
+    class Example {
+        constructor() {
+          this[_private] = 'private';
+        }
+        getName() {
+          return this[_private];
+        }
+    }
+
+    return Example;
+})();
+
+var ex = new Example();
+
+console.log(ex.getName()); // private
+```
+
 ## 数组扩展
 ### reduce
 ``` js
@@ -259,4 +351,27 @@ const getState = ({id, force, verbose}) => {
 }
 // 完美
 getStuffAwesome({ id: 150, force: true, verbose: true })
+```
+
+## for of
+它结合了 forEach 的简洁性和中断循环的能力,for...of 循环可以使用的范围包括：
+
+* 数组
+* Set
+* Map
+* 类数组对象，如 arguments 对象、DOM NodeList 对象
+* Generator 对象
+* 字符串
+
+``` js
+for (const v of ['a', 'b', 'c']) {
+  console.log(v); // a b c
+}
+
+for (const [i, v] of ['a', 'b', 'c'].entries()) {
+  console.log(i, v);
+}
+// 0 "a"
+// 1 "b"
+// 2 "c"
 ```

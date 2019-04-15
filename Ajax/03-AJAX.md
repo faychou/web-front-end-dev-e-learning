@@ -22,72 +22,6 @@ XMLHttpRequest 是 AJAX 的核心机制，它是在 IE5 中首先引入的，是
 
 > AJAX 必须在服务器环境下才能正常使用。
 
-## HTTP
-### 一个完整的 HTTP 请求过程
-1. 建立 TCP 连接；
-2. Web 浏览器向 Web 服务器发送请求命令；
-3. Web 浏览器发送请求头信息；
-4. Web 服务器- 应答；
-5. Web 服务器- 发送应答头信息；
-6. Web 服务器- 向浏览器发送数据；
-7. Web 服务器- 关闭 TCP 连接。
-
-### HTTP 请求
-* HTTP 请求的方法或动作如是 GET 还是 POST 请求；
-
-* 正在请求的 URL，总得知道请求的地址是什么吧；
-
-* 请求头，包含一些客户端环境信息，身份验证信息等；
-
-* 请求体，也就是请求正文，请求正文中可以包含客户端提交的查询字符串信息，表单信息等等。
-
-### HTTP 请求方式
-|  请求方式  |         用途        |                安全性             |        大小      |
-| --------- | ------------------ | -------------------------------- | ---------------- |
-|    GET    |   用于信息获取/查询   |  安全性低(使用url传递参数所有人可见)  | 容量低(2000个字符) |
-|    POST   | 用于修改服务器上的资源 |              安全性一般            |    容量几乎无限    |
-|    PUT    | 在服务器更新资源（客户端提供完整资源数据） |               |      |
-|    DELETE  |   从服务器删除资源   |                       |         |
-|    HEAD   |  从服务器获取报头信息（不是资源）|  |  |
-
-### HTTP 响应
-* 一个数字和文字组成的状态码，用来显示请求是成功还是失败；
-
-* 响应头，响应头和请求头一样包含许多有用的信息，例如服务器类型，日期时间，内容类型和长度等；
-
-* 响应体，也就是响应正文。
-
-### 媒体格式类型
-* application/json： JSON数据格式
-
-* application/x-www-form-urlencoded：url 参数形式
-
-* multipart/form-data：from表单
-
-* text/plain：纯文本的方式
-
-### HTTP 状态码
-* 1** 信息，服务器收到请求，需要请求者继续执行操作(如 101，表示升级为 websocket 协议) ；
-
-* 2** 成功，操作被成功接收并处理(如 206,表示部分内容，分段传输) ；
-
-* 3** 重定向，需要进一步操作以完成请求(如 301,302 重定向；304 命中缓存) ；
-
-* 4** 客户端错误，请求包含语法错误或无法完成请求(如 401,要求身份验证；403，服务器理解客服端需求，但是禁止访问) ；
-
-* 5** 服务器错误，服务器在处理请求的过程中发生了错误。
-
-常见的 HTTP 状态码
-
-| 状态码 |	                         描述                        |        短语       |
-| ----- | ---------------------------------------------------- | ---------------- |
-|  200	 |  请求成功。一般用于 GET 和 POST 方法                     |  OK
-|  301	 |  资源移动。所请求资源移动到新的 URL，浏览器自动跳转到新的 URL | Moved Permanently
-|  304	 |  未修改。所请求资源未修改读取缓存数据                      | Not Modified
-|  400	 |  请求语法错误，服务器无法理解	                          | Bad Request
-|  404	 |  未找到资源，可以设置个性”404页面”	                       | Not Found
-|  500	 |  服务器内部错误	                                        | internal Server Error
-
 ## 理解同步和异步
 * 同步: 客户端发起请求 –> 等待 –> 服务器端处理 —> 等待 –> 响应 –> 页面载入 (请求错误时全部重新载入)。
 
@@ -98,15 +32,15 @@ XMLHttpRequest 是 AJAX 的核心机制，它是在 IE5 中首先引入的，是
 ### XMLHttpRequest 对象
 主要用来处理服务器端和客户端的通信，它有以下属性：
 
-* onreadystatechange：每次状态改变所触发事件的事件处理程序。
+* onreadystatechange：一个JavaScript函数对象，当readyState属性改变时会调用它。
 
 * responseText：从服务器进程返回数据的字符串形式。
 
-* responseXML：从服务器进程返回的 DOM 兼容的文档数据对象。
+* responseXML：从服务器进程返回的 XML 数据对象。
 
 * status：从服务器返回的数字代码，比如常见的 404（未找到）和 200（已就绪）。
 
-* status Text：伴随状态码的字符串信息。
+* statusText：伴随状态码的字符串信息。当状态为 200 的时候它是 "OK"，当状态为 404 的时候它是 "Not Found"。
 
 * readyState：对象状态值。
 
@@ -117,6 +51,19 @@ XMLHttpRequest 是 AJAX 的核心机制，它是在 IE5 中首先引入的，是
 * 2：发送。已经调用 send() 方法，未接收到响应。
 * 3：接收。已经接收到部分数据。
 * 4：完成。已经接收到全部数据，可以在客户端使用。
+
+### 取消
+使用 abort() 来取消当前响应，关闭连接并且结束任何未决的网络活动。当请求相应时间超长时，可以调用此方法，然后将其异步请求取消。如：
+
+``` js
+var iscancel = setTimeout(function(){xhr.abort();},5000);
+xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4 && xhr.status ==200){
+        alert(xhr.responseText);
+　　  clearTimeout(iscancel);
+　　}
+}
+```
 
 ### 同步或异步
 AJAX 不一定是异步的，可以通过 open 方法的第三个参数来配置(默认为true，异步)。
@@ -376,6 +323,24 @@ axios.get('/user', {
 ```
 
 ### POST 请求
+``` js
+axios.post('/user', { name: 'faychou' }).then((result) => {
+  // do something
+});
+```
+
+防止 CSRF，那我们需要在请求中的 headers 加上 X-XSRF-TOKEN：
+
+``` js
+axios.post('/user', { name: 'faychou' }, {
+  headers: {
+    'X-XSRF-TOKEN': 'xxxxxxxx',
+  },
+}).then((result) => {
+  // do something
+});
+```
+
 默认情况下，axios 会将JS对象序列化为 JSON 对象。为了使用 `application/x-www-form-urlencoded` 格式发送请求，我们可以这样：
 
 ``` js
@@ -395,14 +360,24 @@ axios.post('/foo', 'bar=123&age=19')
 
 ``` js
 var axios = require('axios');
- 
+
+function getHTTP1() {
+  return axios.get('https://api.faychou.cn/1');
+}
+
+function getHTTP2() {
+  return axios.get('https://api.faychou.cn/2');
+}
+
 axios.all([
-  axios.get('https://api.faychou.cn/1'),
-  axios.get('https://api.faychou.cn/2')
-]).then(axios.spread((response1, response2) => {
+  getHTTP1(), 
+  getHTTP2()
+])
+.then(axios.spread((response1, response2) => {
   console.log(response1.data);
   console.log(response2.data);
-})).catch(error => {
+}))
+.catch(error => {
   console.log(error);
 });
 ```
@@ -476,4 +451,96 @@ axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
         return axios(config);
     });
 });
+```
+
+### 二次封装 axios
+``` js
+import axios from 'axios';
+import Qs from 'qs';
+
+
+function checkStatus(err) {
+    let msg = "", level = "error";
+    switch (err.response.status) {
+      case 401:
+        msg = "您还没有登陆";
+        break;
+      case 403:
+        msg = "您没有该项权限";
+        break;
+      case 404:
+        msg = "资源不存在";
+        break;
+      case 500:
+        msg = "服务器发生了点意外";
+        break;
+    }
+    try {
+      msg = res.data.msg;
+    } catch (err) {
+    } finally {
+      if (msg !== "" && msg !== undefined && msg !== null) {
+        store.dispatch('showSnackBar', {text: msg, level: level});
+      }
+    }
+    return err.response;
+  }
+  
+  function checkCode(res) {
+    if ((res.status >= 200 && res.status < 400) && (res.data.status >= 200 && res.data.status < 400)) {
+      let msg = "", level = "success";
+      switch (res.data.status) {
+        case 201:
+          msg = "创建成功";
+          break;
+        case 204:
+          msg = "删除成功";
+          break;
+      }
+      try {
+        msg = res.data.success;
+      } catch (err) {
+      } finally {
+        
+      }
+      return res;
+    }
+
+    return res;
+  
+  }
+
+//这里封装axios的get,post,put,delete等方法
+export default {
+    get(url, params) {
+      return axios.get(
+        url,
+        params,
+      ).then(checkCode).catch((error)=>{console.log(error)});
+    },
+    post(url, data) {
+      return axios.post(
+        url,
+        Qs.stringify(data),
+      ).then(checkCode).catch(checkStatus);
+    },
+    put(url, data) {
+      return axios.put(
+        url,
+        Qs.stringify(data),
+      ).then(checkCode).catch(checkStatus);
+    },
+    delete(url, data) {
+      return axios.delete(
+        url,
+        {data: Qs.stringify(data)},
+      ).then(checkCode).catch(checkStatus);
+    },
+    patch(url, data) {
+      return axios.patch(
+        url,
+        data,
+      ).then(checkCode).catch(checkStatus);
+    },
+  };
 ```

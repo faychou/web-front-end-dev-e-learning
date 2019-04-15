@@ -13,17 +13,19 @@ AngularJS 诞生于2009年，由Misko Hevery 等人创建，后被Google所收�
 
 MVC 的一般流程是这样的：View（界面）触发事件--》Controller（业务）处理了业务，然后触发了数据更新--》不知道谁更新了 Model 的数据--》Model（带着数据）回到了 View--》View 更新数据
 
-#### MVVM
-* M：Model（数据模型）；
-* V：View（视图）；
-* VM：ViewModel（视图模型），就是中间层，负责监控两侧的数据，并通知另一侧进行修改。
-
 #### MVP
-* M：Model
-* V：View
-* P：Presenter
+是 MVC 模式的改良。
 
-MVP 的思路是切断的 View 和 Model 的联系，让 View 只和 Presenter（原 Controller）交互，减少在需求变化中需要维护的对象的数量。
+* M：Model 层依然是主要与业务相关的数据和对应处理数据的方法；
+* V：View 依然负责显示,但 MVP 中的 View 并不能直接使用 Model；
+* P：Presenter作为View和Model之间的“中间人”，且MVP中的View并不能直接使用Model，而是通过为Presenter提供接口，让Presenter去更新Model，再通过观察者模式更新View。
+
+在 MVP 中 View 并不直接使用 Model，它们之间的通信是通过 Presenter (MVC 中的Controller)来进行的，所有的交互都发生在 Presenter 内部，而在 MVC 中 View 会直接从 Model 中读取数据而不是通过 Controller。
+
+#### MVVM
+* M：Model（数据模型）state 或 props，仅仅关注数据本身，不关心任何行为（格式化数据由 View 负责）；
+* V：View 通过使用模板语法来声明式的将数据渲染进 DOM，当 ViewModel 对 Model 进行更新的时候，会通过数据绑定更新到 View。；
+* VM：ViewModel（组件）会对 View 层的声明进行处理.当 ViewModel 中数据变化，View 层会进行更新;如果是双向绑定,一旦 View 对绑定的数据进行操作，则 ViewModel 中的数据也会进行自动更新。
 
 ## SPA -单页应用程序
 单页Web应用（single page application，SPA），就是只有一个 Web 页面的应用，

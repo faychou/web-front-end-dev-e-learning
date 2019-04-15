@@ -53,20 +53,14 @@ Pet.prototype.constructor = Pet;
 ```
 
 ### `__proto__`
-每个 JavaScript 对象(除了 null )都具有一个 `__proto__` 属性，它是对构造函数的 prototype 对象的引用。
+每个 JavaScript 对象(除了 null 和 undefined)都具有一个 `__proto__` 属性，它是对构造函数的 prototype 对象的引用。
 
 ``` js
 function Person() {
-
+  //...
 }
 var person = new Person();
 console.log(person.__proto__ === Person.prototype); // true
-```
-
-``` js
-function Foo() {};
-var foo = new Foo();
-console.log(foo.__proto__ === Foo.prototype); // ture
 ```
 
 由于 `Foo.prototype` 是 Object 预创建的一个对象，是 Object 创建的一个实例，所以 `Foo.prototype.__proto_` 是 `Object.prototype` 的引用。
@@ -76,7 +70,7 @@ function Foo(){};
 console.log(Foo.prototype.__proto__ === Object.prototype); // true
 ```
 
-访问一个对象的原型可以使用 ES5 中的 `Object.getPrototypeOf` 方法,或者 ES6 中的 `__proto__` 属性。
+实际上 `__proto__` 属性是在 ES6 中定义的，用于访问或者设置一个对象的原型，当然更佳高效的是使用 ES5 中定义的 `Object.getPrototypeOf` 方法来访问一个对象的原型, `Object.setPrototypeOf` 方法来设置一个对象的原型。
 
 ``` js
 var foo = {   x: 10,   y: 20  //实际上foo还预留了__proto__这个属性，指向该实例的原型};
@@ -117,23 +111,23 @@ var obj = {
 
 // 创建一个关联到 obj 的对象
 var newObject = Object.create( obj );
-newObject.a; // 2
+newObject.a; // 1
 ```
 
-`Object.create(null)` 会 创 建 一 个 拥 有 空( 或 者 说 null) Prototype 链接的对象，这个对象无法进行委托。由于这个对象没有原型链，所以 instanceof 操作符(之前解释过)无法进行判断，因此总是会返回 false。 这些特殊的空 Prototype 对象通常被称作“字典”，它们完全不会受到原 型链的干扰，因此非常适合用来存储数据。
+`Object.create(null)` 会 创 建 一 个 拥 有 空( 或 者 说 null) Prototype 链接的对象，这个对象无法进行委托。由于这个对象没有原型链，所以 instanceof 操作符(之前解释过)无法进行判断，因此总是会返回 false。 这些特殊的空 Prototype 对象通常被称作“字典”，它们完全不会受到原型链的干扰，因此非常适合用来存储数据。
 
 #### 行为委托
 ``` js
 var anotherObject = {
-    cool: function() {
-        console.log( "cool!" );
-    }
+  cool: function() {
+    console.log( "cool!" );
+  }
 };
 
 var myObject = Object.create( anotherObject );
 
 myObject.doCool = function() {
-    this.cool(); // 内部委托!
+  this.cool(); // 内部委托!
 };
 
 myObject.doCool(); // "cool!"
