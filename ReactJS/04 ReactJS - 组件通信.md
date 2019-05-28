@@ -1,24 +1,61 @@
 # 组件通信
 ## props
+父组件通过向子组件传递 props，子组件得到 props 后进行相应的处理。
+
 ``` jsx
-class App extends Component {
+class Parent extends Component{
+  state = {
+    msg: 'start'
+  };
+
   render() {
-    return <Toolbar theme="dark"></Toolbar>;
+    return <Child parms={this.state.msg} />;
   }
 }
 
-const Toolbar = (props) => {
-  <div>
-    <ThemedButton theme={props.theme}></ThemedButton>
-  </div>
-};
-
-const ThemedButton = (props) {
-  <Button theme={props.theme}></Button>;
+class Child extends Component{
+  render() {
+    return <p>{this.props.parms}</p>
+  }
 }
 ```
 
 ## 事件
+利用回调函数，实现子组件向父组件通信：父组件将一个函数作为 props 传递给子组件，子组件调用该回调函数。
+
+``` js
+// 父组件
+export default class App extends React.Component {
+  callback(msg) {
+    console.log(msg);
+  }
+  render(){
+    return(
+      <div>
+        <Child callback = { this.callback.bind(this) } />
+      </div>
+    )
+  }
+}
+
+// 子组件
+class Child extends React.component{
+  construtor(props){
+    super(props)
+    this.state = {}
+  }
+  cb = (msg) => {
+    this.props.callback(msg);
+  }
+  render(){
+    return(
+      <div>
+        <button onClick = { this.cb("通信") }>点击我</button>
+      </div>
+    )
+  }
+}
+```
 
 ## Context
 Context 可以在组件之间共享“全局”数据。例如：登陆的用户信息，用户选择的主题、语言等等。

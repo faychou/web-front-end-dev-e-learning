@@ -1,32 +1,48 @@
 # HTTP
 ### 一个完整的 HTTP 请求过程
-1. 建立 TCP 连接；
-2. Web 浏览器向 Web 服务器发送请求命令；
-3. Web 浏览器发送请求头信息；
-4. Web 服务器- 应答；
-5. Web 服务器- 发送应答头信息；
-6. Web 服务器- 向浏览器发送数据；
-7. Web 服务器- 关闭 TCP 连接。
+1. 查询 NDS(域名解析),获取域名对应的 IP 地址 查询浏览器缓存
+2. 浏览器与服务器建立 TCP 链接（三次握手）
+3. 浏览器向服务器发送 HTTP 请求(请求和传输数据）
+4. 服务器接受到这个请求后，根据路经参数，经过后端的一些处理生成 HTML 代码返回给浏览器
+5. 浏览器拿到完整的 HTML 页面代码开始解析和渲染，如果遇到外部的 CSS 或者 JS，图片一样的步骤
+6. 浏览器根据拿到的资源对页面进行渲染，把一个完整的页面呈现出来
 
-> 或者：
+* HTML parser --> DOM Tree
+  * 标记化算法，进行元素状态的标记
+  * dom 树构建
 
-* DNS解析
-* 建立TCP连接（3次握手）
-* 发送HTTP请求，从服务器下载相关内容
-* 浏览器构建DOM树和CSS树，然后生成渲染树。这个一个渐进式过程，引擎会力求最快将内容呈现给用户。
-* 在第四步的过程中，`<script>` 的位置和加载方式会影响响应速度。
-* 关闭TCP连接（4次握手）
+* CSS parser --> Style Tree
+
+  * 解析 css 代码，生成样式树
+
+* attachment --> Render Tree
+  * 结合 dom树 与 style树，生成渲染树
+
+* layout: 布局
+* GPU painting: 像素绘制页面
+
+### TCP三次握手
+建立连接前，客户端和服务端需要通过握手来确认对方:
+
+* 客户端发送 syn(同步序列编号) 请求，进入 syn_send 状态，等待确认
+* 服务端接收并确认 syn 包后发送 syn+ack 包，进入 syn_recv 状态
+* 客户端接收 syn+ack 包后，发送 ack 包，双方进入 established 状态
+
+### TCP四次挥手
+* 客户端 -- FIN --> 服务端， FIN—WAIT
+* 服务端 -- ACK --> 客户端， CLOSE-WAIT
+* 服务端 -- ACK,FIN --> 客户端， LAST-ACK
+* 客户端 -- ACK --> 服务端，CLOSED
 
 ## HTTP 请求
-* HTTP 请求的方法或动作如是 GET 还是 POST 请求；
+### 请求组成部分
+* 请求方法 URI 协议/版本 （例如：GET/haorooms.jspHTTP/1.1）
 
-* 正在请求的 URL，总得知道请求的地址是什么吧；
-
-* 请求头，包含一些客户端环境信息，身份验证信息等；
+* 请求头(Request Header)，包含一些客户端环境信息，身份验证信息等（例如：Accept:image/gif.image/jpeg./ Accept-Language:zh-cn Connection:Keep-Alive Host:localhost等等）
 
 * 请求体，也就是请求正文，请求正文中可以包含客户端提交的查询字符串信息，表单信息等等。
 
-### HTTP 请求方式
+### 请求方式
 |  请求方式  |         用途        |                安全性             |        大小      |
 | --------- | ------------------ | -------------------------------- | ---------------- |
 |    GET    |   用于信息获取/查询   |  安全性低(使用url传递参数所有人可见)  | 容量低(2000个字符) |
@@ -71,13 +87,21 @@ Content-Type: application/json; charset=utf-8
 
 | 状态码 |	                         描述                        |        短语       |
 | ----- | ---------------------------------------------------- | ---------------- |
+|  1xx	 |  接受，继续处理                                        |   
 |  200	 |  请求成功。一般用于 GET 和 POST 方法                     |  OK
-|  201	 |  新建资源成功。一般用于 POST 方法                     |  Created
-|  301	 |  资源移动。所请求资源移动到新的 URL，浏览器自动跳转到新的 URL | Moved Permanently
+|  201	 |   新建资源成功。一般用于 POST 方法                     |  Created
+|  202	 |                      已接受                          |   
+|  203	 |             成功，但未授权                             |   
+|  204	 |               成功，无内容                            | 
+|  205	 |                   成功，重置内容                       | 
+|  206	 |              成功，部分内容                            | 
+|  301	 |  请求资源移动到新的 URL，浏览器重定向到新的 URL | Moved Permanently
+|  302	 |     临时移动，可使用原有URI                             |  
 |  304	 |  未修改。所请求资源未修改读取缓存数据                      | Not Modified
+|  305	 |         需代理访问                                    |
 |  400	 |  请求语法错误，服务器无法理解	                          | Bad Request
-|  401	 |  标记客户端错误，需要客户端自查	                          | Unauthorized
-|  403	 |  当客户端访问未授权的资源时，服务器应该返回403要求用户授权信息 | Forbidden
+|  401	 |  要求身份认证                                         | Unauthorized
+|  403	 |  当客户端访问未授权的资源时，拒绝请求                    | Forbidden
 |  404	 |  未找到资源，可以设置个性”404页面”	                       | Not Found
 |  415	 |  服务器媒体类型 Content-Type 和 Accept 指定错误          | Unsupported Media Type
 |  500	 |  服务器内部错误	                                        | internal Server Error
@@ -90,3 +114,15 @@ Content-Type: application/json; charset=utf-8
 |  X-RateLimit-Limit	 |  每小时允许的最大请求数量。             |
 |  X-RateLimit-Remaining |  当前速率限制窗口中剩余的请求数。       |
 |  X-RateLimit-Reset	 |  当前速率限制窗口以UTC历元秒为单位重置的时间。|
+
+## 浏览器缓存
+### 缓存机制
+
+### 如何处理缓存？
+* ajax 随机数
+
+* ajax 参数
+
+* meta 中设置
+
+### 如何清除缓存？

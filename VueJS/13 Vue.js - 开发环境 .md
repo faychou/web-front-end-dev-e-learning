@@ -166,15 +166,39 @@ npm run serve
 
 然后打开 http://localhost:8080 预览。
 
+### 插件
+现有的项目中安装插件，但是需要注意的是该命令安装的包是以 @vue/cli-plugin 或者 vue-cli-plugin 开头，即只能安装 Vue 集成的包。
+
+``` bash
+vue add @vue/eslint
+# 会解析为完整的包名 @vue/cli-plugin-eslint
+```
+
+如果安装的插件不存在，则会失败。
+
+另外 vue add 中还有两个特例，如下：
+
+``` bash
+# 安装 vue-router
+vue add router
+
+# 安装 vuex
+vue add vuex
+```
+
+这两个命令会直接安装 vue-router 和 vuex 并改变你的代码结构。
+
 ### 配置
 与 vue-cli2.0 的很大区别是根目录下的 webpack 配置的目录不见了，如果需要自定义配置，则需要在根目录下创建 vue.config.js 文件，包括了配置 常用的输出路径名、跟目录、预处理、devServer 配置、pwa、dll、第三方插件等。 [官网配置](https://cli.vuejs.org/zh/config/)
 
 ``` js
   // vue.config.js
   module.exports = {
-    // 选项...
+    // 去掉文件名中的 hash
+    filenameHashing: false,
     // 如果你的应用被部署在 https://www.my-app.com/my-app/，则设置 publicPath 为 /my-app/
     publicPath: '/', // 部署应用包时的基本 URL，Default: '/'
+    // publicPath: '/blog' 如果部署到 https://www.faychou.com/blog
     outputDir: 'dist', // 生产环境构建文件的目录，Default: 'dist'
     assetsDir: '', // 放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录，默认 ''
     devServer: {

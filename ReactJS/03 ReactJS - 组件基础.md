@@ -11,16 +11,27 @@ var MyComponent = React.createClass({
 });
 
 //React v16 推荐创建组件方式
+import React from 'react'
 class MyComponent extends React.Component {
   render() {
     return <h1>hello world!</h1>;
   }
 }
 
+// 或者
+import React, { Component } from 'react'
+class MyComponent extends Component {
+  render() {
+    return <h1>hello world!</h1>;
+  }
+}
+
 //把组件渲染到页面 body 中
-React.render(
+import React from 'react'
+import ReactDOM from 'react-dom'
+ReactDOM.render(
   <MyComponent />,
-  document.body
+  document.getElementById('app')
 );
 ```
 
@@ -28,23 +39,103 @@ React.render(
 
 * 每个组件都必须有 render 方法，定义输出的样式；
 
-* React 规定，自定义组件的第一个字母必须大写，比如 MyComponent 不能写成 myComponent ，以便与内置的原生类相区分；
+* React 规定，自定义组件的首字母必须大写，比如 MyComponent 不能写成 myComponent ，以便与内置的原生类相区分；
 
 * `<MyComponent/>` 表示生成一个组件类的实例，每个实例一定要有闭合标签，写成 `<MyComponent></MyComponent>` 也可。
 
 
 ## 属性
-props 是组件对外的接口，是一个只读属性，上层组件通过 props 向下传递数据，组件内部不能直接修改 props，要想修改 props，只能在该组件的上层组件中修改。
+props 是组件对外的接口，是一个只读属性，上层组件通过 props 属性向下传递数据，组件内部通过 this.props 获取。
 
-## 状态
-每个组件 都有 state 属性，代表当前组件的状态。
+注意：不能直接修改 props，要想修改 props，只能在该组件的上层组件中修改。
 
 ``` js
+class HelloMessage extends Component {
+  render() {
+    return (
+      <div>
+        Hello {this.props.name}
+      </div>
+    );
+  }
+}
 
+ReactDOM.render(
+  <HelloMessage name="FayChou" />,
+  document.getElementById('app')
+);
+```
+
+### prop-types
+``` bash
+# 安装
+npm i --save prop-types
+```
+
+``` js
+import PropTypes from 'prop-types'
+
+class App extends Component {
+  static propTypes = {
+    model: React.PropTypes.object.isRequired,
+    title: React.PropTypes.string
+  }
+}
+
+PureComponent.propTypes = {
+  onSubmit: func.isRequired,
+  expanded: bool,
+  onExpand: func.isRequired
+}
+
+const PureComponent = (props) => (
+  <div>
+    //use props
+  </div>
+)
+```
+
+## 状态
+每个组件除了使用外部数据（通过 this.props 访问）以外，组件还可以维护其内部的状态数据 state。通过 this.state 访问，当组件的状态数据改变时，组件会再次调用 render() 方法重新渲染对应的标记。
+
+``` js
+class Timer extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { seconds: 0 }
+  }
+
+  tick() {
+    this.setState(state => ({
+      seconds: state.seconds + 1
+    }))
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(() => this.tick(), 1000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval)
+  }
+
+  render() {
+    return (
+      <div>
+        Seconds: {this.state.seconds}
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(
+  <Timer />,
+  document.getElementById('app')
+)
 ```
 
 ### 修改 State
-不能直接修改 State，否则组件并不会重新重发 render。
+不能直接修改 State，只能通过 setState() 更新状态，否则组件并不会重新触发 render。
 
 ``` js
 // 错误
@@ -69,20 +160,15 @@ this.setState({
 为避免这个问题，可以使用 setState() 的另一种形式 -- 接受函数而不是对象。该函数有两个参数，第一个参数是组件之前的 state，第二个参数是组件当前最新的 props：
 
 ``` js
-// Correct
 this.setState((prevState, props) => ({
   counter: prevState.counter + props.increment
 }));
 ```
 
-``` js
-// ES5
-this.setState(function(prevState, props) {
-  return {
-    counter: prevState.counter + props.increment
-  };
-});
-```
+>> setState并不是单纯的异步或同步，这其实与调用时的环境相关:
+
+* 在 合成事件 和 生命周期钩子(除 componentDidUpdate) 中，setState是"异步"的；
+* 在 原生事件 和 setTimeout 中，setState是同步的，可以马上获取更新后的值；
 
 ### 状态的类型是数组
 如有一个数组类型的状态 books，当向 books 中增加一本书时，使用数组的 concat 方法或 ES6 的数组扩展语法（spread syntax）即可。
@@ -126,16 +212,16 @@ this.setState(preState => ({
 // 方法一：将state先赋值给另外的变量，然后使用filter创建新数组
 var books = this.state.books; 
 this.setState({  
-books: books.filter(item => {   
- return item != 'React'; 
-  });
+  books: books.filter(item => {   
+      return item != 'React'; 
+    });
 });
 
 // 方法二：使用preState、filter创建新数组
 this.setState(preState => ({ 
- books: preState.books.filter(item => {    
- return item != 'React'; 
-  });
+  books: preState.books.filter(item => {    
+      return item != 'React'; 
+    });
 }));
 ```
 
@@ -192,21 +278,6 @@ function ExpandableForm({ onExpand, expanded = false, children, onSubmit }) {
         </form>
     )
 }
-```
-
-### 添加 prop-types
-``` js
-PureComponent.propTypes = {
-  onSubmit: func.isRequired,
-  expanded: bool,
-  onExpand: func.isRequired
-}
-
-const PureComponent = (props) => (
-  <div>
-    //use props
-  </div>
-)
 ```
 
 > 函数声明组件存在一些问题:

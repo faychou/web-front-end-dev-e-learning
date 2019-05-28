@@ -227,11 +227,39 @@ export default {
 }
 ```
 
-### 函数式组件的模板
-要声明一个应该编译为函数式组件的模板，请将 functional 特性添加到模板块中。这样做以后就可以省略 `<script>` 块中的 functional 选项。模板中的表达式会在函数式渲染上下文中求值。这意味着在模板中，prop 需要以 `props.xxx` 的形式访问：
+## 函数式组件
+函数式组件，即无状态，无法实例化，内部没有任何生命周期处理方法，非常轻量，因而渲染性能高，特别适合用来只依赖外部数据传递而变化的组件。
 
-``` html
+要声明一个应该编译为函数式组件的模板，请将 functional 特性添加到模板块中。这样做以后就可以省略 `<script>` 块中的 functional 选项。模板中的表达式会在函数式渲染上下文中求值。这意味着在模板中，props 需要以 `props.xxx` 的形式访问：
+
+``` jsx
+// App.vue 
+<template>
+  <div id="app">
+    <List
+      :items="['Wonderwoman', 'Ironman']"
+      :item-click="item => (clicked = item)"
+    />
+    <p>Clicked hero: {{ clicked }}</p>
+  </div>
+</template>
+
+<script>
+import List from "./List";
+
+export default {
+  name: "App",
+  data: () => ({ clicked: "" }),
+  components: { List }
+};
+</script>
+
+// List.vue 函数式组件 
 <template functional>
-  <div>{{ props.foo }}</div>
+  <div>
+    <p v-for="item in props.items" @click="props.itemClick(item);">
+      {{ item }}
+    </p>
+  </div>
 </template>
 ```

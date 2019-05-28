@@ -23,7 +23,7 @@ npm install --save react-redux
 
 ### 引入
 ``` javascript
-  import { Provider, connect } from 'react-redux'
+import { Provider, connect } from 'react-redux'
 ```
 
 ## 使用方法

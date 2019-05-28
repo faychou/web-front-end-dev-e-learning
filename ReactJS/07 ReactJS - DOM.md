@@ -159,3 +159,12 @@ class AutoFocusTextInput extends React.Component {
 
 ## findDOMNode
 不管 ref 设置值是回调函数还是字符串，都可以通过 `ReactDOM.findDOMNode(ref)` 来获取组件挂载后真正的 DOM 节点。
+
+``` js
+import { findDOMNode } from 'react-dom';
+
+//...
+componentDidMound() {
+  const el = findDOMNode(this);
+}
+```

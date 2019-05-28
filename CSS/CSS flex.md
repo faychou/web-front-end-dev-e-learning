@@ -34,7 +34,7 @@ Flex 属性分为两部分，一部分作用于容器称容器属性，另一部
 * column-reverse 表示从下向上排列
 
 ### flex-wrap
-缺省情况下，Flex 项目都排在一条线（又称"轴线"）上，可以通过 flex-wrap 属性让 Flex 项目换行排列。
+默认情况下，Flex 项目都排在一条线（又称"轴线"）上，可以通过 flex-wrap 属性让 Flex 项目换行排列。
 
 ``` css
 .box {
@@ -42,9 +42,9 @@ Flex 属性分为两部分，一部分作用于容器称容器属性，另一部
 }
 ```
 
-* nowrap(缺省)：所有 Flex 项目单行排列
-* wrap：所有 Flex 项目多行排列，按从上到下的顺序
-* wrap-reverse：所有 Flex 项目多行排列，按从下到上的顺序
+* nowrap：所有 item 单行排列，内容大小超出则调整 item 的大小以免溢出，默认。
+* wrap：表示在内容过多时 item 会换行，按从上到下的顺序。
+* wrap-reverse：表示在内容过多时 item 会换行，按从下到上的顺序。
 
 ### flex-flow
 flex-flow 属性是 flex-direction 属性和 flex-wrap 属性的简写形式，默认值为 row nowrap。
@@ -95,7 +95,7 @@ flex-flow 属性是 flex-direction 属性和 flex-wrap 属性的简写形式，�
 }
 ```
 
-* stretch (缺省)：拉伸显示
+* stretch：拉伸显示，默认
 * flex-start：从启点线开始顺序排列
 * flex-end：相对终点线顺序排列
 * center：居中排列
@@ -104,7 +104,7 @@ flex-flow 属性是 flex-direction 属性和 flex-wrap 属性的简写形式，�
 
 ## 项目属性
 ### order
-缺省情况下，Flex 项目是按照在代码中出现的先后顺序排列的。然而 order 属性可以控制项目在容器中的先后顺序。
+默认情况下，Flex 项目是按照在代码中出现的先后顺序排列的。然而 order 属性可以控制项目在容器中的先后顺序。
 
 ``` css
 .item {
@@ -112,7 +112,7 @@ flex-flow 属性是 flex-direction 属性和 flex-wrap 属性的简写形式，�
 }
 ```
 
-元素按 order 值从小到大排列，可以为负值，缺省为 0。
+元素按 order 值从小到大排列，可以为负值，默认为 0。
 
 ### flex-grow
 flex-grow 属性定义项目的放大比例，flex-grow 值是一个单位的正整数，表示放大的比例。默认为 0，即如果存在额外空间，也不放大，负值无效。
@@ -130,18 +130,20 @@ flex-grow 属性定义项目的放大比例，flex-grow 值是一个单位的正
 
 ``` css
 .item {
-  flex-shrink: <number>; /* 缺省 1 */
+  flex-shrink: <number>;
 }
 ```
 
 ### flex-basis
-定义项目在分配额外空间之前的缺省尺寸。属性值可以是长度（20%，10rem 等）,默认值为 auto，即项目的本来大小。
+定义项目在分配额外空间之前的默认尺寸。属性值可以是长度（20%，10rem 等）,默认值为 auto，即项目的本来大小。
 
 ``` css
 .item {
-  flex-basis: <length> | auto; /* 缺省 auto */
+  flex-basis: <length> | auto;
 }
 ```
+
+当主轴为水平方向，设置了 flex-basic，则 flex item 的 width 值会失效。
 
 ### flex
 该属性属性是 flex-grow, flex-shrink 和 flex-basis 的简写，默认值为 0 1 auto。后两个是可选属性。

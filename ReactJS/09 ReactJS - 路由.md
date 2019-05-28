@@ -2,7 +2,7 @@
 控制不同的 url 渲染不同的组件。
 
 ## 一、环境安装
-react 路由提供了 react-router 和 react-router-dom 两个包，但是我们在使用的时候两个只要引用一个就行了，不同之处就是后者比前者多出了 `<Link>`、 `<BrowserRouter>` 这样的 DOM 类组件。因此我们只需引用 react-router-dom 这个包。如果搭配 redux，还需要使用 react-router-redux。
+React Router库包含三个包： react-router, react-router-dom, 和 react-router-native。react-router是路由的核心包，而其他两个是基于特定环境的。如果你在开发一个网站，你应该使用react-router-dom，如果你在移动应用的开发环境使用React Native，你应该使用react-router-native。因此我们只需引用 react-router-dom 这个包。如果搭配 redux，还需要使用 react-router-redux。
 
 ```
 npm install react-router-dom --save
@@ -112,6 +112,14 @@ import { Route } from "react-router-dom";
 |   /one	 |       /one/two	 |  true	 | 否 |
 
 ``` jsx
+<Route path="/" component={Home}/>
+<Route path="/category" component={Category}/>
+<Route path="/products" component={Products}/>
+```
+
+在这里，`/` 同时匹配 `/` 和 `/category`。因此，所有路由都匹配并被渲染。解决的方法就是添加 exact= {true}。
+
+``` jsx
 <Route exact path="/" component={Home}/>
 ```
 
@@ -149,7 +157,7 @@ import { Route, Switch } from "react-router-dom";
 </Switch>
 ```
 
-如果我们处于 /about，`<Switch>` 将开始寻找匹配的 `<Route>`。`<Route path="/about"/>` 将被匹配， `<Switch>` 将停止寻找匹配并渲染 `<About>`。同样，如果我们处于 /fay，`<User>` 组件将被渲染。
+有 `<Switch>` 组件的话，只有第一个匹配路径的子 `<Route>` 会渲染。
 
 ### Redirect
 渲染`<Redirect>` 的时候将会导航到一个新的地址（location）。这个新的地址（location）将会覆盖在访问历史记录里面的原地址，就像服务端的重定向（HTTP 3XX）一样。
@@ -221,7 +229,15 @@ const oddEvent = (match, location) => {
 
 ## 四、API
 ### match
-通过 `this.props.match` 获取 URL 参数。
+当路由路径和当前路径成功匹配，会生成一个 match 对象。match 对象有更多关于 URL 和 path 的信息。这些信息在组件中可以通过 `this.props.match` 获取。
+
+* `match.url` 返回 URL 匹配部分的字符串。对于创建嵌套的 `<Link>` 很有用。
+
+* `match.path` 返回路由路径字符串 - 就是 `<Route path="">`。将用来创建嵌套的`<Route>`。
+
+* `match.isExact` 返回布尔值，如果准确（没有任何多余字符）匹配则返回 true。
+
+* `match.params` 返回一个对象包含 Path-to-RegExp 包从 URL 解析的键值对。
 
 ## 五、案例
 ### 嵌套布局

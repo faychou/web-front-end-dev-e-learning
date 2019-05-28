@@ -1,5 +1,5 @@
 # JSX
-HTML 语言直接写在 JavaScript 语言之中，不加任何引号。
+React 提出一种叫 JSX 的语法，这应该是最开始接触 React 最不能接受的设定之一，因为一直都是“表现和逻辑层分离”这种思想为主导。React 发明了 JSX 让 JS 支持嵌入 HTML 之中，不加任何引号。
 
 ``` js
 //...
@@ -11,7 +11,53 @@ render:function() {
     </div>
   )
 }
-//...
+
+// 变量
+const name = 'Josh Perez';
+const element = <h1>Hello, {name}</h1>;
+
+// 调用函数
+function formatName(user) {
+  return user.firstName + ' ' + user.lastName;
+}
+
+const user = {
+  firstName: 'Harper',
+  lastName: 'Perez'
+};
+
+const element = (
+  <h1>
+    Hello, {formatName(user)}!
+  </h1>
+);
+
+// if 语句
+function getGreeting(user) {
+  if (user) {
+    return <h1>Hello, {formatName(user)}!</h1>;
+  }
+  return <h1>Hello, Stranger.</h1>;
+}
+// or
+{ isLoading && <Loading /> }
+// or
+{ isLoading ? <Loading /> : ''}
+// or
+{isLoggedIn ? (
+  <LogoutButton onClick={this.handleLogoutClick} />
+) : (
+  <LoginButton onClick={this.handleLoginClick} />
+)}
+
+// 在属性值中插入一个 JavaScript 表达式
+const element = <img src={user.avatarUrl}></img>;
+
+// for 循环
+const numbers = [1, 2, 3, 4, 5];
+const listItems = numbers.map((number) =>
+  <li>{number}</li>
+);
 ```
 
 > 注意：
@@ -37,6 +83,18 @@ render() {
 
 <h1> { 1 + 1 * 4 } </h1>
 
-//注释需要写在花括号中
+// 注意的是在一个组件的子元素位置使用注释要用 {} 包起来
 {/*注释...*/}
+```
+
+### HTML 转义
+React 会将所有要显示到 DOM 的字符串转义，防止 XSS。所以如果 JSX 中含有转义后的实体字符比如 &copy; (©) 最后显示到 DOM 中不会正确显示，因为 React 自动把 &copy; 中的特殊字符转义了。有几种解决办法：
+
+* 直接使用 UTF-8 字符 ©
+* 使用对应字符的 Unicode 编码，查询编码
+* 使用数组组装 <div>{['cc ', <span>&copy;</span>, ' 2015']}</div>
+* 直接插入原始的 HTML
+
+``` html
+<div dangerouslySetInnerHTML={{__html: 'cc &copy; 2015'}} />
 ```

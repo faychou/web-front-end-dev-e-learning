@@ -1,7 +1,7 @@
 # 事件
 
 ## 事件命名
-React 事件采用驼峰式命名：
+React 实现了一个“合成事件”层（synthetic event system），这个事件模型保证了和 W3C 标准保持一致，所以不用担心有什么诡异的用法，并且这个事件层消除了 IE 与 W3C 标准实现之间的兼容问题。React 事件采用驼峰式命名：
 
 ``` js
 <button onClick={this.handleClick}>按钮</button>

@@ -367,8 +367,8 @@ export default {
 
 使用了 keep-alive 组件后，导致有了新的生命周期函数 activated（keep-alive 组件激活时调用）、deactivated（keep-alive 组件停用时调用）。
 
-### activate（钩子）
-在切换组件时，在切入前可能需要进行一些异步操作。
+#### activate（钩子）
+keep-alive 的组件有个特有的生命周期钩子 activated()。activated() 会在 keep-alive 的组件每次激活时调用，而 created() 只有创建的时候会被调用一次，再次激活就不会被调用了。所以可以在 activated() 钩子中重置我们的页面数据。
 
 ``` js
 Vue.component('activate-example', { 

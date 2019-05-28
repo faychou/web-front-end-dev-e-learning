@@ -418,14 +418,14 @@ devServer: {
 }
 ```
 
-请求到 /api/users 会被代理到 http://localhost:3000/api/users。如果不想传递 /api ：
+请求到 /api/users 会被代理到 http://localhost:3000/api/users。如果不想传递 /api，如请求 /api/users 代理到 http://localhost:3000/users ：
 
 ``` js
 devServer: {
   proxy: {
     "/api": {
       target: "http://localhost:3000",
-      pathRewrite: {"^/api" : ""}
+      pathRewrite: {"^/api" : "/"}
     }
   }
 }
@@ -437,7 +437,7 @@ devServer: {
 proxy: {
   "/api": {
     target: "https://other-server.example.com",
-    secure: false
+    secure: false // 接受 运行在 https 上的服务
   }
 }
 ```

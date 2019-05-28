@@ -31,13 +31,7 @@
 
 <script>
   export default {
-    props: {
-      msg: {
-        type: String,
-        required: true,
-        default: () => { return 'from child' }
-      }
-    }
+    props:[ 'msg']
   }
 </script>
 ```
@@ -45,9 +39,58 @@
 #### 方法二：使用`$children`
 在父组件中使用 `$children` 可以访问子组件，但是官网并不推荐。
 
+``` html
+<!-- 父组件 -->
+<template>
+  <div @click="handleClick" class="home">
+    <my-comp v-for="msg in msgs" :key="msg.id" :msg="msg"></my-comp>
+  </div>
+</template>
+
+<script>
+import MyComp from '@/components/MyComp.vue'
+
+export default {
+  // ...
+  data () {
+    return {
+      msgs: [{
+          // ...
+      }]
+    }
+  },
+  methods: {
+    handleClick () {
+      this.$children.forEach(child => {
+        child.$data.colored = !child.$data.colored // 逐一控制子组件的 $data
+      })
+    }
+  }
+}
+</script>
+```
+
+``` js
+// 子组件
+export default {
+  name: 'MyComp',
+  data () {
+    return {
+      colored: false // colored 状态
+    }
+  },
+  computed: {
+    color () {
+      return this.colored ? 'red' : 'black'
+    }
+  },
+  props: ['msg']
+}
+```
+
 ### 子组件向父组件通信
 #### 方法一：使用 vue 事件
-子组件通过 events 给父组件发送消息。具体操作方法：父组件向子组件传递事件方法，子组件通过 `$emit` 触发事件，回调给父组件。
+父组件向子组件传递事件方法，子组件通过 `$emit` 触发事件，回调给父组件。
 
 ``` html
 <!-- father.vue -->
@@ -64,7 +107,7 @@
     },
     methods: {
       func (msg) {
-        console.log(msg);
+        console.log('来自于子组件的数据：',msg);
       }
     }
   }
@@ -80,8 +123,7 @@
     props: {},
     methods () {
       handleClick () {
-        //........
-        this.$emit('msgFunc','子组件数据');
+        this.$emit('msgFunc','子组件回调给父组件的数据');
       }
     }
   }
@@ -140,18 +182,88 @@ export default {
 </script>
 ```
 
-#### 方法三： 通过修改父组件传递的 props 来修改父组件数据
-这种方法只能在父组件传递一个引用变量时可以使用，字面变量无法达到相应效果。因为引用变量最终无论是父组件中的数据还是子组件得到的 props 中的数据都是指向同一块内存地址，所以修改了子组件中 props 的数据即修改了父组件的数据。
-
-但是并不推荐这么做，并不建议直接修改 props 的值，如果数据是用于显示修改的，在实际开发中我经常会将其放入 data 中，在需要回传给父组件的时候再用事件回传数据。这样做保持了组件独立以及解耦，不会因为使用同一份数据而导致数据流异常混乱，只通过特定的接口传递数据来达到修改数据的目的，而内部数据状态由专门的 data 负责管理。
-
-#### 方法四：使用 `$parent`
+#### 方法三：使用 `$parent`
 在子组件中使用 `$parent` 可以访问父组件，同样的官网并不推荐。
 
-#### 方法五：`$root`
+``` html
+<template>
+  <div class="home">
+    <my-comp v-for="msg in msgs" :key="msg.id" :msg="msg" :colored="colored"></my-comp>
+  </div>
+</template>
+
+<script>
+import MyComp from '@/components/MyComp.vue'
+
+export default {
+  name: 'home',
+  components: {
+    MyComp
+  },
+  data () {
+    return {
+      colored: false, // 父组件维护一个 colored 状态
+      msgs: [{
+          // ...
+      }]
+    }
+  }
+}
+</script>
+
+<!-- 子组件 -->
+<template>
+  <div>
+    <div @click="handleClick" :style="{color}">
+      {{msg.id}} - {{msg.data}} ⭕
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+    // ...
+  props: ['msg', 'colored'],
+  methods: {
+    handleClick (e) {
+      this.$parent.$data.colored = !this.$parent.$data.colored
+    }
+  }
+}
+</script>
+```
+
+#### 方法四：`$root`
 当前组件树的根 Vue 实例。如果当前实例没有父实例，此实例将会是其自己。通过访问根组件也能进行数据之间的交互。
 
-#### 方法六：`$attrs` 和 `$listeners`
+``` js
+// main.js
+
+new Vue({
+  data () {
+    return { // 将数据存储在 Vue 实例
+      colored: false
+    }
+  },
+  router,
+  store,
+  render: h => h(App)
+}).$mount('#app')
+```
+
+``` js
+// 其他组件
+export default {
+  name: 'MyComp',
+  // ...
+  mounted () {
+    console.log(this.$root) // 直接访问到根组件
+  },
+  // ...
+}
+```
+
+#### 方法五：`$attrs` 和 `$listeners`
 `$attrs` ：包含了父作用域中不作为 prop 被识别 (且获取) 的特性绑定 (class 和 style 除外)。当一个组件没有声明任何 prop 时，这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 `v-bind="$attrs"` 传入内部组件——在创建高级别的组件时非常有用。
 
 `$listeners` ：包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。它可以通过 `v-on="$listeners"` 传入内部组件——在创建更高层次的组件时非常有用。
@@ -222,8 +334,10 @@ export default {
 </script>
 ```
 
-#### 方法七：provide / inject
-provide 和 inject 主要为高阶插件/组件库提供用例。并不推荐直接用于应用程序代码中。并且这对选项需要一起使用，以允许一个祖先组件向其所有子孙后代注入一个依赖，不论组件层次有多深，并在起上下游关系成立的时间里始终生效。
+#### 方法六：provide / inject
+适用于祖先和后代关系的组件间的通信，祖先元素通过 provide 提供一个值，后代元素无论嵌套多深都可通过 inject 获取到这个值。但是 provide 和 inject 主要为高阶插件/组件库提供用例，并不推荐直接用于应用程序代码中。
+
+provide 选项应该是一个对象或返回一个对象的函数。该对象包含可注入其子孙的属性。
 
 ``` html
 <!-- 父组件：father.vue -->
@@ -237,17 +351,21 @@ provide 和 inject 主要为高阶插件/组件库提供用例。并不推荐直
 import son from './son.vue';
 
 export default {
-  provide: {
-    house: '房子',
-    car: '车子',
-    money: '￥10000'
+  provide(){ 
+    return {
+      foo: 'bar'
+    }
   },
   components: {
     son
   }
 }
 </script>
+```
 
+inject 选项应该是一个字符串数组或者一个对象：
+
+``` html
 <!-- 子组件 son.vue -->
 <template>
   <h2>son</h2>
@@ -255,80 +373,104 @@ export default {
 
 <script>
 export default {
-  inject: {
-    house: {
-      default: '没房'
-    },
-    car: {
-      default: '没车'
-    },
-    money: {
-      // 长大工作了虽然有点钱
-      // 仅供生活费，需要向父母要
-      default: '￥4500'
-    }
-  },
+  inject: ['foo'],
   created () {
-    console.log(this.house, this.car, this.money)
-    // -> '房子', '车子', '￥10000'
+    console.log(this.foo)
   }
 }
 </script>
 ```
 
+>> 注意：provide 和 inject 绑定并不是可响应的。这是刻意为之的。然而，如果你传入了一个可监听的对象，那么其对象的属性还是可响应的。
+
 ## 非父子组件通信
-### 空 Vue 实例
+### 中央事件总线
 有时候两个非父子关系组件也需要通信。在简单的场景下，Vue 官方推荐使用一个空的 Vue 实例作为中央事件总线，把所有的通信数据，事件监听都存储到这个变量上。这样就达到在组件间数据共享了，有点类似于 Vuex。但这种方式只适用于极小的项目，复杂项目还是推荐 Vuex：
 
 ``` js
-/* 新建一个全局的空 Vue 实例作为中央事件总线 */
-let bus = new Vue();
+// src/eventBus.js
+import Vue from 'vue'
 
-// 在组件 A 创建的钩子中监听事件
-bus.$on('id-selected', function (id) {
-  // console.log('received: '+ id)
-})
+let bus = new Vue() // 新建一个全局的空 Vue 实例作为中央事件总线
 
-
-// 在组件 B 中触发组件 A 中的事件
-bus.$emit('id-selected', 'bus data.')
+export default bus
 ```
 
-示例：
+``` js
+// src/component/A.vue
+import bus from '@/eventbus'
+
+export default {
+    // ...
+  mounted () {
+    // A 组件中监听事件
+    bus.$on('change-color', () => {
+      this.colored = !this.colored
+    })
+  }
+}
+```
 
 ``` js
-<script>
-  // 中间组件
-  var bus = new Vue()
-  // 通信组件
-  var vm = new Vue({
-    el: '#app',
-    components: {
-      comB: {
-        template: '<p>组件A告诉我：{{msg}}</p>',
-        data() {
-          return {
-            msg: ''
-          }
-        },
-        created() {
-          // 给中间组件绑定自定义事件 注意:如果用到this 需要用箭头函数
-          bus.$on('tellComB', (msg) => {
-            this.msg = msg
-          })
-        }
-      },
-      comA: {
-        template: '<button @click="emitFn">告诉B</button>',
-        methods: {
-          emitFn() {
-            // 触发中间组件中的自定义事件
-            bus.$emit('tellComB', '土豆土豆我是南瓜')
-          }
-        }
-      }
+// src/component/B.vue
+import bus from '@/eventbus'
+
+export default {
+    // ...
+  methods: {
+    handleClick (e) {
+      // B 组件中触发
+      bus.$emit('change-color')
     }
-  })
+  }
+}
+
+```
+
+>> 缺点：需要在组件销毁时，手动清除事件监听。
+
+### Observable
+vue.js 2.6新增加的Observable API ，通过使用这个api我们可以应对一些简单的跨组件数据状态共享的情况。
+
+第一步、创建一个 store.js，包含一个 store 和一个 mutations，分别用来指向数据和处理方法：
+
+``` js
+import Vue from "vue"
+
+export const store = Vue.observable({ count: 0 })
+
+export const mutations = {
+  setCount(count) {
+    store.count = count
+  }
+}
+```
+
+第二步、然后在App.vue里面引入这个store.js，在组件里面使用引入的数据和方法：
+
+``` jsx
+<template>
+  <div id="app">
+    <img width="25%" src="./assets/logo.png">
+    <p>count:{{count}}</p>
+    <button @click="setCount(count+1)">+1</button>
+    <button @click="setCount(count-1)">-1</button>
+  </div>
+</template>
+
+<script>
+import { store, mutations } from "./store";
+export default {
+  name: "App",
+  computed: {
+    count() {
+      return store.count;
+    }
+  },
+  methods: {
+    setCount: mutations.setCount
+  }
+};
 </script>
 ```
 

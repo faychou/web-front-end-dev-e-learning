@@ -26,6 +26,13 @@ this.state && <p>显示</p>
 this.state ? <p>显示</p> : null;
 ```
 
+### 过滤空值
+空值指的是没有具体意义的一些值，比如0，undefined，null，false，空字符串等。
+
+``` js
+let res = [1,2,0,undefined,null,false,''].filter(Boolean); // >> 1,2
+```
+
 ### JavaScript 事件监听兼容写法
 包括 IE 下 this 指向问题。
 
@@ -89,6 +96,19 @@ function isEmptyObject(obj) {
 ### jQuery 中判断一个元素是否存在
 ``` js
 if ($(selector).length)
+```
+
+### 参数非空检测
+可以直接赋值一个函数，如果没有传参，我们就直接抛出错误提醒，如果一个组件里面有很多方法，我们就可以直接复用，而不用每个方法里面都去做非空判断处理。
+
+``` js
+const isRequired = () => { throw new Error('param is required'); };
+
+const hello = (name = isRequired()) => { console.log(`hello ${name}`) };
+// 抛出一个错误，因为参数没有传
+hello()；
+// 没有问题
+hello('hello')
 ```
 
 ### 克隆对象

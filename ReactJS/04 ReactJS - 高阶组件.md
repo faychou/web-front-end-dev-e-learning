@@ -403,4 +403,52 @@ export default MyComponent3WithHOC
 
 实际上，此时的 ExampleHoc 和我们最初对高阶组件的定义已经不同。它已经变成了一个高阶函数，但这个高阶函数的返回值是一个高阶组件。我们可以把它看成高阶组件的变种形式。这种形式的高阶组件大量出现在第三方库中。
 
+### 权限控制
+``` jsx
+function withAdminAuth(WrappedComponent) {
+    return class extends React.Component {
+		constructor(props){
+			super(props)
+			this.state = {
+		    	isAdmin: false,
+			}
+		} 
+		async componentWillMount() {
+		    const currentRole = await getCurrentUserRole();
+		    this.setState({
+		        isAdmin: currentRole === 'Admin',
+		    });
+		}
+		render() {
+		    if (this.state.isAdmin) {
+		        return <Comp {...this.props} />;
+		    } else {
+		        return (<div>您没有权限查看该页面，请联系管理员！</div>);
+		    }
+		}
+    };
+}
+```
+
+### 性能监控
+``` jsx
+function withTiming(Comp) {
+    return class extends Comp {
+        constructor(props) {
+            super(props);
+            this.start = Date.now();
+            this.end = 0;
+        }
+        componentDidMount() {
+            super.componentDidMount && super.componentDidMount();
+            this.end = Date.now();
+            console.log(`${WrappedComponent.name} 组件渲染时间为 ${this.end - this.start} ms`);
+        }
+        render() {
+            return super.render();
+        }
+    };
+}
+```
+
 

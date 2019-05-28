@@ -318,6 +318,23 @@ var ex = new Example();
 console.log(ex.getName()); // private
 ```
 
+为了能够解决多次使用同一个 symbol 值的情况，提供了全局注册并登记的方法 Symbol.keyFor()：
+
+``` js
+let name1 = Symbol.for('name'); //检测到未创建后新建
+let name2 = Symbol.for('name'); //检测到已创建后返回
+console.log(name1 === name2); // true
+```
+
+通过 Symbol.keyFor() 获取到参数值：
+
+``` js
+let name1 = Symbol.for('name');
+let name2 = Symbol.for('name');
+console.log(Symbol.keyFor(name1));  // 'name'
+console.log(Symbol.keyFor(name2)); // 'name'
+```
+
 ## 数组扩展
 ### reduce
 ``` js

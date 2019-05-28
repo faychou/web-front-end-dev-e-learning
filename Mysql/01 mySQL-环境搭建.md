@@ -200,7 +200,11 @@ SET PASSWORD FOR "username"=PASSWORD("new password");
 
 #### 方法三
 ``` bash
+use mysql; # 使用命令切换到mysql数据库
 UPDATE mysql.user SET authentication_string=PASSWORD("new password") WHERE user="username";
+
+FLUSH PRIVILEGES; #刷新权限
+# 然后退出，重新登录
 ```
 
 ## 重置密码

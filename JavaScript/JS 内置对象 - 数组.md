@@ -266,12 +266,31 @@ let newArray = arr.map(function(currentValue, index, arr), thisArg)
 * thisArg 可选，当执行回调函数时 this 绑定对象的值，默认值为 undefined。
 
 ``` js
+// 批量修改数组的值
 let arr = ['1','2','3','4'];
 let result = arr.map(function (value, index, array) {
   return value + 'a'
 });
 console.log(result, arr); 
 // ["1a","2a","3a","4a"] ["1","2","3","4"]
+
+// 批量修改数组中每个对象的属性值 
+var arr = [{
+  name: "lily",
+  age: 10
+}, {
+  name: "lucy",
+  age: 20
+}, {
+  name: "jack",
+  age: 30
+}];
+
+arr = arr.map(function(item, index, arr) {
+    item.age++;
+    return item;
+})
+console.log(arr); // [{"name":"lily","age":11},{"name":"lucy","age":21},{"name":"jack","age":31}]
 ```
 
 ### every()
