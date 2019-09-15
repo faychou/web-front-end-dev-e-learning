@@ -1,5 +1,4 @@
-# 变形
-## 2D
+## 变形
 ### 位移 translate()
 可以将元素向指定的方向移动，而不影响在X、Y轴上的任何Web组件。
 
@@ -19,14 +18,31 @@ transform: rotate(45deg);
 ### 矩阵 matrix()
 是一个含六个值的(a,b,c,d,e,f)变换矩阵，用来指定一个2D变换，相当于直接应用一个[a b c d e f]变换矩阵。就是基于水平方向（X轴）和垂直方向（Y轴）重新定位元素。
 
-### 原点 transform-origin
-任何一个元素都有一个中心点，默认情况之下，其中心点是居于元素X轴和Y轴的50%处。
+### transform-origin
+设置旋转元素的基点位置。任何一个元素都有一个中心点，默认情况之下，其中心点是居于元素 X 轴和 Y 轴的 50% 处。
 
 ``` css
+/* transform-origin: x-axis y-axis z-axis; */
 transform-origin: left top;
 ```
-# 过渡
-## 过渡属性 transition
+
+### transform-style
+让转换的子元素保留 3D 转换(一般与 perspective 搭配使用)。
+
+``` css
+transform-style: preserve-3d;
+```
+
+### perspective
+让元素实现3D透视效果。
+
+``` css
+perspective: 1000px;
+```
+
+这个属性让物体具有立体的 3D 透视效果, 值越大此时我们的眼睛看到屏幕里物体的距离就越远, 相反若它的值越小, 离我们的视角就越近, 即在屏幕中显示的大小就越大。它和 preserve-3d 共同使用在需要实现3D效果的父元素上搭建舞台视角, 让其子元素能够实现真正的 3D 转换。 
+
+## transition
 通过鼠标的单击、获得焦点，被点击或对元素任何改变中触发，并平滑地以动画效果改变CSS的属性值。 
 
 ### transition-property

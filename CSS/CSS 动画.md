@@ -1,7 +1,7 @@
 # CSS 动画
 animation 是 CSS3 中新增加属性，用来实现动画效果的，IE10+、Firefox 以及 Opera 支持 animation 属性。Safari 和 Chrome 支持替代的 -webkit-animation 属性。
 
-### animation
+## animation
 所有动画属性的简写，除了 animation-play-state 属性。
 
 ### animation-name
@@ -22,7 +22,7 @@ animation 是 CSS3 中新增加属性，用来实现动画效果的，IE10+、Fi
 * steps
 
 ### animation-delay
-指定动画开始播放的延迟时间，默认是0 。
+指定动画开始播放的延迟时间，默认是0 。设置为负值时让动画马上开始, 并且跳过1秒前的动画。
 
 ### animation-iteration-count
 规定动画播放的次数，默认是 1。除了指定数字，也可以设置关键字 infinite，表示无限循环播放。
@@ -30,8 +30,14 @@ animation 是 CSS3 中新增加属性，用来实现动画效果的，IE10+、Fi
 ### animation-direction
 规定动画播放的方向，默认值为 normal，表示正常播放动画。
 
+* normal：默认值；
+* reverse：相反运动；
 * alternate：在奇数次（1,3,5...）正常播放，而偶数次（2,4,6...）反向播放；
 * alternate-reverse：与 alternate 相反。
+
+``` css
+animation-direction: normal|reverse|alternate|alternate-reverse;
+```
 
 ### animation-play-state
 规定动画是否正在运行或者暂停，默认是 running，表示动画正在播放中。
@@ -41,12 +47,16 @@ animation 是 CSS3 中新增加属性，用来实现动画效果的，IE10+、Fi
 可以在 Javascript 中使用该属性 `object.style.animationPlayState="paused"` 来暂停动画。
 
 ### animation-fill-mode
-规定动画时间之外的状态。
+规定当动画不播放时, 要应用到元素的样式。
 
 * none：默认值，表示动画播放完成后，恢复到初始的状态；
-* forwards：表示动画播放完成后，保持 @keyframes 里最后一帧的属性；
+* forwards：动画结束后停留在最后一帧；
 * backwards：表示开始播放动画的时候，应用 @keyframes 里第一帧的属性，播放完成的时候，恢复到初始状态，通常设置 animation-delay 后，才能看出效果；
 * both：表示 forwards 和 backwards 都应用。
+
+``` css
+animation-fill-mode: none|forwards|backwards|both; 
+```
 
 ### @keyframes
 用来定义动画的各个关键帧。基本写法如下：

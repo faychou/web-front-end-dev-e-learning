@@ -389,6 +389,11 @@ new WebSocket(url, protocols);
 
 * protocols：可选参数，可以是一个单个的协议名字字符串或者包含多个协议名字字符串的数组。这些字符串用来表示子协议，这样做可以让一个服务器实现多种 WebSocket 子协议（例如你可能希望通过制定不同的协议来处理不同类型的交互）。如果没有制定这个参数，它会默认设为一个空字符串。
 
+ws 和 wss 他们两个其实很像 HTTP 和 HTTPS 之间的关系。其中ws表示纯文本通信，而 wss 表示使用加密信道通信（TCP+TLS）。
+
+* ws协议：普通请求，占用与 HTTP 相同的 80 端口
+* wss协议：基于 SSL 的安全传输，占用与 TLS 相同的 443 端口。
+
 #### webSocket.binaryType
 一个字符串表示被传输二进制的内容的类型。取值应当是"blob"或者"arraybuffer"。"blob"表示使用DOM Blob 对象，而"arraybuffer"表示使用 ArrayBuffer 对象。
 

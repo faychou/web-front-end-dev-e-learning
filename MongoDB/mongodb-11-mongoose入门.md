@@ -15,6 +15,14 @@ const mongoose = require("mongoose");
 ### 连接数据库
 ``` js
 mongoose.connect("mongodb://user:pass@ip:port/database", options);
+
+// 如
+mongoose.connect("mongodb://root:root@127.0.0.1:27017", {
+  server: {
+    auto_reconnect: true, // 是否自动重连接
+    poolSize: 10 // 连接池大小
+  }
+});
 ```
 
 * user ：mongodb 的用户名
@@ -60,12 +68,12 @@ mongoose.connect("mongodb://localhost/test", function(err) {
 schema 是 mongoose 里会用到的一种数据模式，相当于一个数据库的模板，不具备操作数据库的能力，每个 schema 会映射到 mongodb 中的一个 collection。定义 Schema 非常简单，指定字段名和类型即可：
 
 ``` js
-const kittySchema = mongoose.Schema({
+const UserSchema = mongoose.Schema({
   name: String,
   friends: [String],  age: Number
 });
 
-const blogSchema = mongoose.Schema({
+const BlogSchema = mongoose.Schema({
   title:  String,
   author: String,
   body:   String,
@@ -87,7 +95,7 @@ const blogSchema = mongoose.Schema({
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-const kittySchema = new Schema({
+const UserSchema = new Schema({
   name: String,
   friends: [String],  age: Number
 });
@@ -112,7 +120,7 @@ const kittySchema = new Schema({
 * enum:  枚举匹配(表示该属性值,只能出席哪些，只适用于字符串)
 
 ``` js
-const userSchema = mongoose.Schema({
+const UserSchema = mongoose.Schema({
   username: {// 真实姓名
     type: String,
     unique: true, // 不可重复约束
@@ -186,6 +194,33 @@ new Schema({..}, { autoIndex: false }); //懒癌不推荐
 
 每一个文档 document 都会被 mongoose 添加一个不重复的 `_id`，`_id` 的数据类型不是字符串，而是 ObjectID 类型。如果在查询语句中要使用 `_id`，则需要使用 findById 语句，而不能使用 find 或 findOne 语句。
 
+#### 静态方法
+通过 Schema 对象的 statics 属性添加静态方法：
+
+``` js
+const UserSchema = mongoose.Schema({
+  name: String, 
+  age: Number
+});
+UserSchema.statics.findByName = function (name, fn) {  return this.find({name: new RegExp(name,'i')}, fn);};
+
+var User = mongoose.model('user', userSchema);
+User.findByName('fido', function (err, doc) {
+  console.log(doc);
+});
+```
+
+#### 查询方法
+通过 schema 对象的 query 属性，给 model 添加查询方法：
+
+``` js
+const UserSchema = mongoose.Schema({
+  name: String, 
+  age: Number
+});
+UserSchema.query.byName = function (name) {  return this.find({name: new RegExp(name)});}
+```
+
 #### 实例方法
 Schema 类似创建表时的数据定义(不仅仅可以定义文档的结构和属性，还可以定义文档的实例方法、静态模型方法、复合索引等)：
 
@@ -208,36 +243,26 @@ model 是由 schema 生成的模型，是一个构造器或者称为类，具有
 
 ``` js
 // 它在数据库中会创建一个名为 users 的 collection
-var User = mongoose.model('User', kittySchema);
+var User = mongoose.model('User', UserSchema);
 ```
 
-model() 方法的第一个参数 User 是模型名称，它对应到 mongodb 里就是数据库中的集合名称，默认会将集合名称设置为模型名称的小写版。如果名称的最后一个字符是字母，则会变成复数；如果名称的最后一个字符是数字，则不变，所以这里创建的集合名字为'users',当我们对其添加数据时如果 users 已经存在，则会保存到其目录下，如果未存在，则会创建 users 集合，然后在保存数据。
+* 参数一：模型名称，对应 mongodb 的集合名称，默认模型名称为小写。如果名称的最后一个字符是字母，则会变成复数；如果名称的最后一个字符是数字，则不变，所以这里创建的集合名字为'users',当我们对其添加数据时如果 users 已经存在，则会保存到其目录下，如果未存在，则会创建 users 集合，然后再保存数据。
+
+* 参数二：是 Schema 的名字；
+
+* 参数三：可选，用来指定集合名，如：let User = mongoose.model("User", UserSchema, "admin")。
 
 > 注意：一定要将 model() 方法的第一个参数和其返回值设置为相同的值，否则会出现不可预知的结果。
 
-通过 Schema 对象的 statics 属性给 Model 添加静态方法：
+当然也可以直接指定要链接的数据库中的哪个集合：
 
-``` js
-const userSchema = mongoose.Schema({
-  name: String, 
-  age: Number
-});
-userSchema.statics.findByName = function (name,cb) {  return this.find({name: new RegExp(name,'i')},cb);};
+``` sql
+const UserSchema = mongoose.Schema({
+  name: String,
+  friends: [String],  age: Number
+}, { collection: 'Users'});
 
-var User = mongoose.model('user', userSchema);
-User.findByName('fido', function (err, doc) {
-  console.log(doc);
-});
-```
-
-通过 schema 对象的 query 属性，给 model 添加查询方法：
-
-``` js
-const userSchema = mongoose.Schema({
-  name: String, 
-  age: Number
-});
-userSchema.query.byName = function (name) {  return this.find({name: new RegExp(name)});}
+const User = mongoose.model('User', UserSchema);
 ```
 
 ### Entity
@@ -253,12 +278,12 @@ console.log(user.name);  // 'faychou'
 ```
 
 为 Entity 添加自定义方法，必须在 Schema 对象的 methods 属性中扩展 ：``` js
-const userSchema = mongoose.Schema({
+const UserSchema = mongoose.Schema({
   name: String, 
   age: Number
 });
 
-// methods 必须加在 mongoose.model() 之前userSchema.methods.speak = function () {  var greeting = this.name ? "my name is " + this.name : "I don't have a name";  console.log(greeting);}
+// methods 必须加在 mongoose.model() 之前UserSchema.methods.speak = function () {  var greeting = this.name ? "my name is " + this.name : "I don't have a name";  console.log(greeting);}
 const User = mongoose.model('User', userSchema);
 const user = new User({name:'fay',age:18});
 
@@ -278,7 +303,9 @@ user.fullName;
 
 > Schema、Model、Entity 的关系：Schema 生成 Model，Model 创造 Entity，Model 和 Entity 都可对数据库操作造成影响，但 Model 比 Entity 更具操作性。
 
-## 语法
+存储数据步骤：定义Schema (骨架) > 创建model（模型）>  Entity实例化方法。
+
+## CRUD
 ### 文档插入
 通过 Model 创建的 Entity，必须通过 save() 方法才能将创建的文档保存到数据库的集合中：
 
@@ -338,7 +365,7 @@ con.once('open',()=>{
     res.getAge();
     
     //查找数据
-    Model.find({name:'hanmeimei'},(err,data)=>{
+    Student.find({name:'hanmeimei'},(err,data)=>{
       console.log(data);
     })
   });
@@ -402,6 +429,9 @@ Model.count(conditions, [callback])  // 数量查询
 ``` js
 // 查询年龄大于 18 的数据
 User.find({age:{$gte:18}}, callback);
+
+// 找出名字叫 john，并且年龄大于18的同学
+User.find({ name: 'john', age: { $gte: 18 }}, callback);
         
 // 查询年龄大于等 21 而且小于等于 65 岁
 User.find({age: {$gte: 21, $lte: 65}}, callback);
@@ -415,7 +445,10 @@ User.find({age:{$gte:18},name:/huo/}, callback);
 // 找出名字里存在'a'的数据，且只输出'name'字段
 User.find({name:/a/},'name', callback);
 
-// 找出 age>20 的文档中的第一个文档，且只输出 name 字段
+// name LIKE john and only selecting the "name" and "friends" fields, executing immediately
+User.find({ name: /john/i }, 'name friends', function (err, docs) { })
+
+// 找出 age > 20 的文档中的第一个文档，且只输出 name 字段
 User.findOne({age:{$gt : 20}},{name:1,_id:0}, callback);
 
 // 找出 age>20 的文档中的第一个文档，且输出包含 name 字段在内的最短字段
@@ -425,6 +458,9 @@ User.findOne({age:{$gt : 20}},"name",{lean:true}, callback);
 > 注意：如果使用第三个参数，前两个参数如果没有值，需要设置为 null:
 
 ``` js
+// passing options
+User.find({ name: /john/i }, null, { skip: 10 }, callback)
+
 User.find(null,null,{skip:2}, callback);
 ```
 
@@ -474,11 +510,49 @@ getByPager();
 更新文档可以使用以下几种方法：update()、updateOne()、updateMany()、findByIdAndUpdate()、fingOneAndUpdate()。
 
 ``` js
-Model.update(conditions, update, [options], [callback]);
+// Model.update(conditions, update, [options], [callback]);
+User.update({_id: ObjectId(req.query.id)}, {name: req.query.name, author: req.query.author},(err,result) => {
+  if(err) {
+    res.send(err)
+  }
+  res.send('修改成功')
+});
 
-// 一次更新多条:Model.updateMany(conditions, doc, [options], [callback])
+User.update({ age: { $gt: 18 } }, { oldEnough: true }, fn);
+User.update({ name: 'Tobi' }, { ferret: true }, { multi: true },fn)
+
+// 注意、新版本：Replace update() with updateOne(), updateMany(), or replaceOne()
+```
+``` js
+// Model.updateOne(conditions, doc, [options], [callback])
+User.updateOne({ _id: Object("5d6cd43be93a8e41146ded63") }, { age: "1000" }, function (err, data) {
+  if (err) console.log(err);
+  console.log(data);
+});
+
+// 一次更新多条:Model.updateMany(conditions, doc, [options], [callback])
+
+Model.replaceOne(conditions, doc, [options], [callback])```
+``` js// 更新指定ID：
+// Model.findByIdAndUpdate(id, [update], [options], [callback])
+User.findByIdAndUpdate(u._id, {
+  username: 'sang',
+}, (err, user) => {
+  t.false(err);
+  t.is(user.username, 'sang');
+});
+```
+``` js
 // 找到一条记录并更新
-Model.findOneAndUpdate([conditions], [update], [options], [callback])// 更新指定ID：Model.findByIdAndUpdate(id, [update], [options], [callback])```
+// Model.findOneAndUpdate([conditions], [update], [options], [callback])
+User.findOneAndUpdate({
+  username: 'i5ting for update 2',
+}, {
+  username: 'sang',
+}, (err, user) => {
+  t.false(err);
+  t.is(user.username, 'sang');
+});```
 
 * Model：集合名字，如：User
 * conditions：查询条件；* update：需要修改的数据，不能修改主键（_id）；* options：控制选项；* callback：回调函数
@@ -520,11 +594,31 @@ User.update({name:/aa/},{age: 0},{upsert:true}).exec();
 同样也是提供多种方法：remove()、findOneAndRemove()、findByIdAndRemove()。
 
 ``` js
-Model.remove([conditions], [callback]) // 根据条件查找到并删除
+// Model.remove([conditions], [callback]) // 根据条件查找到并删除
+User.remove({"_id": ObjectId(req.query.id)}, (err,result) => {
+  if(err) {
+    alert(err)
+  }
+  res.send('删除成功')
+});
 
 Model.findByIdAndRemove(id, [options], [callback]) // 根据id查找到并删除
 
 Model.findOneAndRemove(conditions, [options], [callback])
+
+// 注意、新版本：Replace remove() with deleteOne() or deleteMany()
+```
+``` js
+// Model.deleteOne(conditions, callback)
+User.deleteOne({ name: 'Eddard Stark' }, function (err) {});
+
+User.deleteOne({ _id: ObjectId("5d6cd43be93a8e41146ded63") }, function (err, data) {
+  if (err) console.log(err)
+  console.log(data)
+});
+
+// Model.deleteMany(conditions, callback)
+User.deleteMany({ name: /Stark/, age: { $gte: 18 } }, function (err) {});
 ```
 
 > 注意：
@@ -714,11 +808,16 @@ var mySchema = new Schema({
 const mongoose = require('mongoose');
 
 // 连接数据库 test
-mongoose.connect('mongodb://localhost/test');
+mongoose.connect('mongodb://username:password@localhost/test', {
+  authSource: "admin",
+  useNewUrlParser: true,
+  useCreateIndex: true
+});
 
 // 实例化连接对象
 const db = mongoose.connection;
 
+// 使用 Connetion 监听连接状态
 db.on('error', (error) => {
   console.error('数据库连接失败：' + error);
 });
@@ -748,46 +847,143 @@ kitty.save(function (err) {
 ```
 
 ### population
-mongodb 本来就是一门非关系型数据库。 但有时候又需要联合其他的集合进行数据查找。 population 就是用来连接多集合数据查询，只要提供某一个 collection 的`_id` , 使用关键字 ref 来指明外联的数据库的名字，就可以实现完美的联合查询。一般,我们需要在 schema 中就定义好：
+Mongodb 本来就是一门非关系型数据库。 但有时候又需要联合其他的集合进行数据查找。 MongoDB 3.2 之后，也有像 sql 里 join 的聚合操作，那就是 $lookup 而 Mongoose，拥有更强大的 populate()，用来连接多集合查询数据。
+
+Population 可以自动替换 document 中的指定字段，替换内容从其他 collection 获取。 我们可以填充（populate）单个或多个 document、单个或多个纯对象，甚至是 query 返回的一切对象。
+
+只要提供某一个 collection 的`_id` , 使用关键字 ref 来指明外联的数据库的名字，就可以实现完美的联合查询。一般,我们需要在 schema 中就定义好：
+
+语法：
 
 ``` js
-var mongoose = require('mongoose')
-  , Schema = mongoose.Schema
+populate(path, [select], [model], [match], [options])
+
+// path：String 或 Object，指定要查询的表。
+
+// select：Object 或 String，可选，指定填充 document 中的哪些字段，默认会填充 _id。
+// Object类型的时，格式如: {name: 1, _id: 0}，为0表示不填充，为1时表示填充。
+// String类型的时，格式如: “name -_id”，用空格分隔字段，在字段名前加上-表示不填充。
+
+// model：可选，指定关联字段的 model，如果没有指定就会使用 Schema 的 ref。
+
+// match：可选，Object，指定附加的查询条件。
+
+// options：可选，指定附加的其他查询选项，如排序以及条数限制等等。
+```
+
+例如：
+
+``` js
+const mongoose = require('mongoose'),
+  Schema = mongoose.Schema
   
-var personSchema = Schema({
-  _id     : Number,
-  name    : String,
-  age     : Number,
-  stories : [{ type: Schema.Types.ObjectId, ref: 'Story' }]
+const studentSchema = Schema({
+  student_name: String,
+  age: Number,
+  classId: { 
+    type: Schema.Types.ObjectId, 
+    ref: 'Classes' 
+  }
+  // 如果是一对多，也可以写为数组形式：
+  // friendsId: [{type: Schema.Types.ObjectId, ref: 'Friend'}]
 });
  
-var storySchema = Schema({
-  _creator : { type: Schema.Types.ObjectId, ref: 'Person' },
-  title    : String
+const classesSchema = Schema({
+  class_name: String,
+  fans: [{ type: Schema.Types.ObjectId, ref: 'Person' }]
+});
+
+const Student = mongoose.model('Student', studentSchema);
+const Classes = mongoose.model('Classes', classesSchema);
+```
+
+> 注意：ref 选项告诉 Mongoose 在填充的时候使用哪个 model，本例中为 Classes model，即 mongoose.model('Classes', classesSchema) 第一个参数值。 所有储存在此的 `_id` 都必须是 Classes model 中 document 的 `_id`。
+
+> 注意: ObjectId、Number、String 以及 Buffer 都可以作为 refs 使用。 但是最好还是使用 ObjectId。
+
+``` js
+const classes = new Classes({
+  class_name: 'class one'
+});
+
+classes.save(function (err) {
+  if (err) return handleError(err);
+
+  const student = new Student({
+    student_name: 'fay',
+    age: 18,
+    classId: classes._id
+  });
+
+  student.save(function (err) {
+    // ...
+  });
 });
 ```
 
-> 注意：实际上, 就是通过 `_id` 的相互索引即可. 这里需要说明的是, `_id` 应该是某个具体 model 的 id。
+在查询时将 populate 的第一个参数对应 studentSchema 中外链的字段
 
 ``` js
-const fay = new Person({
-  name: 'fay',
-  _id: 1,
-  age: 18,
-  stories: []
-});
-fay.save((err,doc) => {
-  if(err) return err;
-  let story = new Story({
-    _creator:doc._id,
-    title:"逗比"
+Student
+  .findOne({ student_name: 'Casino' })
+  .populate('classId')
+  .exec(function (err, doc) {
+    if (err) return handleError(err);
+    console.log(doc);
   });
-});
- 
-Story.findOne({title:"逗比"}).populate('_creator').exec((err,doc) => {
-    if(err)console.log(err);
-    console.log(doc._creator.name);
-});
+```
+
+如果我们只想返回填充的文档某些字段，这时可以将所需的字段名称作为第二个参数传递给 populate ,每个字段空格隔开 加 "-" 表示不返回：
+
+``` js
+Student
+  .findOne({ student_name: 'Casino'})
+  .populate('classId', 'class_name -_id') // 返回 class_name 字段，不包括 _id
+  .exec(function (err, doc) {
+    if (err) return handleError(err);
+
+    console.log(doc);
+
+    // ...
+  });
+```
+
+需要填充多个路径时，只需要多次调用populate()方法即可：
+
+``` js
+Student
+  .find(...)
+  .populate('fans')
+  .populate('author')
+  .exec();
+```
+
+但是，如果在同一个路径上多次调用 populate() 方法，仅最后一次调用会生效：
+
+``` js
+// The 2nd `populate()` call below overwrites the first because they
+// both populate 'fans'.
+Student
+  .find()
+  .populate({ path: 'fans', select: 'name' })
+  .populate({ path: 'fans', select: 'email' });
+// The above is equivalent to:
+Student.find().populate({ path: 'fans', select: 'email' });
+```
+
+按年龄 age 来对的 fans 进行筛选，并且只返回他们的名字，并且最多返回其中的5个。这时，可以像下面这样操作：
+
+``` js
+Student
+  .find(...)
+  .populate({
+    path: 'fans',
+    match: { age: { $gte: 21 }},
+    // Explicitly exclude `_id`, see http://bit.ly/2aEfTdB
+    select: 'name -_id',
+    options: { limit: 5 }
+  })
+  .exec();
 ```
 
 #### 简单联表操作 demo
@@ -814,7 +1010,7 @@ const CategorySchema = mongoose.Schema({
   },
   description: { type: String },
   posts: [{ 
-    type: mongoose.Schema.Types.ObjectId, 
+    type: Schema.Types.ObjectId, 
     ref: 'Post' 
   }],
   recommend: { type: Boolean },
@@ -838,8 +1034,8 @@ const PostSchema = mongoose.Schema({
   },
   description: { type: String },
   content: { type: String },
-  category: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  category: {
+    type: Schema.Types.ObjectId, 
     ref: 'Category', 
     index: true 
   },
@@ -940,3 +1136,5 @@ app.put('/posts/:id', adminAuth, (req, res) => {
 });
 //...
 ```
+
+### 创建连接池

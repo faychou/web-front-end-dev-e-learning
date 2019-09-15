@@ -741,7 +741,7 @@ body {
 }
 ```
 
-## 吸底 效果
+## 吸底效果
 当内容区的内容较少时，页脚区不是随着内容区排布，而是始终显示在屏幕的最下方；当内容区的内容较多时，页脚能随着内容区的增高而撑开，始终显示在页面的最底部。
 
 ### 方案一
@@ -762,10 +762,65 @@ main {
 ### 方案二
 ``` css
 body { 
-  display: flex; 
+  display: flex; /* 有兼容问题 */
   flex-flow: column; 
   min-height: 100vh; 
 } 
 main { flex: 1; }
 ```
+
+### 方案三
+兼容度高。
+
+``` html
+<div class="wrapper">
+   <div class="content">
+     主体内容
+   </div>
+  <footer>
+    底部吸底按钮
+  </footer>
+ </div>
+```
+``` css
+/* 固定于页面底部 */
+html,
+body {
+  height: 100%;
+}
+.wrapper {
+  position: relative; /* 关键 */
+  box-sizing: border-box;
+  min-height:100%; /* 关键 */
+  padding-bottom: 100px;   /* 该值设置大于等于按钮的高度 */
+}
+footer {
+  position: absolute; /* 关键 */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px; /* 设置固定高度 */
+  background: red;
+}
+
+/* 固定于可视窗口底部 */
+html,
+body {
+  height: 100%;
+}
+.wrapper {
+  box-sizing: border-box;
+  min-height:100%; /* 关键 */
+  padding-bottom: 100px;   /* 该值设置大于等于按钮的高度 */
+}
+footer {
+  position: fixed; /* 关键 */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px; /* 设置固定高度 */
+  background: red;
+}
+```
+
 
