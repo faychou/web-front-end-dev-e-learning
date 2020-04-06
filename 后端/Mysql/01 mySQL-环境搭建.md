@@ -5,13 +5,13 @@ MySQL 具有运行速度很快、容易使用、支持查询语言、多个用�
 # 环境搭建
 ## Linux 系统配置
 ### centos
-第一步、由于 centos 的 yum 源中没有 mysql ，需要到 mysql 的官网下载 yum repo 配置文件：
+第一步、由于 centos 的 yum 源中没有 mysql ，需要到 mysql 的官网下载 `yum` 的 `repo` 配置文件：
 
 ``` bash
 wget http://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
 ```
 
-第二步、安装 yum repo 文件：
+第二步、安装 `yum` `repo` 文件：
 
 ``` bash
 yum -y install mysql57-community-release-el7-11.noarch.rpm
@@ -25,7 +25,7 @@ yum -y install mysql57-community-release-el7-11.noarch.rpm
 yum repolist enabled | grep mysql.*
 ```
 
-第三步、更新 yum 缓存（可以省略）：
+第三步、更新 `yum` 缓存（可以省略）：
 
 ``` bash
 yum clear all
@@ -80,11 +80,11 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY '********';
 > 注意：mysql 默认安装了密码安全检查插件（validate_password），默认密码检查策略要求密码必须包含：大小写字母、数字和特殊符号，并且长度不能少于8位。否则会提示 ERROR 1819 (HY000): Your password does not satisfy the current policy requirements 错误。
 
 ## Windows 系统
-1、 直接官网下载 mysql.zip [下载地址](https://dev.mysql.com/downloads/mysql/)，注意 MySQL Community Server 表示的是个人免费版，其他版本都是要收费的；
+1、 直接官网下载 `mysql.zip` [下载地址](https://dev.mysql.com/downloads/mysql/)，注意 MySQL Community Server 表示的是个人免费版，其他版本都是要收费的；
 
-2、 将下载的 mysql.zip 解压到相应的位置, 如: C:\Program Files;
+2、 将下载的 `mysql.zip` 解压到相应的位置, 如: `C:\Program Files`；
 
-3、 在安装目录（如: C:\Program Files\mysql-8.0.11）下找到 my-default.ini 配置文件, 复制该文件并将其重命名为 my.ini , 打开并编辑 my.ini, 如果不存在 my-default.ini 文件则直接创建 my.ini 并编辑以下代码即可；
+3、 在安装目录（如: `C:\Program Files\mysql-8.0.11`）下找到 `my-default.ini` 配置文件, 复制该文件并将其重命名为 `my.ini` , 打开并编辑 `my.ini`, 如果不存在 `my-default.ini` 文件则直接创建 `my.ini` 并编辑以下代码即可；
 
 ``` bash
 [mysql]
@@ -137,9 +137,9 @@ mysqld --initialize-insecure
 mysqld -install
 
 # 后面的服务名字可以不写，默认为 mysql
-``` 
+```
 
-提示 "Service successfully installed." 则表示安装成功。
+提示 `Service successfully installed.` 则表示安装成功。
 
 ### MySQL服务的启动、停止与卸载
 ``` bash
@@ -154,7 +154,20 @@ sc delete MySQL
 ```
 
 ## MacOS 系统
-官网下载 mysql 的 dmg 版本傻瓜式安装即可。安装完成后在系统偏好设置的其他下，点击 ‘mysql’ 的图标，然后点击 start mysql server 按钮，启动 mysql 。
+官网下载 mysql 的 dmg 版本傻瓜式安装即可。安装完成后在系统偏好设置的其他下，点击 mysql 的图标，然后点击 `start mysql server` 按钮，启动 mysql 。
+
+然后配置 mysql 的环境变量：
+
+``` bash
+# 打开环境变量配置文件
+open -t ~/.bash_profile
+
+# 添加 mysql 路径，完成后保存并关闭
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/mysql/bin
+
+# 刷新，或者关闭终端再重新打开
+source  ~/.bash_profile
+```
 
 ## 登录 MySQL
 当 MySQL 服务已经运行时, 此时 mysql 还没有密码，我们可以通过以下命令设置新密码：
@@ -180,9 +193,9 @@ mysql -h 主机名 -u 用户名 -p
 如果遗忘了密码，可以直接编辑 my.ini 文件来跳过密码认证过程，步骤如下：
 
   1、在 [mysqld]字段下添加一行 `skip-grant-tables`，然后保存退出即可；
-  
+
   2、接着重启 MySQL 即可。
-  
+
 ### 修改用户密码
 #### 方法一
 打开终端, 直接执行以下命令: 
@@ -268,7 +281,7 @@ sudo /usr/local/mysql/support-files/mysql.server stop
 第二步：进入以下目录：
 
 ``` bash
-cd/usr/local/mysql/bin
+cd /usr/local/mysql/bin
 ```
 
 第三步：获取权限：
@@ -316,19 +329,19 @@ set password for 'root'@'localhost'=password('新密码');
 #### 方法二：
 第一步：在系统偏好中,中止 MYSQL 服务；
 
-第二步：
+第二步：打开终端输入以下命令，进入 mysql 安装目录：
 
 ``` bash
-cd/usr/local/mysql/bin
+cd /usr/local/mysql/bin
 ```
 
-第三步：
+第三步：执行完这步后会有一个错误的日志文件地址：
 
 ``` bash
-sudo ./mysqld_safe--skip-grant-tables &
+sudo ./mysqld_safe --skip-grant-tables &
 ```
 
-第四步：登录 MySQL：
+第四步：重新打开一个终端，登录 MySQL：
 
 ``` bash
 mysql
@@ -374,10 +387,10 @@ systemctl restart mysqld.service
 
 接着还需要在阿里云 ECS 配置安全组规则，放开 22，3306 端口。[详情](https://help.aliyun.com/document_detail/25471.html?spm=5176.100241.0.0.IneJPl)
 
-最后，使用本地 mysql 客户端（navicat，sequel pro）通过 SSH 方式连接数据库，注意这时需要同时填写 mysql 设置的账号 和 阿里云服务器的登陆账号，mysql 的连接地址直接填 127.0.0.1 ，阿里云的连接地址是公网 ip。
+最后，使用本地 mysql 客户端（navicat，sequel pro）通过 SSH 方式连接数据库，注意这时需要同时填写 mysql 设置的账号 和 阿里云服务器的登陆账号，mysql 的连接地址直接填 `127.0.0.1` ，阿里云的连接地址是公网 ip。
 
 ## 配置默认编码为 utf8
-修改/etc/my.cnf配置文件，在[mysqld]下添加编码配置，如下所示：
+修改 `/etc/my.cnf` 配置文件，在 `[mysqld]` 下添加编码配置，如下所示：
 
 ```
 [mysqld]
@@ -399,16 +412,16 @@ systemctl daemon-reload
 
 2. 在控制面板中运行添加删除程序，将 mysql 卸载。
 
-3. 删除MySQL安装目录. 
+3. 删除 MySQL 安装目录. 
 
-4. 删除目录 C:\Documents and Settings\All Users\Application Data\MySQL
+4. 删除目录 `C:\Documents and Settings\All Users\Application Data\MySQL`
 
-5. 检查C:\WINDOWS目录下是否有my.ini文件,将其删除 
+5. 检查 `C:\WINDOWS` 目录下是否有 `my.ini` 文件,将其删除 
 
-6. 卸载后打开注册表（在开始---运行,输入 regedit），
+6. 卸载后打开注册表（在开始---运行,输入 `regedit`），
 
-查看 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services 下的键值，如果有相关 mysql 键值(mysql、mysqladmin)则删掉，即可。
+查看 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services` 下的键值，如果有相关 mysql 键值(`mysql`、`mysqladmin`)则删掉，即可。
 
 7. 重启，将 mysql 的安装残余目录删掉 (查看服务，此时服务中已没有 mysql)。
 
-8. 重新安装 mysql.安装后先不要运行 Server Instance Configuration wizard，重启后在开始菜单中运行该向导，即可。
+8. 重新安装 mysql，安装后先不要运行 `Server Instance Configuration wizard`，重启后在开始菜单中运行该向导，即可。
