@@ -135,6 +135,19 @@ useEffect(callback, [source])接受两个参数：
 * 如果第二个参数传递一个空数组 []，这种情况下只有在组件初始化或销毁的时候才会触发，用来代替 componentDidMount 和 componentWillUnmount 慎用；
 * 返回值(如果有)则在组件销毁或者调用函数前调用。
 
+``` js
+const [count, setCount] = useState(0);
+
+useEffect(() => {
+    const id = setInterval(() => {
+        setCount(count + 1);
+    }, 1000);
+    return () => clearInterval(id);
+}, [count]);
+```
+
+
+
 ### useContext
 useContext 获取 context 对象。
 
@@ -163,7 +176,51 @@ function Todos() {
 ### useMemo
 用于缓存传入的 props，避免依赖的组件每次都重新渲染。
 
+``` js
+const data = useMemo(() => ({
+    a,
+    b,
+    c,
+    d: 'xxx'
+}), [a, b, c]);
+
+// 可以用 useCallback 代替
+const fn = useMemo(() => () => {
+    // do something
+}, [a, b]);
+
+const memoComponentsA = useMemo(() => (
+    <ComponentsA {...someProps} />
+), [someProps]);
+```
+
+``` js
+function Example(props) {
+    const [count, setCount] = useState(0);
+    const [foo] = useState("foo");
+
+    const main = useMemo(() => (
+        <div>
+            <Item key={1} x={1} foo={foo} />
+            <Item key={2} x={2} foo={foo} />
+            <Item key={3} x={3} foo={foo} />
+            <Item key={4} x={4} foo={foo} />
+            <Item key={5} x={5} foo={foo} />
+        </div>
+    ), [foo]);
+
+    return (
+        <div>
+            <p>{count}</p>
+            <button onClick={() => setCount(count + 1)}>setCount</button>
+            {main}
+        </div>
+    );
+}
+```
+
 ### useRef
+
 获取组件的真实节点。
 
 ### useLayoutEffect:

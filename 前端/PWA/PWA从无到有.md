@@ -122,7 +122,7 @@ Service Worker 能够拦截进出的 HTTP 请求，从而完全控制你的网�
 
 第一步，在跟目录下创建一个空文件叫做 service-worker.js。这个文件必须放在根目录。因为 service worker 的作用域范围是跟它所在的位置来决定的。
 
-第二步，在 app.js 中添加以下代码来检查浏览器是不是支持 service worker，如果支持会注册 service worker：
+第二步，在 html 中引入 app.js 并添加以下代码来检查浏览器是不是支持 service worker，如果支持会注册 service worker：
 
 ``` js
 if('serviceWorker' in navigator) { // 检查当前浏览器是否支持 Service Workers

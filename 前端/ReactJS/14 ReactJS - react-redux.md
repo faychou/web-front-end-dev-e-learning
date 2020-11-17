@@ -89,17 +89,17 @@ connect 是一个高阶函数，接受两个参数，定义了 UI 组件的业�
 #### mapStateToProps
 用于建立 组件 跟 store.state 的映射关系，接收一个从 reducer 传递过来的 state 作为参数，定义从 state 转换成 UI 组件 props 的规则，并返回 props 对象。也就是说该方法从 Redux 状态树中提取需要的部分作为 props 传递给当前的组件。
 
-此函数还可以接收第二个 ownProps 参数，代表直接在 UI 组件上声明的 props。
-
-mapStateToProps 可以不传，如果不传，组件不会监听 store 的变化，也就是说 Store 的更新不会引起 UI 的更新。
-
 ``` js
 function mapStateToProps(state) {
   return {
     todoList: state.todoList
   }
 }
+```
 
+此函数还可以接收第二个 ownProps 参数，代表直接在 UI 组件上声明的 props。
+
+``` js
 function mapStateToProps(state, ownProps) {
   return {
     active: ownProps.filter === state.visibilityFilter
@@ -107,8 +107,29 @@ function mapStateToProps(state, ownProps) {
 }
 ```
 
+mapStateToProps 可以不传，如果不传，组件不会监听 store 的变化，也就是说 Store 的更新不会引起 UI 的更新。
+
+``` js
+export default connect(null, mapDispatchToProps)(Counter)
+```
+
 #### mapDispatchToProps
+
 用于建立组件跟 store.dispatch 的映射关系，接收 Store 中的  dispatch 方法作为参数，用户发出的动作如何变为 Action 对象，从 UI 组件传出去，并返回 props 对象。也就是说将需要绑定的响应事件（action）作为 props 传递到组件上。
+
+``` js
+function mapDispatchToProps(dispatch) {
+  return {
+    add:() => dispatch({type: 'ADD'})
+  }
+}
+```
+
+如果你不为 connect() 指明第二个参数，你的组件会默认接收 dispatch。
+
+``` js
+export default connect(mapStateToProps)(App)
+```
 
 ### 案例
 ``` javascript

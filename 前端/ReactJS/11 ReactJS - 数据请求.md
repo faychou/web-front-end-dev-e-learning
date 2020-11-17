@@ -200,3 +200,82 @@ axios.interceptors.response.use(function (response) {
 var myInterceptor = axios.interceptors.request.use(function () {/*...*/});
 axios.interceptors.request.eject(myInterceptor);
 ```
+
+### React 引入
+
+二次封装：
+
+``` j
+import Axios from 'axios';
+import qs from 'qs';
+const axios = Axios.create();
+axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+axios.interceptors.request.use((config) => {
+
+    if (config.method === 'post') {
+        config.data = qs.stringify(config.data);
+    }
+
+    return config;
+});
+// Add a response interceptor
+axios.interceptors.response.use(
+    (response) => {
+        // Do something with response data
+        let data = response.data;
+        response.data = data.data;
+
+        return response;
+    },
+    (error) => {
+        // Do something with response error
+        return Promise.reject(error);
+    }
+);
+export default axios;
+```
+
+组件引入 axios：
+
+``` js
+import React, { Component } from 'react';
+import axios from '../model/axios';
+
+class Axios extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            list: []
+        }
+    }
+    getData = () => {
+        axios.get('https://www.easy-mock.com/mock/5b4eb12d56c59c6f56266215/api/order_list')
+        .then((response) => {
+            this.setState({
+                list: response.data
+            })
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+    render(){
+        return (
+            <div>
+                <button onClick={this.getData}>获取axios数据</button>
+                {
+                    this.state.list.map((item,key) => {
+                        return (
+                            <li key={key}>
+                                {item.title}
+                            </li>
+                        )
+                    })
+                }
+            </div>
+        )
+    }
+}
+export default Axios;
+```
+

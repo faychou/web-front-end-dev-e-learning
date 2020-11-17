@@ -6,7 +6,7 @@ Mongoose 是 MongoDB 的一个对象模型工具，是基于 node-mongodb-native
 ```
 npm install mongoose --save
 ```
-	
+
 ### 引用 mongoose
 ``` js
 const mongoose = require("mongoose");
@@ -54,7 +54,7 @@ connect() 函数还接受一个回调参数：
 
 ``` js
 var mongoose = require('mongoose');
-mongoose.connect("mongodb://localhost/test", function(err) {
+mongoose.connect("mongodb://localhost/test", options, function(err) {
   if(err) {
     console.log('连接失败');
   } else {
@@ -70,7 +70,8 @@ schema 是 mongoose 里会用到的一种数据模式，相当于一个数据库
 ``` js
 const UserSchema = mongoose.Schema({
   name: String,
-  friends: [String],  age: Number
+  friends: [String],
+  age: Number
 });
 
 const BlogSchema = mongoose.Schema({
@@ -97,7 +98,8 @@ var Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
   name: String,
-  friends: [String],  age: Number
+  friends: [String],
+  age: Number
 });
 
 ```
@@ -105,18 +107,15 @@ const UserSchema = new Schema({
 #### 文档验证
 如果不进行文档验证，保存文档时，就可以不按照 Schema 设置的字段进行设置，这样肯定是要出问题的，所以在新建 Schema 的时候要设置验证：
 
+* type：字段类型
+
 * required: 数据必须填写
-
 * default: 默认值
-
+* unique：不可重复约束
 * validate: 自定义匹配
-
 * min: 最小值(只适用于数字)
-
 * max: 最大值(只适用于数字)
-
 * match: 正则匹配(只适用于字符串)
-
 * enum:  枚举匹配(表示该属性值,只能出席哪些，只适用于字符串)
 
 ``` js
@@ -173,10 +172,10 @@ var UserSchema = mongoose.Schema(
 var animalSchema = new Schema({
   name: String,
   type: String,
-  tags: { type: [String], index: true } 
+  tags: { type: [String], index: true } // field level
 });
 
-// 在 Schema.index 中设置.
+// schema level
 animalSchema.index({ name: 1, type: -1 }); // 1 表示正序, -1 表示逆序
 ```
 
@@ -194,6 +193,19 @@ new Schema({..}, { autoIndex: false }); //懒癌不推荐
 
 每一个文档 document 都会被 mongoose 添加一个不重复的 `_id`，`_id` 的数据类型不是字符串，而是 ObjectID 类型。如果在查询语句中要使用 `_id`，则需要使用 findById 语句，而不能使用 find 或 findOne 语句。
 
+用 mongoose 来插入数据，插入后数据库的数据中会多一个字段 `_v`，用来记录版本的，如果不需要，则可以设置 `versionKey`。
+
+``` js
+const mongoose = require('../index');
+
+const UserSchema = new mongoose.Schema({
+	username: { type: String, unique: true },
+	password: { type: String }
+}, { versionKey: false })
+
+module.exports = mongoose.model('User', UserSchema);
+```
+
 #### 静态方法
 通过 Schema 对象的 statics 属性添加静态方法：
 
@@ -202,7 +214,10 @@ const UserSchema = mongoose.Schema({
   name: String, 
   age: Number
 });
-UserSchema.statics.findByName = function (name, fn) {  return this.find({name: new RegExp(name,'i')}, fn);};
+
+UserSchema.statics.findByName = function (name, fn) {
+  return this.find({name: new RegExp(name,'i')}, fn);
+};
 
 var User = mongoose.model('user', userSchema);
 User.findByName('fido', function (err, doc) {
@@ -218,7 +233,10 @@ const UserSchema = mongoose.Schema({
   name: String, 
   age: Number
 });
-UserSchema.query.byName = function (name) {  return this.find({name: new RegExp(name)});}
+
+UserSchema.query.byName = function (name) {
+  return this.find({name: new RegExp(name)});
+}
 ```
 
 #### 实例方法
@@ -259,7 +277,8 @@ var User = mongoose.model('User', UserSchema);
 ``` sql
 const UserSchema = mongoose.Schema({
   name: String,
-  friends: [String],  age: Number
+  friends: [String],
+  age: Number
 }, { collection: 'Users'});
 
 const User = mongoose.model('User', UserSchema);
@@ -277,17 +296,25 @@ var user = new User({
 console.log(user.name);  // 'faychou'
 ```
 
-为 Entity 添加自定义方法，必须在 Schema 对象的 methods 属性中扩展 ：``` js
+为 Entity 添加自定义方法，必须在 Schema 对象的 methods 属性中扩展 ：
+
+``` js
 const UserSchema = mongoose.Schema({
   name: String, 
   age: Number
 });
 
-// methods 必须加在 mongoose.model() 之前UserSchema.methods.speak = function () {  var greeting = this.name ? "my name is " + this.name : "I don't have a name";  console.log(greeting);}
-const User = mongoose.model('User', userSchema);
+// methods 必须加在 mongoose.model() 之前
+UserSchema.methods.speak = function () {
+  var greeting = this.name ? "my name is " + this.name : "I don't have a name";
+  console.log(greeting);
+}
+
+const User = mongoose.model('User', userSchema);
 const user = new User({name:'fay',age:18});
 
-user.speak();```
+user.speak();
+```
 
 Mongoose 还有一个super featrue-- virtual property 该属性是直接设置在Schema上的。但是 VR 并不会真正的存放在 db 中，他只是一个提取数据的方法：
 
@@ -316,20 +343,39 @@ save([options], [options.safe], [options.validateBeforeSave], [fn])
 ``` js
 // err 为错误信息
 // docs 为保存的文档对象
-user.save(function (err,docs) {  if (err) return console.error(err);  console.log('数据插入成功！' + docs);});
+user.save(function (err,docs) {
+  if (err) return console.error(err);
+  console.log('数据插入成功！' + docs);
+});
 ```
 
 也可以使用模型 Model 的 create() 方法完成数据插入：
 
 ``` js
-var user = {name:’fay’ , age:18}; User.create(user,function(err,docs) {  if(err) return console.log(err);   console.log(’数据插入成功：' + docs);});
+var user = {name:’fay’ , age:18}; 
+User.create(user,function(err,docs) {
+  if(err) return console.log(err); 
+  console.log(’数据插入成功：' + docs);
+});
 
 // 也可以同时插入多条记录
-User.create({name:’fay’,age:18},{name:’jay’,age:28},function(err,docs1,docs2) {  if(err) return console.log(err);   console.log(’数据插入成功：',docs1,docs2);});
+User.create({name:’fay’,age:18},{name:’jay’,age:28},function(err,docs1,docs2) {
+  if(err) return console.log(err); 
+  console.log(’数据插入成功：',docs1,docs2);
+});
 ```
 
-也可以使用 Model 的 insertMany() 方法同时插入多条数据：``` js
-User.insertMany([   {name: ”jack", password:'0123456789'},   {name : ”baur", password:'0123456789'}  ], function(err, docs) {   if(err) return console.log(err);   console.log('保存成功：' + docs); });```
+也可以使用 Model 的 insertMany() 方法同时插入多条数据：
+
+``` js
+User.insertMany([ 
+  {name: ”jack", password:'0123456789'}, 
+  {name : ”baur", password:'0123456789'} 
+ ], function(err, docs) { 
+  if(err) return console.log(err); 
+  console.log('保存成功：' + docs); 
+});
+```
 
 ``` js
 // 简单 demo
@@ -381,10 +427,15 @@ Model.find(conditions, [fields], [options], [callback]);
 Model.findById(id, [projection], [options], [callback]);
 
 // 返回查找到的所有实例的第一个
-Model.findOne([conditions], [projection], [options], [callback]);```
+Model.findOne([conditions], [projection], [options], [callback]);
+
+```
 
 * Model：集合名字，如：User
-* conditions：查询条件；* fields：控制返回的字段；* options：配置查询参数；* callback：回调函数
+* conditions：查询条件；
+* fields：控制返回的字段；
+* options：配置查询参数；
+* callback：回调函数
 
 
 ``` js
@@ -403,23 +454,27 @@ Model.count(conditions, [callback])  // 数量查询
 
 查询条件：
 
-* `$or`：或关系
-* `$nor`：或关系取反
-* `$gt`：大于
-* `$gte`：大于等于
-* `$lt`：小于
-* `$lte`：小于等于
-* `$ne`：不等于
+* `$or`：满足数组中指定的条件的其中一个
+* `$and`：满足数组中指定的所有条件
+* `$nor`：不满足数组中指定的所有条件
+* `$not`：反转查询，返回不满足指定条件的文档
+* `$eq`：与指定的值相等
+* `$gt`：大于指定值
+* `$gte`：大于等于指定值
+* `$lt`：小于指定值
+* `$lte`：小于等于指定值
+* `$ne`：与指定的值不相等
 * `$in`：在多个值范围内
-* `$nin`：不在多个值范围内
-* `$all`：匹配数组中多个值
+* `$nin`：与查询数组中指定的值中的任何一个都。，不匹配（不在多个值范围内）
+* `$all`：匹配包含查询数组中指定的所有条件的数组字段
 * `$regex`：正则，用于模糊查询
-* `$size`：匹配数组大小
+* `$size`：匹配数组字段的 length 与指定的大小一样的 document
 * `$maxDistance`：范围查询，距离（基于LBS）
 * `$mod`：取模运算
 * `$near`：邻域查询，查询附近的位置（基于LBS）
-* `$exists`：字段是否存在
-* `$elemMatch`：匹配内数组内的元素
+* `$exists`：匹配指定字段是否存在
+* `$type`：返回字段属于指定类型的文档
+* `$elemMatch`：匹配数组字段中的某个值满足指定的所有条件
 * `$within`：范围查询（基于LBS）
 * `$box`：范围查询，矩形范围（基于LBS）
 * `$center`：范围醒询，圆形范围（基于LBS）
@@ -430,9 +485,15 @@ Model.count(conditions, [callback])  // 数量查询
 // 查询年龄大于 18 的数据
 User.find({age:{$gte:18}}, callback);
 
+// 返回 age 字段大于 16 或者 age 字段 不存在 的文档
+Model.find( { age: { $not: { $lte: 16 }}})
+
 // 找出名字叫 john，并且年龄大于18的同学
 User.find({ name: 'john', age: { $gte: 18 }}, callback);
-        
+
+// 使用点语法，可匹配嵌套的字段，其中字段名必须用引号引起来
+Model.find({ 'name.last': 'wang' })
+
 // 查询年龄大于等 21 而且小于等于 65 岁
 User.find({age: {$gte: 21, $lte: 65}}, callback);
 
@@ -453,6 +514,9 @@ User.findOne({age:{$gt : 20}},{name:1,_id:0}, callback);
 
 // 找出 age>20 的文档中的第一个文档，且输出包含 name 字段在内的最短字段
 User.findOne({age:{$gt : 20}},"name",{lean:true}, callback);
+
+// 查找同时存在 2019 和 2020 的 document
+Model.find({ year: { $all: [ 2019, 2020 ] } });
 ```
 
 > 注意：如果使用第三个参数，前两个参数如果没有值，需要设置为 null:
@@ -506,7 +570,38 @@ function getByPager(){
 getByPager();
 ```
 
-### 文档更新
+#### exec
+
+使用 `query` 实例的 `exec()` 方法执行查询，即在链式语法的最后统一通过传入 `callback` 获取查询数据。
+
+``` js
+// 效果一样
+Model.find(
+  { name: /Dora/, age: { $gte: 16, $lt: 18 } },
+  'name age -_id',
+  { limit: 2, sort: 'age' },
+  (err,res)=>{
+    if (err) return handleError(err);
+    console.log(res);
+  }
+});
+
+let query = Model.
+  find({ name: /Dora/ }).
+  where('age').gte(16).lt(18).
+  select('name age -_id').
+  limit(2).sort('age');
+
+  query.exec((err, res)=> {
+    if (err) return handleError(err);
+    console.log(res);
+  });
+```
+
+
+
+### 就文档更新
+
 更新文档可以使用以下几种方法：update()、updateOne()、updateMany()、findByIdAndUpdate()、fingOneAndUpdate()。
 
 ``` js
@@ -521,7 +616,7 @@ User.update({_id: ObjectId(req.query.id)}, {name: req.query.name, author: req.qu
 User.update({ age: { $gt: 18 } }, { oldEnough: true }, fn);
 User.update({ name: 'Tobi' }, { ferret: true }, { multi: true },fn)
 
-// 注意、新版本：Replace update() with updateOne(), updateMany(), or replaceOne()
+// 注意、新版本：将 update() 替换为 updateOne(), updateMany(),  replaceOne()
 ```
 ``` js
 // Model.updateOne(conditions, doc, [options], [callback])
@@ -530,10 +625,13 @@ User.updateOne({ _id: Object("5d6cd43be93a8e41146ded63") }, { age: "1000" }, fun
   console.log(data);
 });
 
-// 一次更新多条:Model.updateMany(conditions, doc, [options], [callback])
+// 一次更新多条:
+Model.updateMany(conditions, doc, [options], [callback])
 
-Model.replaceOne(conditions, doc, [options], [callback])```
-``` js// 更新指定ID：
+Model.replaceOne(conditions, doc, [options], [callback])
+```
+``` js
+// 更新指定ID：
 // Model.findByIdAndUpdate(id, [update], [options], [callback])
 User.findByIdAndUpdate(u._id, {
   username: 'sang',
@@ -552,10 +650,14 @@ User.findOneAndUpdate({
 }, (err, user) => {
   t.false(err);
   t.is(user.username, 'sang');
-});```
+});
+```
 
 * Model：集合名字，如：User
-* conditions：查询条件；* update：需要修改的数据，不能修改主键（_id）；* options：控制选项；* callback：回调函数
+* conditions：查询条件；
+* update：需要修改的数据，不能修改主键（_id）；
+* options：控制选项；
+* callback：回调函数
 
 options 选项：
 
@@ -574,13 +676,19 @@ options 选项：
 * overwrite (boolean)： 默认为 false。禁用 update-only 模式，允许覆盖记录。
 
 ``` js
-var param = {name:'fay',age:18}; var date = {$set:{name:'jack',age:26}};Kitten.update(param,date,function(err,docs) {  if(err) return console.log(err);   console.log('更改成功：' + docs);});
+var param = {name:'fay',age:18}; 
+var date = {$set:{name:'jack',age:26}};
+Kitten.update(param,date,function(err,docs) {
+  if(err) return console.log(err); 
+  console.log('更改成功：' + docs);
+});
 
 // 查询 age 大于 20 的数据，并将其年龄更改为 40 岁
 User.update({age:{$gte:20}},{age:40}, callback);
 
 //同时更新多个记录，需要设置 options 里的 multi 为 true。下面将名字中有'a'字符的年龄设置为10岁
-User.update({name:/a/},{age: 10},{multi:true}, callback)```
+User.update({name:/a/},{age: 10},{multi:true}, callback)
+```
 
 如果设置的查找条件，数据库里的数据并不满足，默认什么事都不发生。
 
@@ -606,7 +714,7 @@ Model.findByIdAndRemove(id, [options], [callback]) // 根据id查找到并删除
 
 Model.findOneAndRemove(conditions, [options], [callback])
 
-// 注意、新版本：Replace remove() with deleteOne() or deleteMany()
+// 注意、新版本：将 remove() 替换为 deleteOne() or deleteMany()
 ```
 ``` js
 // Model.deleteOne(conditions, callback)
@@ -628,7 +736,12 @@ User.deleteMany({ name: /Stark/, age: { $gte: 18 } }, function (err) {});
 > 2、回调函数不能省略，否则数据不会被删除。
 
 ``` js
-var param = {name:’fay’}; Kitten.remove(param , function(err,docs) {  if(err) return console.log(err);   console.log('删除成功：' + docs);});```
+var param = {name:’fay’}; 
+Kitten.remove(param , function(err,docs) {
+  if(err) return console.log(err); 
+  console.log('删除成功：' + docs);
+});
+```
 
 ### 前后钩子
 前后钩子即pre()和post()方法，又称为中间件，是在执行某些操作时可以执行的函数。
@@ -847,7 +960,7 @@ kitty.save(function (err) {
 ```
 
 ### population
-Mongodb 本来就是一门非关系型数据库。 但有时候又需要联合其他的集合进行数据查找。 MongoDB 3.2 之后，也有像 sql 里 join 的聚合操作，那就是 $lookup 而 Mongoose，拥有更强大的 populate()，用来连接多集合查询数据。
+Mongodb 本来就是一门非关系型数据库。 但有时候又需要联合其他的集合进行数据查找。 MongoDB 3.2 之后，也有像 sql 里 join 的聚合操作，那就是 $lookup ,而 Mongoose，拥有更强大的 populate()，用来连接多集合查询数据。
 
 Population 可以自动替换 document 中的指定字段，替换内容从其他 collection 获取。 我们可以填充（populate）单个或多个 document、单个或多个纯对象，甚至是 query 返回的一切对象。
 

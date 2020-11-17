@@ -81,15 +81,18 @@ brew update
 ```
 
 ### Window 平台安装
-官网直接下载 `.msi` 格式的安装包，按照提示进行安装。启动服务：
+官网直接下载 `.msi` 格式的安装包，按照提示进行安装。
 
-1、 MongoDB 需要一个目录来保存数据，默认的数据目录是 `\data\db`，但是这个目录需要我们自己去创建，进入 mongodb 的安装目录：
+启动服务：
+
+1、 MongoDB 需要一个目录来保存数据，默认的数据目录是 `\data\db`，但是这个目录需要我们自己去创建，进入 mongodb 的安装目录（新版在安装时就已经设置了，可以省略这一步）：
 
 ``` bash
-# mkdir –p 的意思是同时创建 data 及下级目录 dbmkdir –p data/db  
+# mkdir –p 的意思是同时创建 data 及下级目录 db
+mkdir –p data/db  
 ```
 
-2、 同样还是在安装目录下创建存放日志的文件夹：
+2、 同样还是在安装目录下创建存放日志的文件夹（新版在安装时就已经设置了，可以省略这一步）：
 
 ``` bash
 mkdir logs
@@ -174,7 +177,7 @@ mongo --username <user> --password <pass> --host <Host.IP.Adrs> --port 27017
 
 * --fork
 
-#### 配置windows服务
+#### 配置 windows 服务（在4.0版本后安装时就可以选择设置）
 管理员身份启动 cmd，进入 `D:\Program Files\MongoDB\bin` 目录，输入
  `mongod --config "D:\Program Files\MongoDB\mongo.config" --install --serviceName "MongoDB"` 完成后打开服务，之后可使用 `net start MongoDB` 来启动 mongodb。
 
@@ -214,14 +217,14 @@ kill 28883
 ```
 mongod --port 27017 --dbpath /data/db
 ```
-	
+
 2、 连接 shell：
 
 ``` bash
 mongo
 # mongo --port 27017
 ```
-	
+
 3、 创建超级管理员账号（必须先添加）：
 
 ``` sql
@@ -272,17 +275,17 @@ db.auth('myUserAdmin','abc123');
 ```
 mongod --auth --port 27017 --dbpath /data/db
 ```
-	
+
 5、 使用账号连接：
 
 ```
 mongo --port 27017 -u "myUserAdmin" -p "abc123" --authenticationDatabase "admin"
 ```
-	
+
 6、创建用户角色：
 
 ``` sql
-# 新建 test数据库
+# 新建 test 数据库
 use test
 db.createUser({
   user: "myTester",

@@ -1,7 +1,30 @@
 # nginx
-nginx ("engine x") 是一个高性能的 HTTP 和反向代理服务器，也是一个 IMAP/POP3/SMTP 服务器。采用事件驱动的异步非阻塞处理方式框架，这让其具有极好的 IO 性能，时常用于服务端的反向代理和负载均衡。Nginx 是由 Igor Sysoev 为俄罗斯访问量第二的 Rambler.ru 站点开发的，第一个公开版本 0.1.0 发布于 2004年10月4日。
+nginx ("engine x") 是一个轻量级、高性能的 web 服务器、反向代理服务器，也是一个 IMAP/POP3/SMTP 服务器。采用事件驱动的异步非阻塞处理方式框架，这让其具有极好的 IO 性能，时常用于服务端的反向代理和负载均衡。Nginx 是由 Igor Sysoev 为俄罗斯访问量第二的 Rambler.ru 站点开发的，第一个公开版本 0.1.0 发布于 2004年10月4日。
 
 擅长于底层服务器端资源的处理（静态资源处理转发、反向代理，负载均衡等）。
+
+#### 作用
+
+1. web 服务.
+2. 负载均衡 （反向代理）
+3. web cache（web 缓存）
+
+#### 优点
+
+1. 高并发。静态小文件
+2. 占用资源少。2万并发、10个线程，内存消耗几百M。
+3. 功能种类比较多。web,cache,proxy。每一个功能都不是特别强。
+4. 支持epoll模型，使得nginx可以支持高并发。
+5. nginx 配合动态服务和Apache有区别。（FASTCGI 接口）
+6. 利用nginx可以对IP限速，可以限制连接数。
+7. 配置简单，更灵活。
+
+#### 应用场合
+
+1. 静态服务器。（图片，视频服务）另一个lighttpd。并发几万，html，js，css，flv，jpg，gif等。
+2. 动态服务，nginx——fastcgi 的方式运行PHP，jsp。（PHP并发在500-1500，MySQL 并发在300-1500）。
+3. 反向代理，负载均衡。日pv2000W以下，都可以直接用nginx做代理。
+4. 缓存服务。类似 SQUID,VARNISH。
 
 ## 配置
 nginx 的配置都写在 nginx.conf 的文件里,从 nginx 的配置指令作用域来讲，分为 5 个作用域块：
@@ -37,24 +60,27 @@ nginx 依赖以下模块:
 
 * gzip 模块需要 zlib 库 及其开发环境
 * rewrite 模块需要 pcre 库及开发环境
-* ssl 功能需要 openssl 库及开发环境以及 yum install -y gcc-c++ 环境
+* ssl 功能需要 openssl 库
+* 可能还需要安装 C++ 编译环境 gcc-c++
 
 #### 源码安装：
 1、使用以下几个命令安装必备的几个库：
 
 ``` bash
 # 所有操作的基础路径在 /usr/local/src ，请先进入该目录
-yum -y install make zlib zlib-devel gcc gcc-c++ libtool openssl openssl-devel
+yum -y install make zlib zlib-devel gcc gcc-c++ libtool openssl openssl-devel pcre pcre-devel
 
+# 如果 pcre 安装失败，可使用以下方法
 # 紧接着安装 PCRE，这家伙提供了 Rewrite 功能：
 ## 先下载二进制包
+# curl http://downloads.sourceforge.net/project/pcre/pcre/8.41/pcre-8.41.tar.gz
 wget http://downloads.sourceforge.net/project/pcre/pcre/8.41/pcre-8.41.tar.gz
 ## 解压
 tar zxvf pcre-8.41.tar.gz
 ## 进入安装目录编译安装
 cd pcre-8.41
-./configure
-make && make install
+./configure # ./configure，这个命令会在目录里生成Makefile文件
+make && make install # make 命令生成二进制文件
 ```
 
 2、之后安装 nginx ：
@@ -122,7 +148,7 @@ source /etc/profile
 接下来就可以直接运行：`nginx`命令了。
 
 ##### 设置 nginx 为系统服务：
-Nginx安装完成后默认不会注册为系统服务，所以需要手工添加系统服务脚本。在/etc/init.d目录下新建nginx文件，并更改权限其即可。
+Nginx 安装完成后默认不会注册为系统服务，所以需要手工添加系统服务脚本。在 `/etc/init.d` 目录下新建 nginx 文件，并更改权限其即可。
 
 1、新建文件：
 
@@ -444,15 +470,15 @@ nginx 是由模块组成的，这些模块在配置文件中又有指定的指�
 # 工作的子进程数量（通常等于CPU数量或者2倍于CPU），默认1
 worker_processes  2; 
 
-# 错误日志存放路径，级别
+# 全局错误日志、存放路径、级别
 # 级别：debug/info/notice/warn/error/crit；从左到右记录的信息从最详细到最少
 # error_log  logs/error.log;
 error_log  logs/error.log  info;
 
 # 指定 nginx 进程运行文件存放地址,默认配置文件是注释了
 # 如果上面 worker_processes 的数量大于 1 那 Nginx 就会启动多个进程
-# 而发信号的时候需要知道要向哪个进程发信息，不同进程有不同的 pid，所以写进文件发信号比较简单
-# pid logs/nginx.pid;
+# 而发信号的时候需要知道要向哪个进程发信息，不同进程有不同的 pid，所以需要记录当前启动的 nginx 的进程 id
+pid logs/nginx.pid;
 
 # 简化调试 此指令不得用于生产环境
 # master_process  off;
@@ -497,6 +523,7 @@ events {
   # ulimit -SHn 65535
 }
 
+# 设定 http 服务器
 http {
   # 关闭错误页面的 nginx 版本数字，提高安全性
   server_tokens off;
@@ -516,9 +543,11 @@ http {
   # access_log logs/access.log main;
   
   # 定义日志记录格式，如果 access_log 设置为 off 可以注释掉这段
-  # log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+  log_format  main  '[$remote_addr] - [$remote_user] [$time_local] "$request" '
                     # '$status $body_bytes_sent "$http_referer" '
                     # '"$http_user_agent" "$http_x_forwarded_for"';
+  access_log logs/access.log main;
+  rewrite_log on;
   
   client_header_timeout  3m;  
   client_body_timeout    3m;  
@@ -549,7 +578,7 @@ http {
   # tcp_nodelay     on; 
   
   # 连接超时时间，默认为 75s
-  keepalive_timeout  65;
+  keepalive_timeout  120;
   
   # 开启 gzip 压缩
   # gzip on;
@@ -641,10 +670,11 @@ http {
       root   html;
     }
     
+    # 设定查看 nginx 状态地址
     location /nginx_status {
       stub_status on;
-      access_log off;
-      allow 127.0.0.1;#设置为可访问该状态信息的ip
+      access_log on;
+      allow 127.0.0.1; #设置为可访问该状态信息的ip
       deny all;
     }
     
@@ -658,8 +688,8 @@ http {
     
     #禁止访问 .htxxx 文件
       location ~ /.ht {
-      deny all;
-    }
+          deny all;
+      }
   } 
 
   # HTTPS server
@@ -862,8 +892,10 @@ ip addr show eth0 | grep inet | awk '{ print $2; }' | sed 's/\/.*$//'
 ``` bash
 # upstream，定义一个上游服务器集群
 upstream backend {
-  server 127.0.0.1:3000;
-  server 47.93.6.93;
+  # weight 参数表示权值。权值越大被分配到的几率越大
+  server 127.0.0.1:3000 weight=5;
+  server 127.0.0.1:3000 weight=2;
+  server 47.93.6.93  weight=6;
 }
 server {
     listen       80;
@@ -895,6 +927,8 @@ ip_hash 它的作用是如果第一次访问该服务器后就记录，之后再
 
 反向代理（Reverse Proxy）则正好相反，客户端发送的请求，想要访问 server 上的内容。但将被发送到一个代理服务器 proxy，这个代理服务器将把请求代理到和自己属于同一个 LAN 下的内部服务器上，而用户真正想获得的内容就储存在这些内部服务器上。
 
+即以代理服务器来接受 internet 上的链接请求，然后将请求转发给内部网络上的服务器，并将从服务器上得到的结果返回给 Internet 上请求连接的客户端，此时代理服务器对外表现为一个反向代理服务器。
+
 通过反向代理，同时也能解决跨域的问题，而解决跨域问题的方式有很多，比如有 window.name、iframe、JSONP、CORS 等等，就不详细展开了，涉及到 协议、端口 不一样的跨域请求方式是采用代理。
 
 Nginx 反向代理的配置：
@@ -911,6 +945,9 @@ server {
     //下面都是次要关注项
     proxy_set_header Host $host;
     proxy_method POST;
+    
+    # 后端 web 服务器可以获取用户真是 IP
+    proxy_set_header X-Forwarded-For $remote_addr;
     
     //指定不转发的头部字段
     proxy_hide_header Cache-Control;
@@ -1102,7 +1139,45 @@ location / {
 } 
 ```
 
+### 多网站配置
+
+一个站点对应好几个网站应用，可以通过反向代理来分配到不同的端口号
+
+``` nginx
+http {
+  
+  # 负载均衡配置，可以配置多个
+  upstream admin {
+    server 127.0.0.1:8080; # 反向代理到后台应用服务器节点上
+  }
+    
+  upstream webapp {
+    server 127.0.0.1:8089;
+  }
+    
+  upstream pc {
+    server 127.0.0.1:8081;
+  }
+  
+  # 配置虚拟主机的相关参数，一个 http 中可以有多个 server
+  server {
+    
+    location / {
+      proxy_pass http://pc;
+    }
+    
+    location /admin {
+      proxy_pass http://admin;
+    }
+        
+    location /webapp {
+      proxy_pass http://webapp;
+    }
+  } 
+```
+
 ### 合并请求
+
 前端性能优化中重要一点就是尽量减少 http 资源请求的数量。通过 nginx-http-concat 模块（淘宝开发的第三方模块，需要单独安装）用一种特殊的请求 url 规则（例子：example.com/??a.js,b.js,c.js ），前端可以将多个资源的请求合并成一个请求，后台 Nginx 会获取各个资源并拼接成一个结果进行返回。例如上面的例子通过一个请求将 a.js,b.js,c.js 三个 js 资源合并成一个请求，减少了浏览器开销。
 
 ``` js
