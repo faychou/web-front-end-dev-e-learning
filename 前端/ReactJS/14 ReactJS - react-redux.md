@@ -256,3 +256,103 @@ const store = createStore(
 
 return store
 ```
+
+## redux hook
+
+``` js
+import React, { memo, useEffect } from 'react'
+import { shallowEqual, useDispatch, useSelector } from 'react-redux'
+import { getTopBannersAction } from './store/actionCreator'
+
+function JMRecommend(props) {
+  // redux Hook 组件和redux关联: 获取数据和进行操作
+  const { topBanners } = useSelector(state => ({
+    topBanners: state.recommend.topBanners,
+  }), shallowEqual)
+  const dispatch = useDispatch()
+  
+  useEffect(() => {
+    dispatch(getTopBannersAction())
+  }, [dispatch])
+
+  return (
+    <div>
+      <h2>JMRecommend</h2>
+      <h3>{topBanners.length}</h3>
+    </div>
+  )
+}
+export default memo(JMRecommend)
+```
+
+
+
+## immutableJS
+
+使用 `immutable` 可以让 `redux` 中的维护的 `state` 不在是浅层拷贝再赋值，而是使用 `immutable`数据结构保存数据，这样修改数据后，会返回一个新的对象，原来的对象不会发生改变。
+
+使用 immutableJS 好处: 修改的 `state` 不会修改原有数据结构, 而是返回修改后新的数据结构, 可以利用之前的数据结构而不会造成内存的浪费。
+
+**安装**
+
+``` bash
+yarn add immutable
+```
+
+**使用**
+
+``` js
+// 1.在 reducer.js 文件使用 immutable设置: discover->child-cpn->recommend->store->reducer.js
+import { Map } from "immutable"
+import * as actionTypes from './actionTypes'
+
+// 使用 immutable 管理 redux 中的 state (修改的 state 不会修改原有数据结构, 而是返回修改后新的数据结构)
+// 对象转换成 immutable 对象：Map
+// 数组转换成 immtable 数组：List
+const defaultState = Map({
+  topBanners: [],
+})
+
+export default function reducer(state = defaultState, action) {
+  switch (action.type) {
+    case actionTypes.CHANGE_TOP_BANNER:
+       return state.set('topBanners', action.topBanners) 
+    default:
+      return state
+  }
+}
+
+
+// 2.在 recommend 的 index.js 文件获取的是 immutable 对象, 需要进行设置
+const { topBanners } = useSelector(state => ({
+     topBanners: state.recommend.get('topBanners') 
+}))
+```
+
+### redux-Immutable
+
+使用 `redux-immutable` 中的 `combineReducers` 管理数据
+
+**安装**
+
+``` bash
+yarn add redux-immutable
+```
+
+**使用**
+
+``` js
+// src->store->reducer
+import { combineReducers } from 'redux-immutable'
+
+import { reducer as recommendReducer } from '../pages/discover/child-pages/recommend/store'
+
+// 多个 reducer 合并
+const cRducer = combineReducers({
+  recommend: recommendReducer
+})
+
+export default cRducer
+
+```
+
