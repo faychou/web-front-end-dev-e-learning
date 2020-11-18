@@ -171,12 +171,39 @@ function Todos() {
 * 配合useContext的全局性，可以完成一个轻量级的 Redux。
 
 ### useCallback
-缓存回调函数，避免传入的回调每次都是新的函数实例而导致依赖组件重新渲染，具有性能优化的效果。
+缓存回调函数，避免依赖的属性没有发生改变时，更新 render 后重新定义事件函数，具有性能优化的效果。
+
+``` jsx
+import React, { useState, useCallback } from 'react'
+
+function Example() {
+  const [count, setCount] = useState(0)
+  const [show, setShow] = useState(true)
+  
+  const increment = useCallback(() => {
+    console.log('increment被调用了')
+    setCount(count + 1)
+  }, [count])
+  
+  return (
+    <div>
+      <h2> {count} </h2>
+      <div onClick={increment}  />
+
+      <div onClick={() => setShow(!show)}>show切换</button>
+    </div>
+  )
+}
+```
+
+
 
 ### useMemo
-用于缓存传入的 props，避免依赖的组件每次都重新渲染。
+用于缓存传入的 props，避免依赖没有改变的时候每次都重新渲染。
 
 ``` js
+import React, { useMemo } from 'react'
+
 const data = useMemo(() => ({
     a,
     b,
@@ -195,6 +222,8 @@ const memoComponentsA = useMemo(() => (
 ```
 
 ``` js
+import React, { useState, useMemo } from 'react'
+
 function Example(props) {
     const [count, setCount] = useState(0);
     const [foo] = useState("foo");
@@ -221,15 +250,78 @@ function Example(props) {
 
 ### useRef
 
-获取组件的真实节点。
+返回一个 `ref` 对象，返回的 `ref` 对象在组件的整个生命周期保持不变。可用于获取组件的真实节点或者保存一个数据。
+
+**引用DOM**
+
+``` js
+import React, { Component, useRef } from 'react'
+
+class ChildCpn extends Component {
+  render() {
+    return <div>ChildCpn</div>
+  }
+}
+
+export default function RefHookDemo01() {
+  const titleRef = useRef()
+  const cpnRef = useRef()
+
+  function changeDOM() {
+	titleRef.current.innerHTML = 'hello world
+    console.log(cpnRef.current)
+  }
+  return (
+    <div>
+        <h2 ref={titleRef}>RefHookDemo</h2> 
+        <ChildCpn ref={cpnRef} />
+        <button onClick={changeDOM}>修改DOM</button>
+    </div>
+  )
+}
+```
+
+**使用ref保存上一次的某一个值**
+
+``` js
+import React, { useEffect, useRef, useState } from 'react'
+
+export default function RefHookDemo02() {
+  const [count, setCount] = useState(0)
+
+  // 将上一次的 count 进行保存,在 count 发生改变时,重新保存 count
+  // 点击button时,会调用useEffect函数,渲染DOM后,会重新将上一次的值进行保存,使用ref保存上一次的某一个值不会触发render
+  const numRef = useRef(count)
+  useEffect(() => {
+    numRef.current = count
+  }, [count])
+
+  return (
+    <div>
+      <h3>count上一次的值: {numRef.current}</h3>
+      <h3>count这一次的值 {count}</h3>
+      <button onClick={e => setCount(count + 10)}>+10</button>
+    </div>
+  )
+}
+```
+
+
 
 ### useLayoutEffect:
 * DOM 更新同步钩子。用法与 useEffect 类似，只是区别于执行时间点的不同。
 * useEffect 属于异步执行，并不会等待 DOM 真正渲染后执行，而 useLayoutEffect 则会真正渲染后才触发；
 * 可以获取更新后的 state。
 
-### 自定义钩子(useXxxxx)
-基于 Hooks 可以引用其它 Hooks 这个特性，我们可以编写自定义钩子，如上面的useMounted。又例如，我们需要每个页面自定义标题。
+### 自定义Hook
+基于 Hooks 可以引用其它 Hooks 这个特性，我们可以编写自定义钩子。
+
+**规则**
+
+* 自定义 Hook 是一个函数，以 `use` 开头；
+* 函数内部可以调用其他的 Hook。
+
+例如，我们需要给每个页面自定义标题。
 
 ``` js
 function useTitle(title) {
@@ -249,6 +341,58 @@ function Home() {
 	)
 }
 ```
+
+例如：localStorage 数据存储
+
+``` js
+function useLocalStorage(key) {
+  const [data, setData] = useState(() => {
+    const data = JSON.parse(window.localStorage.getItem(key))
+    return data
+  })
+
+  useEffect(() => {
+    window.localStorage.setItem(key, JSON.stringify(data))
+  }, [data])
+
+  return [data, setData]
+}
+export default useLocalStorage
+```
+
+例如：监听页面大小变化
+
+``` js
+function getSize() {
+  return {
+    innerHeight: window.innerHeight,
+    innerWidth: window.innerWidth,
+    outerHeight: window.outerHeight,
+    outerWidth: window.outerWidth
+  };
+}
+
+function useWindowSize() {
+  let [windowSize, setWindowSize] = useState(getSize());
+
+  function handleResize() {
+    setWindowSize(getSize());
+  }
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  return windowSize;
+}
+
+export default useWindowSize
+```
+
+
 
 
 >> 注意：

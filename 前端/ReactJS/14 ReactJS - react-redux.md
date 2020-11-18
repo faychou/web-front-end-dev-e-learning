@@ -259,6 +259,58 @@ return store
 
 ## redux hook
 
+**useDispatch**
+
+可以直接在组件中直接使用`dispatch`派发`action`。
+
+``` js
+import React, { memo, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { getTopBannersAction } from './store/actionCreator'
+
+function JMRecommend(props) {
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(getTopBannersAction())
+  }, [dispatch])
+
+  return (
+    <div>
+      <h2>JMRecommend</h2>
+    </div>
+  )
+}
+export default memo(JMRecommend)
+```
+
+**useSelector**
+
+- 不用在组件中定义依赖的`state`, 直接在组件中使用`useSelector`传递函数的参数是`state`
+- 函数返回一个对象, 在对象中定义需要依赖的`state`
+
+``` js
+function JMRecommend(props) {
+  const { topBanners } = useSelector(state => ({
+    topBanners: state.recommend.topBanners,
+  }))
+
+  return (
+    <div>
+      <h2>JMRecommend</h2>
+      <h3>{topBanners.length}</h3>
+    </div>
+  )
+}
+export default memo(JMRecommend)
+
+```
+
+`useSelector`优化: 
+
+* `useSelector`的第二个参数传递一个`ShallowEqual`
+
+- `ShallowEqual`作用: 对一次浅层比较, 和前一次`useSelector`返回的对象及进行比较
+
 ``` js
 import React, { memo, useEffect } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
